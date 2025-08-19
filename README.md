@@ -6,9 +6,13 @@
 
 - nginx
   - [docs](https://nginx.org/en/docs/) 
-  - [nginx confic syntax](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/)
+  - [nginx config syntax](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/)
   - [http core module reference](https://nginx.org/en/docs/http/ngx_http_core_module.html)
   - [core module reference](https://nginx.org/en/docs/ngx_core_module.html)
+
+- http
+  - [reference RFC](https://www.rfc-editor.org/rfc/rfc2616)
+  - [http overview mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview)
 
 # Tasks
 
