@@ -87,3 +87,16 @@
 	```
   - 404 response
     - create a 404 response
+
+- Connection Handling
+  - create folder for connection module
+  - tcp 
+    - create a class to handle tcp connection
+    - handle multiple concurrent connections
+    - use epoll or something alike
+  - file
+    - create a class to handle file opening
+  - cgi
+    - create a class to handle fd for inter proccess communication (IPC)
+    - use epoll or something alike
+
