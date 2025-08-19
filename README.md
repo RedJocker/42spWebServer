@@ -26,23 +26,23 @@
   - trivial configuration
     - take a basic trivial nginx config and parse it
       ```
-		http {
-		    # Configuration specific to HTTP and affecting all virtual servers
-		
-		    server {
-		        # configuration of HTTP virtual server 1
-		        location /one {
-		            # configuration for processing URIs starting with '/one'
-		        }
-		        location /two {
-		            # configuration for processing URIs starting with '/two'
-		        }
-		    }
-		
-		    server {
-		        # configuration of HTTP virtual server 2
-		    }
-		}
+                http {
+                    # Configuration specific to HTTP and affecting all virtual servers
+
+                    server {
+                        # configuration of HTTP virtual server 1
+                        location /one {
+                            # configuration for processing URIs starting with '/one'
+                        }
+                        location /two {
+                            # configuration for processing URIs starting with '/two'
+                        }
+                    }
+
+                    server {
+                        # configuration of HTTP virtual server 2
+                    }
+                }
       ```
     - create a public interface for reading parsed configuration 
 
@@ -50,24 +50,24 @@
   - create folder for http module
   - end goal
     - create class for Request
-    	- Request Line
-    	  - Method
-    	  - Path
-    	  - Protocol
-    	- Headers
-  	- Body
-  	- create a method to read a request from fd
-  	- create getter methods for method, path, headers, body
+        - Request Line
+          - Method
+          - Path
+          - Protocol
+        - Headers
+        - Body
+        - create a method to read a request from fd
+        - create getter methods for method, path, headers, body
     - create class for Response
-    	- Status Line
-  	  - Protocol
-  	  - Status Code Number
-	  - Status Code Description
-  	- Headers
-  	- Body
-	- create a method to create a response
-	  - maybe constructor is fine or maybe builder pattern 
-	- create a method that return a response as a string
+        - Status Line
+          - Protocol
+          - Status Code Number
+          - Status Code Description
+        - Headers
+        - Body
+        - create a method to create a response
+          - maybe constructor is fine or maybe builder pattern 
+        - create a method that return a response as a string
   - hello Request
     - parse a get request containing only request line
       - `GET / HTTP/1.1`
@@ -78,17 +78,17 @@
       - ```
            GET / HTTP/1.1
            Connection: close
-	   Host: localhost
-	```
+           Host: localhost
+        ```
     - parse a post request with a body
       - ```
            POST / HTTP/1.1
            Connection: close
-	   Host: localhost
-	   Content-Length: 5
+           Host: localhost
+           Content-Length: 5
 
-	   hello
-	```
+           hello
+        ```
   - 404 response
     - create a 404 response
 
