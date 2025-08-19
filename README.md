@@ -100,3 +100,12 @@
     - create a class to handle fd for inter proccess communication (IPC)
     - use epoll or something alike
 
+- CGI
+  - create folder for cgi module
+  - spawn a python or php process
+  - send information to process through IPC
+  - receive information from process through IPC
+  - research how to better deal with spawned process
+    - one process only dealing with all requests concurrently
+    - one process for each request
+  - research how to better deal with IPC
