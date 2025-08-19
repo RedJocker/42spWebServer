@@ -72,7 +72,8 @@
     - parse a get request containing only request line
       - `GET / HTTP/1.1`
   - setup tests for http module
-    test based on method that return response as a string
+    - test response based on method that return response as a string
+    - test request based on method that accepts fd and create a request object
   - get Request with headers
     - parse a get request containing some headers
       - ```
