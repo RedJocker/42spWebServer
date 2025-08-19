@@ -14,6 +14,10 @@
   - [reference RFC](https://www.rfc-editor.org/rfc/rfc2616)
   - [http overview mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview)
 
+- cgi
+  - [reference RFC](https://www.rfc-editor.org/rfc/rfc3875)
+  - [some examples in different languages](https://gist.github.com/stokito/a9a2732ffc7982978a16e40e8d063c8f)
+
 # Tasks
 
 - [X] init repository
