@@ -8,4 +8,4 @@
 
 # Tasks
 
-- [ ] init repository
+- [X] init repository
