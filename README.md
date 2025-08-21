@@ -99,7 +99,8 @@
 
 - Connection Handling
   - create folder for connection module
-  - tcp 
+  - tcp
+    - [ ] create a tcp connection
     - create a class to handle tcp connection
     - handle multiple concurrent connections
     - use epoll or something alike
