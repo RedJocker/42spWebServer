@@ -1,7 +1,7 @@
 #!/bin/bash
 
 actual_basedir=$(pwd)
-expected_basedir='/sp42_webserver'
+expected_basedir='/42spWebServer'
 expected_basedir_regex="$expected_basedir$"
 
 if ! [[ $actual_basedir =~ $expected_basedir_regex ]]; then
@@ -20,14 +20,13 @@ if (( build_status != 0 )); then
 fi
 
 setup_server() {
-    make test_tcp
     ./test_tcp &
     SERVER_PID=$!
     sleep 0.1
 }
 
 teardown_server() {
-    kill -9 $SERVER_PID
+    kill -9 $SERVER_PID 2> /dev/null 
 }
 
 test_connection() {
@@ -36,9 +35,9 @@ test_connection() {
     nc -v -z localhost 8080
     nc_exit_status=$?
     if (( nc_exit_status == 0 )); then
-	echo "test_connection: [OK]";
+		echo "test_connection: [OK]";
     else
-	echo "test_connection: [ERROR]";
+		echo "test_connection: [ERROR]";
     fi
     teardown_server
 }
