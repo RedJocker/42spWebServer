@@ -18,6 +18,13 @@
   - [reference RFC](https://www.rfc-editor.org/rfc/rfc3875)
   - [some examples in different languages](https://gist.github.com/stokito/a9a2732ffc7982978a16e40e8d063c8f)
 
+- tcp
+  - [create a tcp connection](https://www.geeksforgeeks.org/cpp/socket-programming-in-cpp/)
+  - reuse address
+    - [How do I use setsockopt(SO_REUSEADDR)](https://stackoverflow.com/questions/24194961/how-do-i-use-setsockoptso-reuseaddr)
+    - [Understanding INADDR_ANY](https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming)
+    - [setsockopt](https://linux.die.net/man/3/setsockopt)
+  - [epool example](https://gist.github.com/kesuskim/4624a52146cc1e2676fa0434cef17281)
 # Tasks
 
 - [X] init repository
@@ -98,10 +105,10 @@
     - create a 404 response
 
 - Connection Handling
-  - create folder for connection module
+  - [X] create folder for connection module
   - tcp
-    - [ ] create a tcp connection
-    - create a class to handle tcp connection
+    - [X] create a tcp connection
+    - [X] create a class to handle tcp connection
     - handle multiple concurrent connections
     - use epoll or something alike
   - file

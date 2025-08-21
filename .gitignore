@@ -1,0 +1,15 @@
+# emacs temp
+*~
+\#*\#
+
+# bins and deps
+*.o
+*.d
+*.a
+*.dSYM
+
+**/TAGS
+
+
+webserver
+test_tcp
