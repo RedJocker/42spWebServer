@@ -57,7 +57,7 @@ run_test_command() {
 }
 
 TEMP_FILE=$(mktemp)
-echo hello > $TEMP_FILE
+echo -n hello > $TEMP_FILE
 
 BUFFER_SIZE=1
 setup_with_buffer_size $BUFFER_SIZE
@@ -65,7 +65,7 @@ setup_with_buffer_size $BUFFER_SIZE
 toRead=1
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-h"""
+done: h"""
 expected_status="0"
 run_test_command
 
@@ -73,7 +73,7 @@ toRead=2
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
 reading
-he"""
+done: he"""
 expected_status="0"
 run_test_command
 
@@ -82,7 +82,7 @@ command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
 reading
 reading
-hel"""
+done: hel"""
 expected_status="0"
 run_test_command
 
@@ -92,7 +92,7 @@ expected="""reading
 reading
 reading
 reading
-hell"""
+done: hell"""
 expected_status="0"
 run_test_command
 
@@ -103,7 +103,19 @@ reading
 reading
 reading
 reading
-hello"""
+done: hello"""
+expected_status="0"
+run_test_command
+
+toRead=6
+command=("$test_cdriver" "$TEMP_FILE" "$toRead")
+expected="""reading
+reading
+reading
+reading
+reading
+reading
+eof: hello"""
 expected_status="0"
 run_test_command
 
@@ -113,14 +125,14 @@ setup_with_buffer_size $BUFFER_SIZE
 toRead=1
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-h"""
+done: h"""
 expected_status="0"
 run_test_command
 
 toRead=2
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-he"""
+done: he"""
 expected_status="0"
 run_test_command
 
@@ -128,7 +140,7 @@ toRead=3
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
 reading
-hel"""
+done: hel"""
 expected_status="0"
 run_test_command
 
@@ -136,7 +148,7 @@ toRead=4
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
 reading
-hell"""
+done: hell"""
 expected_status="0"
 run_test_command
 
@@ -145,7 +157,17 @@ command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
 reading
 reading
-hello"""
+done: hello"""
+expected_status="0"
+run_test_command
+
+toRead=6
+command=("$test_cdriver" "$TEMP_FILE" "$toRead")
+expected="""reading
+reading
+reading
+reading
+eof: hello"""
 expected_status="0"
 run_test_command
 
@@ -155,35 +177,42 @@ setup_with_buffer_size $BUFFER_SIZE
 toRead=1
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-h"""
+done: h"""
 expected_status="0"
 run_test_command
 
 toRead=2
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-he"""
+done: he"""
 expected_status="0"
 run_test_command
 
 toRead=3
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-hel"""
+done: hel"""
 expected_status="0"
 run_test_command
 
 toRead=4
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-hell"""
+done: hell"""
 expected_status="0"
 run_test_command
 
 toRead=5
 command=("$test_cdriver" "$TEMP_FILE" "$toRead")
 expected="""reading
-hello"""
+done: hello"""
 expected_status="0"
 run_test_command
 
+toRead=6
+command=("$test_cdriver" "$TEMP_FILE" "$toRead")
+expected="""reading
+reading
+eof: hello"""
+expected_status="0"
+run_test_command

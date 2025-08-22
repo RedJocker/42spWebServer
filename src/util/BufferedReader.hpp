@@ -29,9 +29,10 @@ class BufferedReader
 	std::vector<char> buffered;
 	char readBuffer[BUFFER_SIZE];
 
+	char *consumeBufferedContent();
 	BufferedReader();
 public:
-	enum ReadState {READING, DONE, ERROR};
+	enum ReadState {READING, DONE, ERROR, NO_CONTENT};
 	BufferedReader(int fd);
 	BufferedReader(BufferedReader &toCopy);
 	BufferedReader operator=(BufferedReader &other);

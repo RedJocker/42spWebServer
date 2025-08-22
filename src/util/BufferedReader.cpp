@@ -49,6 +49,17 @@ BufferedReader::~BufferedReader()
 
 }
 
+// returns allocated char* and reset read state
+char *BufferedReader::consumeBufferedContent()
+{
+	char *message = new char[this->buffered.size() + 1];
+	::memcpy(message, &this->buffered[0], this->buffered.size());
+	message[this->buffered.size()] = '\0';
+	this->buffered.clear();
+	this->readBefore = 0;
+	return message;
+}
+
 std::pair<ReadState, char *> BufferedReader::read(size_t length)
 {
 	int toRead = static_cast<int>(length) - this->readBefore;
@@ -60,6 +71,14 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 	}
 	int currentRead = ::read(
 		this->fd, this->readBuffer, std::min(toRead, BUFFER_SIZE));
+	if (currentRead == 0)
+	{
+		char *message = this->consumeBufferedContent();
+		return std::make_pair(
+			NO_CONTENT,
+			message
+		);
+	}
 	if (currentRead > toRead)
 		throw std::domain_error("unexpected read bigger than toRead");
 	if (currentRead == toRead)
@@ -68,14 +87,10 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 			this->buffered.end(),
 			readBuffer,
 			readBuffer + toRead);
-		char *message = new char[this->buffered.size() + 1];
-		::memcpy(message, &this->buffered[0], this->buffered.size());
-		message[this->buffered.size()] = '\0';
-		this->buffered.clear();
-		this->readBefore = 0;
+		char *message = this->consumeBufferedContent();
 		return std::make_pair(DONE, message);
 	}
-	else // if (currentRead < toRead)
+	else // if (currentRead < toRead && currentRead != 0)
 	{
 		this->buffered.insert(
 			this->buffered.end(),
