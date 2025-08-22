@@ -6,14 +6,16 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/20 21:59:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/22 01:22:12 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "TcpServer.hpp"
+#include "BufferedReader.hpp"
 #include <string>
 #include <iostream>
 #include <unistd.h>
+
 
 int main(void)
 {
@@ -30,6 +32,25 @@ int main(void)
 		std::cout << maybeClientFd.second << std::endl;
 		return 11;
 	}
+	int clientFd = maybeClientFd.first;
+	BufferedReader reader(clientFd);
+	std::pair<ReadState, char *> readResult;
+
+	while (readResult.first == BufferedReader::READING)
+	{
+		std::cout << "reading" << std::endl;
+		readResult = reader.read(5);
+	}
+	if (readResult.first == BufferedReader::DONE)
+	{
+		std::cout << std::string(readResult.second) << std::endl;
+		delete[] readResult.second;
+	}
+	else
+	{
+		std::cout << "error" << std::endl;
+	}
+
 	close(maybeClientFd.first);
 	return 69;
 }
