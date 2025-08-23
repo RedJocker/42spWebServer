@@ -12,5 +12,4 @@
 
 
 webserver
-test_tcp
-test_buff_read
+test_*
