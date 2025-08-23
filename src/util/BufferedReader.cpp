@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/22 23:28:31 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/23 00:39:02 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -62,16 +62,24 @@ char *BufferedReader::consumeBufferedContent()
 
 std::pair<ReadState, char *> BufferedReader::read(size_t length)
 {
-	int toRead = static_cast<int>(length) - this->readBefore;
-	if (toRead <= 0)
+	size_t toRead = length > this->readBefore ? length - this->readBefore : 0;
+	if (toRead == 0)
 	{
 		return std::make_pair(
 			ERROR,
 			const_cast<char *>("called with no content to read"));
 	}
-	int currentRead = ::read(
-		this->fd, this->readBuffer, std::min(toRead, BUFFER_SIZE));
-	if (currentRead == 0)
+	ssize_t currentRead = ::read(
+		this->fd,
+		this->readBuffer,
+		std::min(toRead, static_cast<size_t>(BUFFER_SIZE)));
+	if (currentRead < 0)
+	{
+		return std::make_pair(
+			ERROR,
+			const_cast<char *>("read returned negative"));
+	}
+	else if (currentRead == 0)
 	{
 		char *message = this->consumeBufferedContent();
 		return std::make_pair(
@@ -79,9 +87,9 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 			message
 		);
 	}
-	if (currentRead > toRead)
+	if (static_cast<size_t>(currentRead) > toRead)
 		throw std::domain_error("unexpected read bigger than toRead");
-	if (currentRead == toRead)
+	if (static_cast<size_t>(currentRead) == toRead)
 	{
 		this->buffered.insert(
 			this->buffered.end(),
@@ -90,7 +98,7 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 		char *message = this->consumeBufferedContent();
 		return std::make_pair(DONE, message);
 	}
-	else // if (currentRead < toRead && currentRead != 0)
+	else // if (currentRead < toRead && currentRead > 0)
 	{
 		this->buffered.insert(
 			this->buffered.end(),
@@ -103,10 +111,16 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 
 std::pair<ReadState, char *> BufferedReader::readlineCrlf()
 {
-	int currentRead = ::read(
+	ssize_t currentRead = ::read(
 		this->fd, this->readBuffer, BUFFER_SIZE);
 
-	if (currentRead == 0)
+	if (currentRead < 0)
+	{
+		return std::make_pair(
+			ERROR,
+			const_cast<char *>("read returned negative"));
+	}
+	else if (currentRead == 0)
 	{
 		char *message = this->consumeBufferedContent();
 		return std::make_pair(

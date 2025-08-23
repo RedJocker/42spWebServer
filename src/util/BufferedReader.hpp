@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:23 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/22 20:10:22 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/23 00:30:34 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,7 +25,7 @@ class BufferedReader
 {
 
 	int fd;
-	int readBefore;
+	size_t readBefore;
 	std::vector<char> buffered;
 	char readBuffer[BUFFER_SIZE];
 
