@@ -13,3 +13,5 @@
 
 webserver
 test_*
+!test_*.sh
+!test_*.cpp
