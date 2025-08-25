@@ -26,11 +26,11 @@ setup_server() {
 }
 
 teardown_server() {
-    kill -9 $SERVER_PID 2> /dev/null 
+    kill -9 $SERVER_PID 2> /dev/null
 }
 
 test_connection() {
-    echo 'test_connection:' 
+    echo 'test_connection:'
     setup_server
     nc -v -z localhost 8080
     nc_exit_status=$?
