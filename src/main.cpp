@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/22 01:22:12 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/24 21:21:02 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -43,12 +43,17 @@ int main(void)
 	}
 	if (readResult.first == BufferedReader::DONE)
 	{
-		std::cout << std::string(readResult.second) << std::endl;
+		std::cout << "done: " << std::string(readResult.second) << std::endl;
+		delete[] readResult.second;
+	}
+	if (readResult.first == BufferedReader::NO_CONTENT)
+	{
+		std::cout << "eof: " << std::string(readResult.second) << std::endl;
 		delete[] readResult.second;
 	}
 	else
 	{
-		std::cout << "error" << std::endl;
+		std::cout << "error: " << std::endl;
 	}
 
 	close(maybeClientFd.first);
