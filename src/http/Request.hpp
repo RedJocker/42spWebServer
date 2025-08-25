@@ -6,16 +6,19 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/25 11:46:12 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/08/25 16:44:29 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_HPP
-#define REQUEST_HPP
+# define REQUEST_HPP
 
-#include <string>
+# include <string>
 
-class Request {
+namespace http
+{
+	class Request
+	{
 	private:
 		std::string _method;
 		std::string _path;
@@ -32,6 +35,7 @@ class Request {
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getProtocol() const;
-};
+	};
+}
 
 #endif

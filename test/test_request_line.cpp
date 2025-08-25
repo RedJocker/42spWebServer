@@ -34,7 +34,7 @@ void test_basic_request() {
 	std::string raw = "GET / HTTP/1.1\r\n";
 	int fd = makePipeWith(raw);
 
-	Request req;
+	http::Request req;
 	bool ok = req.parseFromFd(fd);
 	close(fd);
 
@@ -51,7 +51,7 @@ void test_invalid_request() {
 	std::string raw = "GARBAGE\r\n";
 	int fd = makePipeWith(raw);
 
-	Request req;
+	http::Request req;
 	bool ok = req.parseFromFd(fd);
 	close(fd);
 
