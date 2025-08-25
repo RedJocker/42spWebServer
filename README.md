@@ -65,14 +65,14 @@
   - create folder for http module
   - end goal
     - create class for Request
-        - Request Line
-          - Method
+	  - [X] Request Line
+		  - Method
           - Path
           - Protocol
-        - Headers
-        - Body
-        - create a method to read a request from fd
-        - create getter methods for method, path, headers, body
+      - Headers
+      - Body
+      - [X] create a method to read a request from fd
+      - [X] create getter methods for method, path, headers, body
     - create class for Response
         - Status Line
           - Protocol
@@ -83,12 +83,12 @@
         - create a method to create a response
           - maybe constructor is fine or maybe builder pattern 
         - create a method that return a response as a string
-  - hello Request
+  - [X] hello Request
     - parse a get request containing only request line
       - `GET / HTTP/1.1`
   - setup tests for http module
     - test response based on method that return response as a string
-    - test request based on method that accepts fd and create a request object
+    - [X] test request based on method that accepts fd and create a request object
   - get Request with headers
     - parse a get request containing some headers
       - ```
