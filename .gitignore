@@ -12,5 +12,6 @@
 
 
 webserver
-test_tcp
-test_buff_read
+test_*
+!test_*.sh
+!test_*.cpp
