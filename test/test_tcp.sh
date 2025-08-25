@@ -28,13 +28,13 @@ setup_server() {
 }
 
 teardown_server() {
-    kill -9 $SERVER_PID 2> /dev/null 
+    kill -9 $SERVER_PID 2> /dev/null
 }
 
 test_connection() {
-    echo 'test_connection:' 
-    setup_server connection
-	nc -v -z -w 2 localhost 8080
+    echo 'test_connection:'
+    setup_server
+    nc -v -z localhost 8080
     nc_exit_status=$?
     if (( nc_exit_status == 0 )); then
 		echo "test_connection: [OK]";
