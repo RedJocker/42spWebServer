@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/24 21:21:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/25 16:57:22 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,10 +15,12 @@
 #include <string>
 #include <iostream>
 #include <unistd.h>
-
+#include "Request.hpp"
 
 int main(void)
 {
+	http::Request request;
+
 	conn::TcpServer server;
 	std::pair<int, std::string> maybeServerFd = server.createAndListen(8080);
 	if (maybeServerFd.first < 0)
