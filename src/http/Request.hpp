@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/26 11:28:33 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/08/26 13:43:16 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ namespace http
 		std::string _path;
 		std::string _protocol;
 		std::map<std::string, std::string> _headers;
+		std::string _body;
 
 		std::string _readBuffer; // non-blocking
 
@@ -40,6 +41,7 @@ namespace http
 		std::string getPath() const;
 		std::string getProtocol() const;
 		std::string getHeader(const std::string &key) const;
+		std::string getBody() const;
 	};
 }
 
