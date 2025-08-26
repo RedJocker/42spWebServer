@@ -1,6 +1,7 @@
 # emacs temp
 *~
 \#*\#
+\.#*
 
 # bins and deps
 *.o

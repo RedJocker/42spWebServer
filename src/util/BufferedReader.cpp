@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/23 00:39:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/26 00:29:01 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,12 +27,12 @@ BufferedReader::BufferedReader(int fd)
 
 }
 
-BufferedReader::BufferedReader(BufferedReader &toCopy)
+BufferedReader::BufferedReader(const BufferedReader &toCopy)
 {
 	*this = toCopy;
 }
 
-BufferedReader BufferedReader::operator=(BufferedReader &other)
+BufferedReader &BufferedReader::operator=(const BufferedReader &other)
 {
 	if (this == &other)
 		return *this;
@@ -128,7 +128,6 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf()
 			message
 		);
 	}
-
 	int index_crlf = -1;
 	for (int i = 0; i < currentRead - 1; ++i)
 	{

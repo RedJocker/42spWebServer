@@ -6,16 +6,16 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/25 16:57:22 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/26 00:27:00 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "TcpServer.hpp"
-#include "BufferedReader.hpp"
 #include <string>
 #include <iostream>
 #include <unistd.h>
 #include "Request.hpp"
+#include "TcpClient.hpp"
 
 int main(void)
 {
@@ -35,29 +35,49 @@ int main(void)
 		return 11;
 	}
 	int clientFd = maybeClientFd.first;
-	BufferedReader reader(clientFd);
+	conn::TcpClient tcpClient(clientFd);
 	std::pair<ReadState, char *> readResult;
 
 	while (readResult.first == BufferedReader::READING)
 	{
 		std::cout << "reading" << std::endl;
-		readResult = reader.read(5);
+		readResult = tcpClient.readlineCrlf();
 	}
+	std::string messageFromClient;
 	if (readResult.first == BufferedReader::DONE)
 	{
-		std::cout << "done: " << std::string(readResult.second) << std::endl;
+		messageFromClient = std::string(readResult.second);
+		std::cout << "done: " << messageFromClient << std::endl;
 		delete[] readResult.second;
 	}
-	if (readResult.first == BufferedReader::NO_CONTENT)
+	else if (readResult.first == BufferedReader::NO_CONTENT)
 	{
-		std::cout << "eof: " << std::string(readResult.second) << std::endl;
+		messageFromClient = std::string(readResult.second);
+		std::cout << "eof: " << messageFromClient << std::endl;
 		delete[] readResult.second;
 	}
 	else
 	{
-		std::cout << "error: " << std::endl;
+		std::cout << "error: " << std::string(readResult.second) << std::endl;
+		return 22;
 	}
 
-	close(maybeClientFd.first);
-	return 69;
+	std::string messageToClient = messageFromClient;
+	tcpClient.setMessageToSend(messageToClient + "\r\n");
+	std::pair<WriteState, char *> writeResult;
+	while (writeResult.first == BufferedWriter::WRITING)
+	{
+		std::cout << "writing" << std::endl;
+		writeResult = tcpClient.flushMessage();
+	}
+	if (writeResult.first == BufferedWriter::ERROR)
+	{
+		std::cout << "error: " << std::string(writeResult.second) << std::endl;
+	}
+	else if (writeResult.first == BufferedWriter::DONE)
+	{
+		std::cout << "message sent"  << std::endl;
+	}
+
+	return 0;
 }
