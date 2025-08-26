@@ -131,7 +131,7 @@
     - [X] read a fixed length based message from client
     - [X] read a line message from client
     - [X] echo a message from client
-    - echo several messages from same client connection
+    - [ ] echo several messages from same client connection
     - handle multiple concurrent connections
     - use epoll or something alike
   - file
