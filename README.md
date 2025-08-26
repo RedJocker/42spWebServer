@@ -115,7 +115,7 @@
     - [X] create a class to handle tcp connection
 	- [X] read a fixed length based message from client
 	- [X] read a line message from client
-	- echo a message from client
+	- [ ] echo a message from client
 	- echo several messages from same client connection
     - handle multiple concurrent connections
     - use epoll or something alike
