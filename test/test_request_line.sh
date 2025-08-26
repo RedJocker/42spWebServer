@@ -1,21 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+if [ -z "$BASH_VERSION" ]; then exec bash "$0" "$@"; fi
 
 set -e
 
-OBJ_DIR=$(mktemp -d)
-BIN_DIR=$(mktemp -d)
-
-cleanup() {
-	rm -rf "$OBJ_DIR" "$BIN_DIR"
-}
+OBJ_DIR="$(mktemp -d)"
+BIN_DIR="$(mktemp -d)"
+cleanup() { rm -rf "$OBJ_DIR" "$BIN_DIR"; }
 trap cleanup EXIT
 
-echo "[1/2] Compiling HTTP Request test..."
+echo "[1/2] Compiling HTTP Request source..."
 c++ -Wall -Wextra -Werror -std=c++98 -I./src -c ./src/http/Request.cpp -o "$OBJ_DIR/Request.o"
+
+echo "[2/2] Compiling and linking tests..."
 c++ -Wall -Wextra -Werror -std=c++98 -I./src ./test/test_request_line.cpp "$OBJ_DIR/Request.o" -o "$BIN_DIR/test_request_line"
 
-echo "[2/2] Running test_request_line..."
-"$BIN_DIR/test_request_line" && \
-	echo -e "test_request_line: [OK]" || \
-	echo -e "test_request_line: [ERROR]"
-
+echo "[3/3] Running Request tests..."
+if "$BIN_DIR/test_request_line"; then
+    echo -e "test_request_line: [OK]"
+else
+    echo -e "test_request_line: [ERROR]"
+    exit 1
+fi
