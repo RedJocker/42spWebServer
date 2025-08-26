@@ -6,26 +6,40 @@
 #    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/08/20 22:22:05 by maurodri         ###   ########.fr        #
+#    Updated: 2025/08/25 23:10:36 by maurodri         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
 BASE_DIR := ./src
 TEST_DIR := ./test
 CONN_DIR := $(addprefix $(BASE_DIR), /conn)
-INCLUDE_DIRS := $(BASE_DIR) $(CONN_DIR)
+UTIL_DIR := $(addprefix $(BASE_DIR), /util)
+HTTP_DIR := $(addprefix $(BASE_DIR), /http)
+INCLUDE_DIRS := $(BASE_DIR) \
+	$(CONN_DIR) \
+	$(UTIL_DIR) \
+	$(HTTP_DIR) # add other module directories here
 
 BASE_FILES := $(addprefix $(BASE_DIR)/, main.cpp)
-CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp)
-MODULE_FILES := $(CONN_FILES) # add other module files here
+CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp \
+					TcpClient.cpp)
+UTIL_FILES := $(addprefix $(UTIL_DIR)/, BufferedReader.cpp\
+					BufferedWriter.cpp)
+HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp)
+MODULE_FILES := $(CONN_FILES) \
+	$(UTIL_FILES) \
+	$(HTTP_FILES) # add other module files here
+
 FILES := $(BASE_FILES) $(MODULE_FILES) # files to create main executable
 
 OBJ_DIR := ./obj/
 OBJS := $(addprefix $(OBJ_DIR), $(patsubst %.cpp, %.o, $(FILES)))
 
+BUFFER_SIZE_ARG = $(if $(BUFFER_SIZE),-DBUFFER_SIZE=$(BUFFER_SIZE))
+
 DEP_FLAGS := -MP -MD
 VPATH := $(MANDATORY_DIR)
-CFLAGS := -g3 -std=c++98 -Wall -Wextra -Werror
+CFLAGS := -g3 -std=c++98 -Wall -Wextra -Werror $(BUFFER_SIZE_ARG)
 CC := c++
 
 NAME := webserver
@@ -37,7 +51,7 @@ DEP_FILES := $(patsubst %.o, %.d, $(OBJS))
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	-etags --language-force=c++ $$(find $(BASE_DIR) -name '*.[tch]pp')
+	-etags $$(find $(BASE_DIR) -name '*.[tch]pp')
 	$(CC) $(CFLAGS) $^ $(INCLUDES) -o $@
 
 $(OBJS): $(OBJ_DIR)%.o : %.cpp | $(OBJ_DIR)
@@ -48,14 +62,20 @@ $(OBJ_DIR):
 	@mkdir -p $@
 
 
-
 test_tcp: $(MODULE_FILES) $(TEST_DIR)/test_tcp.cpp $(TEST_DIR)/test_tcp.sh
-	$(CC) $(CFLAGS) $(TEST_DIR)/test_tcp.cpp -o $@ $< $(INCLUDES)
+	$(CC) $(CFLAGS) $(TEST_DIR)/test_tcp.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
+
+test_buff_read: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_read.cpp $(TEST_DIR)/test_bufferedReader_read.sh 
+	$(CC) $(CFLAGS) $(TEST_DIR)/test_bufferedReader_read.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
+
+test_buff_readlineCrlf: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp $(TEST_DIR)/test_bufferedReader_readlineCrlf.sh 
+	$(CC) $(CFLAGS) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
 clean:
 	rm -fr $(OBJ_DIR) **/*~ *~ **/.#*
 
 fclean: clean
+	-rm ./test_*
 	rm -f $(NAME)
 
 re: fclean all

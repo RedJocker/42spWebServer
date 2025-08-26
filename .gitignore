@@ -1,6 +1,7 @@
 # emacs temp
 *~
 \#*\#
+\.#*
 
 # bins and deps
 *.o
@@ -12,4 +13,6 @@
 
 
 webserver
-test_tcp
+test_*
+!test_*.sh
+!test_*.cpp
