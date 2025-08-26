@@ -65,12 +65,12 @@
   - create folder for http module
   - end goal
     - create class for Request
-	  - [X] Request Line
-		  - Method
-          - Path
-          - Protocol
-      - Headers
-      - Body
+      - [X] Request Line
+        - Method
+        - Path
+        - Protocol
+      - [X] Headers
+      - [X] Body
       - [X] create a method to read a request from fd
       - [X] create getter methods for method, path, headers, body
     - create class for Response
@@ -83,6 +83,21 @@
         - create a method to create a response
           - maybe constructor is fine or maybe builder pattern 
         - create a method that return a response as a string
+  - create a class for Body to be able to use on both Request and Response
+  - create a class for Headers to be able to use on both Request and Response
+    - maybe it is a good idea to inherit from std::map<std::string, std::string>
+  - change parse Request, do not read from fd, read from TcpClient instead
+    - change readFromfd(int fd) to readFromTcpClient(TcpClient client)
+      - use client.readlineCrlf to read a \r\n delimited line
+      - use client.read(len) to read a fixed size content for body parsing
+        - length is part of headers
+      - create a enum for request read state
+        - {READING_REQUEST_LINE, READING_HEADERS, READING_BODY, ERROR, DONE}
+      - return this request read state from readFromTcpClient
+      - it may be a good idea to delegate to Header class responsabillity to parse headers
+      - it may be a good idea to delegate to Body class responsability to parse body
+    - remember we cannot by requirement check errno on read and writes to socket
+      - do not use EAGAIN nor EWOULDBLOCK
   - [X] hello Request
     - parse a get request containing only request line
       - `GET / HTTP/1.1`
@@ -113,10 +128,10 @@
   - tcp
     - [X] create a tcp connection
     - [X] create a class to handle tcp connection
-	- [X] read a fixed length based message from client
-	- [X] read a line message from client
-	- [X] echo a message from client
-	- echo several messages from same client connection
+    - [X] read a fixed length based message from client
+    - [X] read a line message from client
+    - [X] echo a message from client
+    - echo several messages from same client connection
     - handle multiple concurrent connections
     - use epoll or something alike
   - file
