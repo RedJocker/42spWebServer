@@ -6,7 +6,7 @@
 #    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/08/25 16:53:55 by maurodri         ###   ########.fr        #
+#    Updated: 2025/08/25 23:10:36 by maurodri         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -21,8 +21,10 @@ INCLUDE_DIRS := $(BASE_DIR) \
 	$(HTTP_DIR) # add other module directories here
 
 BASE_FILES := $(addprefix $(BASE_DIR)/, main.cpp)
-CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp)
-UTIL_FILES := $(addprefix $(UTIL_DIR)/, BufferedReader.cpp)
+CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp \
+					TcpClient.cpp)
+UTIL_FILES := $(addprefix $(UTIL_DIR)/, BufferedReader.cpp\
+					BufferedWriter.cpp)
 HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp)
 MODULE_FILES := $(CONN_FILES) \
 	$(UTIL_FILES) \
