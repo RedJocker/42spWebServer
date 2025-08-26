@@ -12,13 +12,14 @@
 
 #include "TcpClient.hpp"
 #include <unistd.h>
+#include <stdexcept>
 
 namespace conn
 {
 
 	TcpClient::TcpClient(): clientFd(0), reader(0), writer(0)
 	{
-		throw std::domain_error("should call constructor with reader");
+		throw std::domain_error("default constructor is not allowed, use constructor with clientFd parameter");
 	}
 
 	TcpClient::TcpClient(int clientFd)

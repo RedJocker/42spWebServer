@@ -6,12 +6,13 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 22:58:25 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 01:28:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/26 02:02:26 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "BufferedWriter.hpp"
 #include <unistd.h>
+#include <stdexcept>
 
 BufferedWriter::BufferedWriter()
 {
@@ -46,7 +47,7 @@ BufferedWriter::~BufferedWriter()
 void BufferedWriter::setMessage(std::string message)
 {
 	if (this->state != BufferedWriter::DONE)
-		throw std::domain_error("should call setMessage only with state DONE");
+		throw std::domain_error("setMessage can only be called when state is DONE");
 	this->toWrite = message;
 	this->state = BufferedWriter::WRITING;
 }
@@ -60,7 +61,7 @@ std::pair<WriteState, char *>  BufferedWriter::flushMessage()
 {
 	if (this->state != BufferedWriter::WRITING)
 		throw std::domain_error(
-			"should call setMessage only with state WRITING");
+			"flushMessage can only be called when state is WRITING");
 	ssize_t sizeToWrite = static_cast<ssize_t>(this->toWrite.size());
 	const char *message = this->toWrite.c_str();
 	ssize_t sizeWritten = write(this->fd, message, sizeToWrite);
