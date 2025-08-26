@@ -6,7 +6,10 @@ set -e
 
 OBJ_DIR="$(mktemp -d)"
 BIN_DIR="$(mktemp -d)"
-cleanup() { rm -rf "$OBJ_DIR" "$BIN_DIR"; }
+
+cleanup() {
+    rm -rf "$OBJ_DIR" "$BIN_DIR"
+}
 trap cleanup EXIT
 
 echo "[1/2] Compiling HTTP Request test..."
@@ -15,8 +18,8 @@ c++ -Wall -Wextra -Werror -std=c++98 -I./src ./test/test_request_line.cpp "$OBJ_
 
 echo "[2/2] Running test_request_line..."
 if "$BIN_DIR/test_request_line"; then
-  echo -e "test_request_line: [OK]"
+    echo -e "test_request_line: [OK] ✅"
 else
-  echo -e "test_request_line: [ERROR]"
-  exit 1
+    echo -e "test_request_line: [ERROR] ❌"
+    exit 1
 fi
