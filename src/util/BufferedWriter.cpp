@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 22:58:25 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 02:02:26 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/26 21:31:07 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -48,8 +48,14 @@ void BufferedWriter::setMessage(std::string message)
 {
 	if (this->state != BufferedWriter::DONE)
 		throw std::domain_error("setMessage can only be called when state is DONE");
+	this->message = message;
 	this->toWrite = message;
 	this->state = BufferedWriter::WRITING;
+}
+
+std::string BufferedWriter::getMessage() const
+{
+	return this->message;
 }
 
 WriteState BufferedWriter::getState() const

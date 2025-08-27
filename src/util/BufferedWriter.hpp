@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 22:57:40 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 01:28:38 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/26 21:30:11 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -23,6 +23,7 @@ public:
 private:
 	int fd;
 	WriteState state;
+	std::string message;
 	std::string toWrite;
 	BufferedWriter();
 public:
@@ -34,7 +35,7 @@ public:
 	void setMessage(std::string message);
 	WriteState getState() const;
 	std::pair<WriteState, char*> flushMessage();
-
+	std::string getMessage() const;
 };
 
 typedef BufferedWriter::WriteState WriteState;

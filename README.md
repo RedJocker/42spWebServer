@@ -131,9 +131,10 @@
     - [X] read a fixed length based message from client
     - [X] read a line message from client
     - [X] echo a message from client
-    - [ ] echo several messages from same client connection
-    - handle multiple concurrent connections
-    - use epoll or something alike
+    - [X] echo several messages from same client connection
+    - [X] handle multiple concurrent connections
+    - [X] use epoll or something alike
+    - handle todos left on EventLoop
   - file
     - create a class to handle file opening
   - cgi

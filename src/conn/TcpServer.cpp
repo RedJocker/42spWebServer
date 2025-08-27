@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:36:49 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/20 21:24:54 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/26 17:26:15 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -105,6 +105,11 @@ namespace conn
 		int clientSocket = accept(this->serverFd, 0, 0);
 		
 		return std::make_pair(clientSocket, "Ok");
+	}
+
+	int TcpServer::getServerFd() const
+	{
+		return this->serverFd;
 	}
 }
 
