@@ -122,7 +122,7 @@
         ```
   - 404 response
     - create a 404 response
-  - create a HttpClient class that inherits from TcpClient and has a Request and Response
+  - [ ] create a HttpClient class that inherits from TcpClient and has a Request and Response
     - Request and Response are initially empty
     - we parse Request using Request.readFromTcpClient()
     - generate some Response and send it back to client
