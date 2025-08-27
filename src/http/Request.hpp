@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 12:15:31 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/08/27 13:38:18 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 # define REQUEST_HPP
 
 #include <string>
-#include <map>
-#include <cstddef>
+#include "Headers.hpp"
+#include "Body.hpp"
 
 namespace conn {
 	class TcpClient;
@@ -53,13 +53,13 @@ namespace http
 		std::string _method;
 		std::string _path;
 		std::string _protocol;
-		std::map<std::string, std::string> _headers;
-		std::string _body;
 
-		std::string _readBuffer; // non-blocking
+		Headers _headers;
+		Body _body;
 
 		ReadState _state;
-		size_t _expectedBodyLength;
+
+		bool parseRequestLine(const std::string &line);
 	};
 }
 

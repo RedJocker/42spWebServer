@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 12:24:43 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/08/27 14:23:57 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "BufferedReader.hpp"
 #include <sstream>
 #include <cstdlib>
-#include <cctype>
 
 namespace http
 {
@@ -25,9 +24,7 @@ namespace http
 		, _protocol()
 		, _headers()
 		, _body()
-		, _readBuffer()
 		, _state(READING_REQUEST_LINE)
-		, _expectedBodyLength(0)
 	{}
 
 	Request::Request(const Request &other) {
@@ -41,112 +38,112 @@ namespace http
 			this->_protocol = other._protocol;
 			this->_headers = other._headers;
 			this->_body = other._body;
-			this->_readBuffer = other._readBuffer;
 			this->_state = other._state;
-			this->_expectedBodyLength = other._expectedBodyLength;
 		}
 		return *this;
 	}
 
 	Request::~Request(void) {}
 
+	bool Request::parseRequestLine(const std::string &line) {
+		std::istringstream lineStream(line);
+		if (!(lineStream >> _method >> _path >> _protocol))
+			return false;
+		return true;
+	}
+
 	Request::ReadState Request::readFromTcpClient(conn::TcpClient &client) {
-		switch (_state) {
-			case READING_REQUEST_LINE: {
-				std::pair<BufferedReader::ReadState, char*> result = client.readlineCrlf();
+		while (true) {
+			std::pair<BufferedReader::ReadState, char*> result;
 
-				if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
-					return _state;
-				if (result.first == BufferedReader::ERROR) {
-					_state = READ_ERROR;
-					return _state;
-				}
+			switch (_state) {
+				case READING_REQUEST_LINE: {
+					result = client.readlineCrlf();
 
-				std::string line(result.second);
-				delete[] result.second;
-
-				std::istringstream lineStream(line);
-				if (!(lineStream >> _method >> _path >> _protocol)) {
-					_state = READ_ERROR;
-					return _state;
-				}
-
-				_state = READING_HEADERS;
-				return _state;
-			}
-
-			case READING_HEADERS: {
-				std::pair<BufferedReader::ReadState, char*> result = client.readlineCrlf();
-
-				if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
-					return _state;
-				if (result.first == BufferedReader::ERROR) {
-					_state = READ_ERROR;
-					return _state;
-				}
-
-				std::string line(result.second);
-				delete[] result.second;
-
-				if (line.empty() || line == "\n" || line == "\r\n") {
-					std::map<std::string, std::string>::iterator it = _headers.find("Content-Length");
-
-					if (it != _headers.end()) {
-						_expectedBodyLength = strtoul(it->second.c_str(), NULL, 10);
-						_state = (_expectedBodyLength > 0) ? READING_BODY : READ_COMPLETE;
+					if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
+						return _state;
+					if (result.first == BufferedReader::ERROR) {
+						_state = READ_ERROR;
+						delete[] result.second;
+						return _state;
 					}
-					else
+
+					if (!parseRequestLine(std::string(result.second))) {
+						_state = READ_ERROR;
+						delete[] result.second;
+						return _state;
+					}
+					delete[] result.second;
+					_state = READING_HEADERS;
+					break;
+				}
+
+				case READING_HEADERS: {
+					result = client.readlineCrlf();
+
+					if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
+						return _state;
+					if (result.first == BufferedReader::ERROR) {
+						_state = READ_ERROR;
+						delete[] result.second;
+						return _state;
+					}
+
+					std::string line(result.second);
+					delete[] result.second;
+
+					// End of Headers
+					if (line.empty() || line == "\n" || line == "\r\n") {
+						std::string contentLength = _headers.getHeader("Content-Length");
+						if (!contentLength.empty())
+							_state = READING_BODY; // Body to read
+						else
+							_state = READ_COMPLETE; // No body to read
+					}
+					else {
+						if (!_headers.parseLine(line)) {
+							_state = READ_ERROR;
+							return _state;
+						}
+					}
+
+					break;
+				}
+
+				case READING_BODY: {
+				{
+					std::string contentLength = _headers.getHeader("Content-Length");
+					size_t expectedLength = 0;
+					if (!contentLength.empty()) {
+						expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
+					}
+
+					result = client.read(expectedLength - _body.size());
+					if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
+						return _state;
+					if (result.first == BufferedReader::ERROR) {
+						_state = READ_ERROR;
+						delete[] result.second;
+						return _state;
+					}
+					if (!_body.parse(result.second, expectedLength)) {
+						delete[] result.second;
+						return _state;
+					}
+					delete[] result.second;
+
+					// Check if the body has been fully read
+					if (_body.size() >= expectedLength) {
 						_state = READ_COMPLETE;
-
-					return _state;
+					}
+				}
+				break;
 				}
 
-				// Trimming CRLF
-				if (line.size() >= 2 && line[line.size() - 2] == '\r' && line[line.size() - 1] == '\n')
-					line.erase(line.size() - 2);
-				else if (!line.empty() && (line[line.size() - 1] == '\n' || line[line.size() - 1] == '\r'))
-					line.erase(line.size() - 1);
-
-				size_t colon = line.find(':');
-				if (colon == std::string::npos) {
-					_state = READ_ERROR;
+				case READ_ERROR:
+				case READ_COMPLETE:
 					return _state;
-				}
-
-				std::string key = line.substr(0, colon);
-				std::string value = line.substr(colon + 1);
-				while (!value.empty() && std::isspace(value[0]))
-					value.erase(0, 1);
-
-				_headers[key] = value;
-				return _state;
 			}
-
-			case READING_BODY: {
-				std::pair<BufferedReader::ReadState, char*> chunk = client.read(_expectedBodyLength - _body.size());
-
-				if (!chunk.second || chunk.first == BufferedReader::READING || chunk.first == BufferedReader::NO_CONTENT)
-					return _state;
-				if (chunk.first == BufferedReader::ERROR) {
-					_state = READ_ERROR;
-					delete[] chunk.second;
-					return _state;
-				}
-
-				_body.append(chunk.second);
-				delete[] chunk.second;
-
-				if (_body.size() >= _expectedBodyLength)
-					_state = READ_COMPLETE;
-
-				return _state;
-			}
-
-			case READ_ERROR:
-			case READ_COMPLETE:
-				return _state;
-
-			return READ_ERROR;
 		}
 	}
 
@@ -154,8 +151,7 @@ namespace http
 	std::string Request::getPath() const { return _path; }
 	std::string Request::getProtocol() const { return _protocol; }
 	std::string Request::getHeader(const std::string &key) const {
-		std::map<std::string, std::string>::const_iterator it = _headers.find(key);
-		return it != _headers.end() ? it->second : "";
+		return _headers.getHeader(key);
 	}
-	std::string Request::getBody() const { return _body; }
+	std::string Request::getBody() const { return _body.str(); }
 }
