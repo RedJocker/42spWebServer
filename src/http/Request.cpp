@@ -6,22 +6,34 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/26 15:44:25 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/08/27 12:24:43 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include <unistd.h>
+#include "TcpClient.hpp"
+#include "BufferedReader.hpp"
 #include <sstream>
-#include <iostream>
-#include <cerrno>
-#include <cctype>
 #include <cstdlib>
+#include <cctype>
 
 namespace http
 {
-	Request::Request(void) {}
-	Request::Request(const Request &other) { *this = other; }
+	Request::Request(void)
+		: _method()
+		, _path()
+		, _protocol()
+		, _headers()
+		, _body()
+		, _readBuffer()
+		, _state(READING_REQUEST_LINE)
+		, _expectedBodyLength(0)
+	{}
+
+	Request::Request(const Request &other) {
+		*this = other;
+	}
+
 	Request &Request::operator=(const Request &other) {
 		if (this != &other) {
 			this->_method = other._method;
@@ -30,79 +42,112 @@ namespace http
 			this->_headers = other._headers;
 			this->_body = other._body;
 			this->_readBuffer = other._readBuffer;
+			this->_state = other._state;
+			this->_expectedBodyLength = other._expectedBodyLength;
 		}
 		return *this;
 	}
+
 	Request::~Request(void) {}
 
-	bool Request::readFromFd(int fd) {
-		char tmp[4096];
-		ssize_t n = ::read(fd, tmp, sizeof(tmp));
-		if (n <= 0) {
-			if (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK))
-				return false; // No data available
-			return false; // Error or EOF
-		}
+	Request::ReadState Request::readFromTcpClient(conn::TcpClient &client) {
+		switch (_state) {
+			case READING_REQUEST_LINE: {
+				std::pair<BufferedReader::ReadState, char*> result = client.readlineCrlf();
 
-		_readBuffer.append(tmp, n);
-
-		// Parse request line first
-		size_t lineEnd = _readBuffer.find("\r\n");
-		if (lineEnd == std::string::npos) {
-			lineEnd = _readBuffer.find("\n"); // LF-only
-			if (lineEnd == std::string::npos)
-				return false; // Request line incomplete
-		}
-
-		std::string line = _readBuffer.substr(0, lineEnd);
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
-
-		std::istringstream lineStream(line);
-		if (!(lineStream >> _method >> _path >> _protocol))
-			return false; // Bad request line
-
-		_readBuffer.erase(0, lineEnd + (lineEnd + 2 <= _readBuffer.size() && _readBuffer[lineEnd] == '\r' && _readBuffer[lineEnd + 1] == '\n' ? 2 : 1)); // remove processed line
-
-		// Check if there are headers and body
-		size_t headersEnd = _readBuffer.find("\r\n\r\n");
-		if (headersEnd == std::string::npos)
-			headersEnd = _readBuffer.find("\n\n"); // LF-only
-		if (headersEnd != std::string::npos) {
-			std::istringstream headersStream(_readBuffer.substr(0, headersEnd));
-			std::string headerLine;
-			while (std::getline(headersStream, headerLine)) {
-				if (!headerLine.empty() && headerLine[headerLine.size() - 1] == '\r')
-					headerLine.erase(headerLine.size() - 1);
-				if (headerLine.empty())
-					break;
-
-				size_t colon = headerLine.find(':');
-				if (colon != std::string::npos) {
-					std::string key = headerLine.substr(0, colon);
-					std::string value = headerLine.substr(colon + 1);
-					while (!value.empty() && value[0] == ' ')
-						value.erase(0, 1); // Trim leading spaces
-					_headers[key] = value;
+				if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
+					return _state;
+				if (result.first == BufferedReader::ERROR) {
+					_state = READ_ERROR;
+					return _state;
 				}
-			}
-			_readBuffer.erase(0, headersEnd + 4); // Remove headers from buffer
 
-			// Read body if Content-Length set
-			std::map<std::string, std::string>::iterator it;
-			for (it = _headers.begin(); it != _headers.end(); ++it) {
-				if (it->first == "Content-Length") {
-					size_t contentLength = strtoul(it->second.c_str(), NULL, 10);
-					if (_readBuffer.size() < contentLength)
-						return false; // Body not fully received yet
-					_body = _readBuffer.substr(0, contentLength);
-					_readBuffer.erase(0, contentLength);
-					break;
+				std::string line(result.second);
+				delete[] result.second;
+
+				std::istringstream lineStream(line);
+				if (!(lineStream >> _method >> _path >> _protocol)) {
+					_state = READ_ERROR;
+					return _state;
 				}
-			}
-		}
 
-		return true; // Successfully parsed
+				_state = READING_HEADERS;
+				return _state;
+			}
+
+			case READING_HEADERS: {
+				std::pair<BufferedReader::ReadState, char*> result = client.readlineCrlf();
+
+				if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
+					return _state;
+				if (result.first == BufferedReader::ERROR) {
+					_state = READ_ERROR;
+					return _state;
+				}
+
+				std::string line(result.second);
+				delete[] result.second;
+
+				if (line.empty() || line == "\n" || line == "\r\n") {
+					std::map<std::string, std::string>::iterator it = _headers.find("Content-Length");
+
+					if (it != _headers.end()) {
+						_expectedBodyLength = strtoul(it->second.c_str(), NULL, 10);
+						_state = (_expectedBodyLength > 0) ? READING_BODY : READ_COMPLETE;
+					}
+					else
+						_state = READ_COMPLETE;
+
+					return _state;
+				}
+
+				// Trimming CRLF
+				if (line.size() >= 2 && line[line.size() - 2] == '\r' && line[line.size() - 1] == '\n')
+					line.erase(line.size() - 2);
+				else if (!line.empty() && (line[line.size() - 1] == '\n' || line[line.size() - 1] == '\r'))
+					line.erase(line.size() - 1);
+
+				size_t colon = line.find(':');
+				if (colon == std::string::npos) {
+					_state = READ_ERROR;
+					return _state;
+				}
+
+				std::string key = line.substr(0, colon);
+				std::string value = line.substr(colon + 1);
+				while (!value.empty() && std::isspace(value[0]))
+					value.erase(0, 1);
+
+				_headers[key] = value;
+				return _state;
+			}
+
+			case READING_BODY: {
+				std::pair<BufferedReader::ReadState, char*> chunk = client.read(_expectedBodyLength - _body.size());
+
+				if (!chunk.second || chunk.first == BufferedReader::READING || chunk.first == BufferedReader::NO_CONTENT)
+					return _state;
+				if (chunk.first == BufferedReader::ERROR) {
+					_state = READ_ERROR;
+					delete[] chunk.second;
+					return _state;
+				}
+
+				_body.append(chunk.second);
+				delete[] chunk.second;
+
+				if (_body.size() >= _expectedBodyLength)
+					_state = READ_COMPLETE;
+
+				return _state;
+			}
+
+			case READ_ERROR:
+			case READ_COMPLETE:
+				return _state;
+
+			return READ_ERROR;
+		}
 	}
 
 	std::string Request::getMethod() const { return _method; }
