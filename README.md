@@ -27,7 +27,7 @@
     - [setsockopt](https://linux.die.net/man/3/setsockopt)
   - [epool example](https://gist.github.com/kesuskim/4624a52146cc1e2676fa0434cef17281)
   - [epool intro](https://www.suchprogramming.com/epoll-in-3-easy-steps/)
-
+  - [epool master](https://thelinuxcode.com/epoll-7-c-function/)
 
 # Tasks
 
@@ -131,9 +131,10 @@
     - [X] read a fixed length based message from client
     - [X] read a line message from client
     - [X] echo a message from client
-    - echo several messages from same client connection
-    - handle multiple concurrent connections
-    - use epoll or something alike
+    - [X] echo several messages from same client connection
+    - [X] handle multiple concurrent connections
+    - [X] use epoll or something alike
+    - handle todos left on EventLoop
   - file
     - create a class to handle file opening
   - cgi

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 01:26:46 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/26 21:30:12 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -34,6 +34,7 @@ namespace conn {
 		std::pair<ReadState, char *> readlineCrlf();
 		void setMessageToSend(std::string message);
 		WriteState getWriterState() const;
+		std::string getMessageToSend() const;
 		std::pair<WriteState, char*> flushMessage();
 	};
 }
