@@ -83,10 +83,10 @@
         - create a method to create a response
           - maybe constructor is fine or maybe builder pattern 
         - create a method that return a response as a string
-  - create a class for Body to be able to use on both Request and Response
-  - create a class for Headers to be able to use on both Request and Response
+  - [X] create a class for Body to be able to use on both Request and Response
+  - [X] create a class for Headers to be able to use on both Request and Response
     - maybe it is a good idea to inherit from std::map<std::string, std::string>
-  - change parse Request, do not read from fd, read from TcpClient instead
+  - [X] change parse Request, do not read from fd, read from TcpClient instead
     - change readFromfd(int fd) to readFromTcpClient(TcpClient client)
       - use client.readlineCrlf to read a \r\n delimited line
       - use client.read(len) to read a fixed size content for body parsing
@@ -122,7 +122,13 @@
         ```
   - 404 response
     - create a 404 response
-
+  - create a HttpClient class that inherits from TcpClient and has a Request and Response
+    - Request and Response are initially empty
+    - we parse Request using Request.readFromTcpClient()
+    - generate some Response and send it back to client
+    - next message from client overwrites previous Request
+      - maybe we will need to clear first before reusing
+    - provide a public method to return the state of parsing and the current request 
 - Connection Handling
   - [X] create folder for connection module
   - tcp
