@@ -27,7 +27,7 @@
     - [setsockopt](https://linux.die.net/man/3/setsockopt)
   - [epool example](https://gist.github.com/kesuskim/4624a52146cc1e2676fa0434cef17281)
   - [epool intro](https://www.suchprogramming.com/epoll-in-3-easy-steps/)
-
+  - [epool master](https://thelinuxcode.com/epoll-7-c-function/)
 
 # Tasks
 
