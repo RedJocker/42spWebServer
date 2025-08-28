@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/28 20:21:38 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/28 20:29:40 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ namespace http
 		return true;
 	}
 
-	Request::ReadState Request::readFromTcpClient(conn::TcpClient &client) {
+	Request::ReadState Request::readHttpRequest(conn::TcpClient &client) {
 		std::pair<BufferedReader::ReadState, char*> result;
 
 		switch (_state) {

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/28 20:25:56 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/28 20:29:39 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -51,7 +51,7 @@ namespace http {
 
 	Request Client::readHttpRequest()
 	{
-		this->request.readFromTcpClient(*this);
+		this->request.readHttpRequest(*this);
 		return this->request;
 	}
 
