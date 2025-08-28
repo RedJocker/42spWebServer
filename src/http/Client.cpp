@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/27 21:34:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/28 20:25:56 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -34,6 +34,14 @@ namespace http {
 		//TODO
 
 		return *this;
+	}
+
+	Client &Client::operator=(const conn::TcpClient &other) {
+            if (this == &other) {
+                return *this;
+            }
+			conn::TcpClient::operator=(other);
+			return *this;
 	}
 
 	Client::~Client()

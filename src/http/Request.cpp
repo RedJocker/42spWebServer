@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/27 19:25:32 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/28 20:21:38 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ namespace http
 				_state = READING_HEADERS;
 				return _state;
 			}
+			return _state;
 		}
 
 		case READING_HEADERS: {
@@ -118,6 +119,7 @@ namespace http
 				}
 				return _state;
 			}
+			return _state;
 		}
 
 		case READING_BODY: {
@@ -150,6 +152,7 @@ namespace http
 				}
 				return _state;
 			}
+			return _state;
 		}
 		case READ_BAD_REQUEST:
 		case READ_EOF:
@@ -157,6 +160,7 @@ namespace http
 		case READ_COMPLETE:
 				return _state;
 		}
+		return _state;
 	}
 
 	std::string Request::getMethod() const { return _method; }
