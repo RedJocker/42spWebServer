@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 13:38:18 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/08/27 19:25:49 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,7 @@
 #include <string>
 #include "Headers.hpp"
 #include "Body.hpp"
-
-namespace conn {
-	class TcpClient;
-}
+#include "TcpClient.hpp"
 
 namespace http
 {
@@ -32,7 +29,9 @@ namespace http
 			READING_HEADERS,
 			READING_BODY,
 			READ_ERROR,
-			READ_COMPLETE
+			READ_BAD_REQUEST,
+			READ_COMPLETE,
+			READ_EOF
 		};
 
 		Request(void);
@@ -42,6 +41,7 @@ namespace http
 
 		ReadState readFromTcpClient(conn::TcpClient &client);
 		ReadState state(void) const { return _state; }
+		void clear(void);
 
 		std::string getMethod(void) const;
 		std::string getPath(void) const;

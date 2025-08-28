@@ -104,14 +104,14 @@
   - setup tests for http module
     - test response based on method that return response as a string
     - [X] test request based on method that accepts fd and create a request object
-  - get Request with headers
+  - [X] get Request with headers
     - parse a get request containing some headers
       - ```
            GET / HTTP/1.1
            Connection: close
            Host: localhost
         ```
-    - parse a post request with a body
+    - [X] parse a post request with a body
       - ```
            POST / HTTP/1.1
            Connection: close
@@ -122,13 +122,14 @@
         ```
   - 404 response
     - create a 404 response
-  - [ ] create a HttpClient class that inherits from TcpClient and has a Request and Response
+  - [X] create a HttpClient class that inherits from TcpClient and has a Request and Response
     - Request and Response are initially empty
     - we parse Request using Request.readFromTcpClient()
     - generate some Response and send it back to client
     - next message from client overwrites previous Request
       - maybe we will need to clear first before reusing
-    - provide a public method to return the state of parsing and the current request 
+    - provide a public method to return the state of parsing and the current request
+  - receive a request from browser
 - Connection Handling
   - [X] create folder for connection module
   - tcp
@@ -141,6 +142,7 @@
     - [X] handle multiple concurrent connections
     - [X] use epoll or something alike
     - handle todos left on EventLoop
+    - fix issues of buffered reader: a read may contain several \r\n in a single read
   - file
     - create a class to handle file opening
   - cgi

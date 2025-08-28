@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 14:23:57 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/08/27 19:25:32 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,97 +53,109 @@ namespace http
 	}
 
 	Request::ReadState Request::readFromTcpClient(conn::TcpClient &client) {
-		while (true) {
-			std::pair<BufferedReader::ReadState, char*> result;
+		std::pair<BufferedReader::ReadState, char*> result;
 
-			switch (_state) {
-				case READING_REQUEST_LINE: {
-					result = client.readlineCrlf();
+		switch (_state) {
+		case READING_REQUEST_LINE: {
+			result = client.readlineCrlf();
 
-					if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
-						return _state;
-					if (result.first == BufferedReader::ERROR) {
-						_state = READ_ERROR;
-						delete[] result.second;
-						return _state;
-					}
-
-					if (!parseRequestLine(std::string(result.second))) {
-						_state = READ_ERROR;
-						delete[] result.second;
-						return _state;
-					}
-					delete[] result.second;
-					_state = READING_HEADERS;
-					break;
-				}
-
-				case READING_HEADERS: {
-					result = client.readlineCrlf();
-
-					if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
-						return _state;
-					if (result.first == BufferedReader::ERROR) {
-						_state = READ_ERROR;
-						delete[] result.second;
-						return _state;
-					}
-
-					std::string line(result.second);
-					delete[] result.second;
-
-					// End of Headers
-					if (line.empty() || line == "\n" || line == "\r\n") {
-						std::string contentLength = _headers.getHeader("Content-Length");
-						if (!contentLength.empty())
-							_state = READING_BODY; // Body to read
-						else
-							_state = READ_COMPLETE; // No body to read
-					}
-					else {
-						if (!_headers.parseLine(line)) {
-							_state = READ_ERROR;
-							return _state;
-						}
-					}
-
-					break;
-				}
-
-				case READING_BODY: {
-				{
-					std::string contentLength = _headers.getHeader("Content-Length");
-					size_t expectedLength = 0;
-					if (!contentLength.empty()) {
-						expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
-					}
-
-					result = client.read(expectedLength - _body.size());
-					if (!result.second || result.first == BufferedReader::READING || result.first == BufferedReader::NO_CONTENT)
-						return _state;
-					if (result.first == BufferedReader::ERROR) {
-						_state = READ_ERROR;
-						delete[] result.second;
-						return _state;
-					}
-					if (!_body.parse(result.second, expectedLength)) {
-						delete[] result.second;
-						return _state;
-					}
-					delete[] result.second;
-
-					// Check if the body has been fully read
-					if (_body.size() >= expectedLength) {
-						_state = READ_COMPLETE;
-					}
-				}
-				break;
-				}
-
-				case READ_ERROR:
-				case READ_COMPLETE:
-					return _state;
+			if (result.first == BufferedReader::READING)
+				return _state;
+			else if (result.first == BufferedReader::ERROR)
+			{
+				_state = READ_ERROR;
+				return _state;
 			}
+			else if (result.first == BufferedReader::NO_CONTENT)
+			{
+				delete[] result.second;
+				_state = READ_EOF;
+				return _state;
+			}
+			else if (result.first == BufferedReader::DONE)
+			{
+				if (!parseRequestLine(std::string(result.second)))
+				{
+					_state = READ_BAD_REQUEST;
+					delete[] result.second;
+					return _state;
+				}
+				delete[] result.second;
+				_state = READING_HEADERS;
+				return _state;
+			}
+		}
+
+		case READING_HEADERS: {
+			result = client.readlineCrlf();
+
+			if (result.first == BufferedReader::READING)
+				return _state;
+			else if (result.first == BufferedReader::ERROR) {
+				_state = READ_ERROR;
+				return _state;
+			}
+			else if (result.first == BufferedReader::NO_CONTENT)
+			{
+				delete[] result.second;
+				_state = READ_EOF;
+				return _state;
+			}
+			else if (result.first == BufferedReader::DONE)
+			{
+				std::string line(result.second);
+				delete[] result.second;
+
+				if (line.empty()) { // End of Headers
+					std::string contentLength = _headers.getHeader("Content-Length");
+					if (!contentLength.empty())
+						_state = READING_BODY; // Body to read
+					else
+						_state = READ_COMPLETE; // No body to read
+				}
+				else if (!_headers.parseLine(line)) { // unexpected format
+					_state = READ_BAD_REQUEST;
+				}
+				return _state;
+			}
+		}
+
+		case READING_BODY: {
+			std::string contentLength = _headers.getHeader("Content-Length");
+			size_t expectedLength = 0;
+			if (!contentLength.empty()) {
+				expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
+			}
+
+			result = client.read(expectedLength - _body.size());
+			if (BufferedReader::READING)
+				return _state;
+			else if (result.first == BufferedReader::ERROR) {
+				_state = READ_ERROR;
+				return _state;
+			}
+			else if (result.first == BufferedReader::NO_CONTENT) {
+				_state = READ_EOF;
+				return _state;
+			} else if (result.first == BufferedReader::DONE) {
+				if (!_body.parse(result.second, expectedLength)) {
+					delete[] result.second;
+					return _state;
+				}
+				delete[] result.second;
+
+				// Check if the body has been fully read
+				if (_body.size() >= expectedLength) {
+					_state = READ_COMPLETE;
+				}
+				return _state;
+			}
+		}
+		case READ_BAD_REQUEST:
+		case READ_EOF:
+		case READ_ERROR:
+		case READ_COMPLETE:
+				return _state;
 		}
 	}
 
@@ -154,4 +166,13 @@ namespace http
 		return _headers.getHeader(key);
 	}
 	std::string Request::getBody() const { return _body.str(); }
+	void Request::clear()
+	{
+		_method = "";
+		_path = "";
+		_protocol = "";
+		_state = READING_REQUEST_LINE;
+		_headers.clear();
+		_body.clear();
+	}
 }
