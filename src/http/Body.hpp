@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:30 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 14:11:35 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/08/27 18:50:58 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ namespace http {
 
 			std::string str(void) const;
 			size_t size(void) const;
+			void clear(void);
 
 		private:
 			std::string _content;
