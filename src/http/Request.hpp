@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/28 20:29:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/28 20:55:06 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,9 @@ namespace http
 		ReadState _state;
 
 		bool parseRequestLine(const std::string &line);
+		ReadState readRequestLine(conn::TcpClient &client);
+		ReadState readHeaderLine(conn::TcpClient &client);
+		ReadState readBody(conn::TcpClient &client);
 	};
 }
 
