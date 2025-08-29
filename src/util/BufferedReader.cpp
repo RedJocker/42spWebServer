@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 00:29:01 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/29 02:07:14 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -50,19 +50,45 @@ BufferedReader::~BufferedReader()
 }
 
 // returns allocated char* and reset read state
-char *BufferedReader::consumeBufferedContent()
+bool BufferedReader::hasBufferedContent() const
 {
-	char *message = new char[this->buffered.size() + 1];
-	::memcpy(message, &this->buffered[0], this->buffered.size());
-	message[this->buffered.size()] = '\0';
-	this->buffered.clear();
-	this->readBefore = 0;
+	return this->buffered.size() > 0;
+}
+
+ssize_t BufferedReader::crlfIndex(size_t start) const
+{
+	ssize_t len = this->buffered.size();
+	ssize_t index_crlf = -1;
+	for (ssize_t i = start; i < len - 1; ++i)
+	{
+		if (this->buffered.at(i) == '\r' && this->buffered.at(i + 1) == '\n')
+		{
+			index_crlf = i;
+			break;
+		}
+	}
+	return index_crlf;
+}
+
+// returns allocated char*
+char *BufferedReader::consumeBufferedContent(size_t len, size_t eraseAfter)
+{
+	len = std::min(len, this->buffered.size());
+	char *message = new char[len + 1];
+	::memcpy(message, &this->buffered[0], len);
+	message[len] = '\0';
+	size_t toErase = std::min(len + eraseAfter, this->buffered.size());
+	this->buffered.erase(buffered.begin(), buffered.begin() + toErase);
+	this->readBefore = this->buffered.size();
 	return message;
 }
 
 std::pair<ReadState, char *> BufferedReader::read(size_t length)
 {
-	size_t toRead = length > this->readBefore ? length - this->readBefore : 0;
+	size_t toRead = length > this->readBefore
+		? length - this->readBefore
+		: 0;
+
 	if (toRead == 0)
 	{
 		return std::make_pair(
@@ -73,6 +99,7 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 		this->fd,
 		this->readBuffer,
 		std::min(toRead, static_cast<size_t>(BUFFER_SIZE)));
+
 	if (currentRead < 0)
 	{
 		return std::make_pair(
@@ -81,29 +108,27 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 	}
 	else if (currentRead == 0)
 	{
-		char *message = this->consumeBufferedContent();
+		char *message = this->consumeBufferedContent(buffered.size(), 0);
 		return std::make_pair(
 			NO_CONTENT,
 			message
 		);
 	}
-	if (static_cast<size_t>(currentRead) > toRead)
+	else if (static_cast<size_t>(currentRead) > toRead)
 		throw std::domain_error("unexpected read bigger than toRead");
-	if (static_cast<size_t>(currentRead) == toRead)
-	{
-		this->buffered.insert(
+
+	this->buffered.insert(
 			this->buffered.end(),
 			readBuffer,
-			readBuffer + toRead);
-		char *message = this->consumeBufferedContent();
+			readBuffer + currentRead);
+
+	if (static_cast<size_t>(currentRead) == toRead)
+	{
+		char *message = this->consumeBufferedContent(length, 0);
 		return std::make_pair(DONE, message);
 	}
 	else // if (currentRead < toRead && currentRead > 0)
 	{
-		this->buffered.insert(
-			this->buffered.end(),
-			readBuffer,
-			readBuffer + currentRead);
 		this->readBefore += currentRead;
 		return std::make_pair(READING, reinterpret_cast<char *>(0));
 	}
@@ -111,62 +136,47 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 
 std::pair<ReadState, char *> BufferedReader::readlineCrlf()
 {
-	ssize_t currentRead = ::read(
-		this->fd, this->readBuffer, BUFFER_SIZE);
+	ssize_t currentRead = 0;
+	// read only if does not have buffered content
+	ssize_t index_crlf_buffered = this->crlfIndex(0);
+	size_t lenBeforeRead = this->buffered.size();
+	if (index_crlf_buffered >=0)
+	{
+		char *messageLineCrlf =
+			this->consumeBufferedContent(index_crlf_buffered, 2);
 
-	if (currentRead < 0)
-	{
-		return std::make_pair(
-			ERROR,
-			const_cast<char *>("read returned negative"));
-	}
-	else if (currentRead == 0)
-	{
-		char *message = this->consumeBufferedContent();
-		return std::make_pair(
-			NO_CONTENT,
-			message
-		);
-	}
-	int index_crlf = -1;
-	for (int i = 0; i < currentRead - 1; ++i)
-	{
-		if (this->readBuffer[i] == '\r' && this->readBuffer[i + 1] == '\n')
-		{
-			index_crlf = i;
-			break;
-		}
-	}
-	if (this->readBuffer[0] == '\n' && *(this->buffered.end() - 1) == '\r')
-	{ // \r was last buffered and \n first on currentRead
-		this->buffered.pop_back();
-		char *messageLineCrlf = this->consumeBufferedContent();
-		this->buffered.insert(
-			this->buffered.end(),
-			readBuffer + 1,
-			readBuffer + currentRead);
 		return std::make_pair(
 			DONE,
 			messageLineCrlf);
 	}
-	else if (index_crlf < 0)
+	else
 	{
+		currentRead = ::read(this->fd, this->readBuffer, BUFFER_SIZE);
+		if (currentRead < 0)
+		{ // read fail
+			return std::make_pair(
+				ERROR,
+				const_cast<char *>("read returned negative"));
+		}
+		else if (currentRead == 0)
+		{ // read eof
+			char *message = this->consumeBufferedContent(buffered.size(), 0);
+			return std::make_pair(
+				NO_CONTENT,
+				message);
+		}
+		// append current read to buffered
 		this->buffered.insert(
 			this->buffered.end(),
 			readBuffer,
 			readBuffer + currentRead);
-		return std::make_pair(READING, reinterpret_cast<char *>(0));
 	}
-	this->buffered.insert(
-			this->buffered.end(),
-			readBuffer,
-			readBuffer + index_crlf);
-	char *messageLineCrlf = this->consumeBufferedContent();
-	this->buffered.insert(
-		this->buffered.end(),
-		readBuffer + index_crlf + 2,
-		readBuffer + currentRead);
+	ssize_t index_crlf = this->crlfIndex(
+		lenBeforeRead < 1 ? 0 : lenBeforeRead - 1);
+	if (index_crlf < 0)
+		return std::make_pair(READING, reinterpret_cast<char *>(0));
 
+	char *messageLineCrlf = this->consumeBufferedContent(index_crlf, 2);
 	return std::make_pair(
 		DONE,
 		messageLineCrlf);

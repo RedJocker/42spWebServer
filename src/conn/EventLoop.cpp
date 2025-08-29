@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 22:30:28 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/27 19:21:38 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -66,7 +66,7 @@ namespace conn
 		return insertResult.second;
 	}
 
-	bool EventLoop::subscribeTcpClient(int fd)
+	bool EventLoop::subscribeHttpClient(int fd)
 	{
 		if (!this->isOk())
 		{
@@ -83,17 +83,17 @@ namespace conn
 			return false;
 		}
 
-		TcpClient *tcpClient = new TcpClient(fd);
-		if (tcpClient != 0)
+		http::Client *httpClient = new http::Client(fd);
+		if (httpClient != 0)
 		{
 			std::pair<MapClientIterator, bool> insertResult =
-				clients.insert(std::make_pair(event.data.fd, tcpClient));
+				clients.insert(std::make_pair(event.data.fd, httpClient));
 			return insertResult.second;
 		}
 		return false;
 	}
 
-	bool EventLoop::unsubscribeTcpClient(TcpClient *client , struct epoll_event *clientEvent)
+	bool EventLoop::unsubscribeHttpClient(http::Client *client , struct epoll_event *clientEvent)
 	{
 		int clientFd = clientEvent->data.fd;
 		if (epoll_ctl(this->epollFd, EPOLL_CTL_DEL, clientFd, clientEvent) != 0)
@@ -134,7 +134,7 @@ namespace conn
 						std::cout << errorMessage << std::endl;
 						continue;
 					}
-					bool isSubscribed = this->subscribeTcpClient(clientFd);
+					bool isSubscribed = this->subscribeHttpClient(clientFd);
 					if (!isSubscribed)
 					{
 						std::string errorMessage = "failed to subscribe client";
@@ -146,44 +146,48 @@ namespace conn
 				MapClientIterator clientIt = this->clients.find(events[i].data.fd);
 				if (clientIt != this->clients.end())
 				{
-					TcpClient *client = clientIt->second;
+					http::Client *client = clientIt->second;
 					if (events[i].events & EPOLLIN) // fd has content to read
 					{
-						std::pair<ReadState, char *> readResult = client->readlineCrlf();
-						if (readResult.first == BufferedReader::READING)
+						http::Request maybeCompleteRequest = client->readHttpRequest();
+						if (maybeCompleteRequest.state() <= http::Request::READING_BODY)
 							continue; // has not finished reading, will finish a next epoll_wait
-						else if (readResult.first == BufferedReader::DONE)
+						else if (maybeCompleteRequest.state() == http::Request::READ_COMPLETE)
 						{
 							// has finished reading has message and client still alive
 							// TODO if headers has Connection: close we should close
-
-							char *messageToSend = readResult.second;
+							http::Request request = maybeCompleteRequest;
+							std::string messageToSend = client->responseAsString();
 							std::cout << "done reading: "
-									  << std::string(messageToSend)
+									  << request.getMethod() << " "
+									  << request.getPath() << " "
+									  << request.getProtocol() << " "
 									  << std::endl;
-							client->setMessageToSend(std::string(messageToSend) + "\r\n");
-							delete[] messageToSend;
+							client->setMessageToSend(messageToSend);
 						}
-						else if (readResult.first == BufferedReader::NO_CONTENT)
+						else if (maybeCompleteRequest.state() == http::Request::READ_BAD_REQUEST)
 						{
-							// has finished reading has message and client has closed
-							char *messageToSend = readResult.second;
-							std::cout << "eof reading: "
-									  << std::string(messageToSend)
+							// has finished reading has message and client still alive
+							// TODO if headers has Connection: close we should close
+							std::string messageToSend = client->responseAsString();
+							std::cout << "bad request reading: "
 									  << std::endl;
-							client->setMessageToSend(std::string(messageToSend));
-
-							delete[] messageToSend;
-							unsubscribeTcpClient(client, events + i);
+							client->setMessageToSend(messageToSend);
 						}
-						else if (readResult.first == BufferedReader::ERROR)
+						else if (maybeCompleteRequest.state() == http::Request::READ_EOF)
+						{
+							// has finished reading has message but client has closed
+							// TODO confirm that client is always closed on this case
+							std::cout << "eof reading: " << std::endl;
+							unsubscribeHttpClient(client, events + i);
+						}
+						else if (maybeCompleteRequest.state() == http::Request::READ_ERROR)
 						{
 							// reading failed for some reason
 							//unsubscribe
 							std::cout << "error reading: "
-									  << std::string(readResult.second)
 									  << std::endl;
-							unsubscribeTcpClient(client, events + i);
+							unsubscribeHttpClient(client, events + i);
 							throw std::domain_error("TODO read ERROR");
 						}
 					}
@@ -195,17 +199,20 @@ namespace conn
 						if (flushResult.first == BufferedWriter::DONE)
 						{
 							std::cout << "done writing response: "
-									  << client->getMessageToSend()
+									  << client->responseAsString()
 									  << std::endl;
+							client->clear();
 						}
 						if (flushResult.first == BufferedWriter::ERROR)
 						{
 							throw std::domain_error("TODO write ERROR");
+							client->clear();
 						}
 					}
 					else
 					{
 						throw std::domain_error("TODO else error");
+						client->clear();
 					}
 					continue;
 				}

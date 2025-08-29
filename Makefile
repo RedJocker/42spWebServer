@@ -6,7 +6,7 @@
 #    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/08/27 16:50:26 by maurodri         ###   ########.fr        #
+#    Updated: 2025/08/27 17:55:57 by maurodri         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -28,7 +28,8 @@ UTIL_FILES := $(addprefix $(UTIL_DIR)/, BufferedReader.cpp\
 					BufferedWriter.cpp)
 HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Headers.cpp \
-					Body.cpp)
+					Body.cpp \
+					Client.cpp)
 MODULE_FILES := $(CONN_FILES) \
 	$(UTIL_FILES) \
 	$(HTTP_FILES) # add other module files here

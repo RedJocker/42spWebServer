@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 22:25:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/29 00:16:51 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -79,5 +79,10 @@ namespace conn
 	std::pair<WriteState, char*> TcpClient::flushMessage()
 	{
 		return this->writer.flushMessage();
+	}
+
+	bool TcpClient::hasBufferedContent() const
+	{
+		return this->reader.hasBufferedContent();
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:20 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 14:09:22 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/08/27 18:53:55 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ namespace http {
 			bool parseLine(const std::string &line);
 
 			std::string getHeader(const std::string &key) const;
+			void clear(void);
 
 		private:
 			std::map<std::string, std::string> _headers;
