@@ -130,6 +130,19 @@
       - maybe we will need to clear first before reusing
     - provide a public method to return the state of parsing and the current request
   - [X] exchange message browser and respond 404
+  - detect and respond TRACE http method requests
+    - response body must have the request in literal form
+    - debugging purposes
+    - helps start developing routing by reacting to a request with a response production
+      - at some point we will need to be able, following configuration:
+        - to run multiple servers
+        - each server having their own internal routing
+        - support for some routes processing their request through cgi on response production
+      - create a class Dispatcher
+        - whith a method http::Response dispatch(http::Client &client)
+        - read client.request.method and if == trace
+            - respond 200 Ok with body = client.request.asString()
+            - don't forget to add Content-Length header on response
 - Connection Handling
   - [X] create folder for connection module
   - tcp
