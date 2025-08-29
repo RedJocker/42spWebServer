@@ -129,7 +129,7 @@
     - next message from client overwrites previous Request
       - maybe we will need to clear first before reusing
     - provide a public method to return the state of parsing and the current request
-  - receive a request from browser
+  - [X] exchange message browser and respond 404
 - Connection Handling
   - [X] create folder for connection module
   - tcp
