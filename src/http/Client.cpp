@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/28 20:29:39 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/29 01:53:26 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -58,10 +58,10 @@ namespace http {
 	std::string Client::responseAsString() const
 	{
 		if (this->request.state() == http::Request::READ_BAD_REQUEST)
-			return "HTTP/1.1 400 Bad Request\r\n\r\n";
+			return "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
 		else if (this->request.state() == http::Request::READ_ERROR)
-			return "HTTP/1.1 500 Internal Server Error\r\n\r\n";
-		return "HTTP/1.1 404 Not Found\r\n\r\n";
+			return "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
+		return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
     }
 
     void Client::clear()

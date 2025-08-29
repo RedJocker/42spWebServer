@@ -142,7 +142,7 @@
     - [X] handle multiple concurrent connections
     - [X] use epoll or something alike
     - handle todos left on EventLoop
-    - fix issues of buffered reader: a read may contain several \r\n in a single read
+    - [X] fix issues of buffered reader: a read may contain several \r\n in a single read
   - file
     - create a class to handle file opening
   - cgi
