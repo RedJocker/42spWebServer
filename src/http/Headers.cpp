@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 14:24:46 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/08/27 18:53:47 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,5 +50,9 @@ namespace http {
 		if (it != _headers.end())
 			return it->second;
 		return "";
+	}
+
+	void Headers::clear(void) {
+		this->_headers.clear();
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:36 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 14:25:32 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/08/27 18:51:38 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,5 +47,9 @@ namespace http {
 	// Return content size
 	size_t Body::size(void) const {
 		return _content.size();
+	}
+
+	void Body::clear(void) {
+		_content = "";
 	}
 }
