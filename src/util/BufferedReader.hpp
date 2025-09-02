@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:23 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 00:28:07 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/29 00:16:40 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -20,6 +20,7 @@
 # include <vector>
 # include <utility>
 # include <cstddef>
+# include <unistd.h>
 
 class BufferedReader
 {
@@ -30,6 +31,8 @@ class BufferedReader
 	char readBuffer[BUFFER_SIZE];
 
 	char *consumeBufferedContent();
+	char *consumeBufferedContent(size_t len, size_t eraseAfter);
+	ssize_t crlfIndex(size_t start) const;
 	BufferedReader();
 public:
 	enum ReadState {READING, DONE, ERROR, NO_CONTENT};
@@ -40,6 +43,7 @@ public:
 
 	std::pair<ReadState, char *> read(size_t length);
 	std::pair<ReadState, char *> readlineCrlf();
+	bool hasBufferedContent() const;
 };
 
 typedef BufferedReader::ReadState ReadState;

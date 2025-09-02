@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/28 21:03:38 by maurodri         ###   ########.fr       //
+//   Updated: 2025/08/29 02:04:49 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,10 @@ namespace http
 			}
 			delete[] result.second;
 			_state = READING_HEADERS;
-			return _state;
+			if (client.hasBufferedContent())
+				return this->readHeaderLine(client);
+			else
+				return _state;
 		}
 		default: return _state;
 		}
@@ -117,6 +120,12 @@ namespace http
 			}
 			else if (!_headers.parseLine(line)) { // unexpected format
 				_state = READ_BAD_REQUEST;
+			}
+			if (client.hasBufferedContent()) {
+				if (_state == READING_HEADERS)
+					return readHeaderLine(client);
+ 				else if (_state == READING_BODY)
+					return readBody(client);
 			}
 			return _state;
 		}
@@ -167,7 +176,6 @@ namespace http
 	
 
 	Request::ReadState Request::readHttpRequest(conn::TcpClient &client) {
-
 		switch (_state) {
 		case READING_REQUEST_LINE:
 			return readRequestLine(client);

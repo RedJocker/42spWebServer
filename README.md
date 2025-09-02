@@ -129,7 +129,20 @@
     - next message from client overwrites previous Request
       - maybe we will need to clear first before reusing
     - provide a public method to return the state of parsing and the current request
-  - receive a request from browser
+  - [X] exchange message browser and respond 404
+  - detect and respond TRACE http method requests
+    - response body must have the request in literal form
+    - debugging purposes
+    - helps start developing routing by reacting to a request with a response production
+      - at some point we will need to be able, following configuration:
+        - to run multiple servers
+        - each server having their own internal routing
+        - support for some routes processing their request through cgi on response production
+      - create a class Dispatcher
+        - whith a method http::Response dispatch(http::Client &client)
+        - read client.request.method and if == trace
+            - respond 200 Ok with body = client.request.asString()
+            - don't forget to add Content-Length header on response
 - Connection Handling
   - [X] create folder for connection module
   - tcp
@@ -142,7 +155,7 @@
     - [X] handle multiple concurrent connections
     - [X] use epoll or something alike
     - handle todos left on EventLoop
-    - fix issues of buffered reader: a read may contain several \r\n in a single read
+    - [X] fix issues of buffered reader: a read may contain several \r\n in a single read
   - file
     - create a class to handle file opening
   - cgi
