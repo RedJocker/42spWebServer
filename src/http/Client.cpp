@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   Client.cpp                                         :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/29 01:53:26 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Client.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
+/*   Updated: 2025/09/02 14:32:38 by vcarrara         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "Client.hpp"
 
@@ -37,9 +37,9 @@ namespace http {
 	}
 
 	Client &Client::operator=(const conn::TcpClient &other) {
-            if (this == &other) {
-                return *this;
-            }
+			if (this == &other) {
+				return *this;
+			}
 			conn::TcpClient::operator=(other);
 			return *this;
 	}
@@ -57,16 +57,26 @@ namespace http {
 
 	std::string Client::responseAsString() const
 	{
-		if (this->request.state() == http::Request::READ_BAD_REQUEST)
-			return "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
-		else if (this->request.state() == http::Request::READ_ERROR)
-			return "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
-		return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
-    }
+		http::Response response;
+		if (this->request.state() == http::Request::READ_BAD_REQUEST) {
+			response.setStatusCode(400);
+			response.setStatusInfo("Bad Request");
+		} else if (this->request.state() == http::Request::READ_ERROR) {
+			response.setStatusCode(500);
+			response.setStatusInfo("Internal Server Error");
+		} else {
+			response.setStatusCode(404);
+			response.setStatusInfo("Not found");
+		}
 
-    void Client::clear()
+		response.addHeader("Content-Length", "0");
+
+		return response.toString();
+	}
+
+	void Client::clear()
 	{
 		this->request.clear();
-		// this->response.clear();
-    }
+		this->response.clear();
+	}
 }

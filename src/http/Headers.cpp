@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/27 18:53:47 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/02 14:06:54 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,10 @@ namespace http {
 		return true;
 	}
 
+	std::map<std::string, std::string> Headers::getAll(void) const {
+		return this->_headers;
+	}
+	
 	// Get header value from key
 	std::string Headers::getHeader(const std::string &key) const {
 		std::map<std::string, std::string>::const_iterator it = _headers.find(key);
