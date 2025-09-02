@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/02 14:32:23 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/02 15:27:26 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,14 @@ namespace http {
 		_headers.parseLine(key + ": " + value);
 	}
 
-	void Response::setBody(const Body &body) {
-		_body = body;
+	void Response::setBody(const std::string &content) {
+		Body b;
+		b.parse(content.c_str(), content.size());
+		_body = b;
+	}
+
+	Body Response::getBody(void) const {
+		return _body;
 	}
 
 	std::string Response::toString(void) const {

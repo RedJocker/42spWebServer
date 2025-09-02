@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/02 14:32:00 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/02 15:27:52 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,10 @@ namespace http {
 			void setStatusCode(int code);
 			void setStatusInfo(const std::string &info);
 
+			void setBody(const std::string &body);
+			Body getBody(void) const;
+
 			void addHeader(const std::string &key, const std::string &value);
-			void setBody(const Body &body);
 			void clear(void);
 
 			std::string toString(void) const;

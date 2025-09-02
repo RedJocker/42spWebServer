@@ -6,11 +6,12 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/02 14:32:38 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/02 16:28:24 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include <sstream>
 
 namespace http {
 
@@ -57,21 +58,28 @@ namespace http {
 
 	std::string Client::responseAsString() const
 	{
-		http::Response response;
+		Response r = response;
+
 		if (this->request.state() == http::Request::READ_BAD_REQUEST) {
-			response.setStatusCode(400);
-			response.setStatusInfo("Bad Request");
+			r.setStatusCode(400);
+			r.setStatusInfo("Bad Request");
 		} else if (this->request.state() == http::Request::READ_ERROR) {
-			response.setStatusCode(500);
-			response.setStatusInfo("Internal Server Error");
+			r.setStatusCode(500);
+			r.setStatusInfo("Internal Server Error");
+		} else if (this->request.getMethod() == "TRACE") {
+			r.setStatusCode(200);
+			r.setStatusInfo("OK");
+			r.setBody(this->request.getBody());
 		} else {
-			response.setStatusCode(404);
-			response.setStatusInfo("Not found");
+			r.setStatusCode(404);
+			r.setStatusInfo("Not Found");
 		}
 
-		response.addHeader("Content-Length", "0");
+		std::ostringstream length;
+		length << r.getBody().size();
+		r.addHeader("Content-Length", length.str());
 
-		return response.toString();
+		return r.toString();
 	}
 
 	void Client::clear()
