@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 14:24:46 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/02 11:42:16 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,5 +50,24 @@ namespace http {
 		if (it != _headers.end())
 			return it->second;
 		return "";
+	}
+
+	// Set or update header key-value pair
+	void Headers::setHeader(const std::string &key, const std::string &value) {
+		_headers[key] = value;
+	}
+
+	// Check if header key exists
+	bool Headers::has(const std::string &key) const {
+		return _headers.find(key) != _headers.end();
+	}
+
+	// Convert all headers to string format
+	std::string Headers::toString(void) const {
+		std::string result;
+		for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it) {
+			result += it->first + ": " + it->second + "\r\n";
+		}
+		return result;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:30 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/08/27 14:11:35 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/02 11:44:53 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ namespace http {
 			virtual ~Body(void);
 
 			bool parse(const char *chunk, size_t expectedLength);
+
+			void setContent(const std::string &content);
 
 			std::string str(void) const;
 			size_t size(void) const;
