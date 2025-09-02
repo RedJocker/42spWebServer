@@ -74,13 +74,13 @@
       - [X] create a method to read a request from fd
       - [X] create getter methods for method, path, headers, body
     - create class for Response
-        - Status Line
+        - [X] Status Line
           - Protocol
           - Status Code Number
           - Status Code Description
-        - Headers
-        - Body
-        - create a method to create a response
+        - [X] Headers
+        - [X] Body
+        - [X] create a method to create a response
           - maybe constructor is fine or maybe builder pattern 
         - create a method that return a response as a string
   - [X] create a class for Body to be able to use on both Request and Response
@@ -121,7 +121,7 @@
            hello
         ```
   - 404 response
-    - create a 404 response
+    - [X] create a 404 response
   - create a HttpClient class that inherits from TcpClient and has a Request and Response
     - Request and Response are initially empty
     - we parse Request using Request.readFromTcpClient()
