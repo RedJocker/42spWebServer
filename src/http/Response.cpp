@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/02 14:32:23 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/03 20:28:50 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,32 +37,81 @@ namespace http {
 	}
 	Response::~Response(void) {}
 
-	void Response::setProtocol(const std::string &protocol) {
+	Response &Response::setProtocol(const std::string &protocol) {
 		_protocol = protocol;
+		return *this;
 	}
-	void Response::setStatusCode(int code) {
+	Response &Response::setStatusCode(int code) {
 		_statusCode = code;
+		return *this;
 	}
-	void Response::setStatusInfo(const std::string &info) {
+	Response &Response::setStatusInfo(const std::string &info) {
 		_statusInfo = info;
+		return *this;
 	}
 
-	void Response::addHeader(const std::string &key, const std::string &value) {
-		_headers.parseLine(key + ": " + value);
+	Response &Response::addHeader(const std::string &key, const std::string &value) {
+		_headers.addHeader(key, value);
+		return *this;
 	}
 
-	void Response::setBody(const Body &body) {
+	Response &Response::addHeader(const std::string &key, const size_t value) {
+		std::stringstream ss;
+		ss << value;
+		_headers.addHeader(key, ss.str());
+		return *this;
+	}
+
+	Response &Response::setHeaderContentLength() {
+		const size_t size = _body.size();
+		this->addHeader("Content-Length", size);
+		return *this;
+	}
+
+	Response &Response::setBody(const Body &body) {
 		_body = body;
+		return *this;
+	}
+
+	Response &Response::setBody(const std::string &body) {
+		this->_body.setContent(body);
+		this->setHeaderContentLength();
+		return *this;
+	}
+
+	Response &Response::setOk()
+	{
+		this->clear();
+		return (*this)
+			.setStatusCode(200)
+			.setStatusInfo("Ok");
+	}
+
+	Response &Response::setNotFound()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(404)
+			.setStatusInfo("Not Found")
+			.addHeader("Content-length", "0");
+		return *this;
+	}
+
+	Response &Response::setBadRequest()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(400)
+			.setStatusInfo("Bad Request")
+			.addHeader("Content-length", "0");
+		return *this;
 	}
 
 	std::string Response::toString(void) const {
 		std::ostringstream responseStream;
 		responseStream << _protocol << " " << _statusCode << " " << _statusInfo << "\r\n";
 
-		std::map<std::string, std::string> allHeaders = _headers.getAll();
-		for (std::map<std::string, std::string>::const_iterator it = allHeaders.begin(); it != allHeaders.end(); ++it) {
-			responseStream << it->first << ": " << it->second << "\r\n";
-		}
+		responseStream << _headers.str();
 
 		responseStream << "\r\n";
 		responseStream << _body.str();
@@ -71,7 +120,7 @@ namespace http {
 
 	void Response::clear()
 	{
-		_protocol = "";
+		_protocol = "HTTP/1.1";
 		_statusCode = 0;
 		_statusInfo = "";
 		_headers.clear();

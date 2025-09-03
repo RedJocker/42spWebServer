@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/27 19:21:38 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/03 20:33:36 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -157,21 +157,26 @@ namespace conn
 							// has finished reading has message and client still alive
 							// TODO if headers has Connection: close we should close
 							http::Request request = maybeCompleteRequest;
-							std::string messageToSend = client->responseAsString();
 							std::cout << "done reading: "
 									  << request.getMethod() << " "
 									  << request.getPath() << " "
 									  << request.getProtocol() << " "
 									  << std::endl;
+
+							http::Response &response = dispatcher.dispatch(*client, this->servers);
+							std::string messageToSend = response.toString();
 							client->setMessageToSend(messageToSend);
 						}
 						else if (maybeCompleteRequest.state() == http::Request::READ_BAD_REQUEST)
 						{
 							// has finished reading has message and client still alive
 							// TODO if headers has Connection: close we should close
-							std::string messageToSend = client->responseAsString();
 							std::cout << "bad request reading: "
 									  << std::endl;
+							std::string messageToSend =
+								client->getResponse()
+								.setBadRequest()
+								.toString();
 							client->setMessageToSend(messageToSend);
 						}
 						else if (maybeCompleteRequest.state() == http::Request::READ_EOF)
@@ -199,7 +204,7 @@ namespace conn
 						if (flushResult.first == BufferedWriter::DONE)
 						{
 							std::cout << "done writing response: "
-									  << client->responseAsString()
+									  << client->getResponse().toString()
 									  << std::endl;
 							client->clear();
 						}

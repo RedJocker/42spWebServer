@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/02 14:32:38 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/03 19:31:34 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,29 +49,20 @@ namespace http {
 		//TODO
 	}
 
-	Request Client::readHttpRequest()
+	Request &Client::readHttpRequest()
 	{
 		this->request.readHttpRequest(*this);
 		return this->request;
 	}
 
-	std::string Client::responseAsString() const
+	Response &Client::getResponse()
 	{
-		http::Response response;
-		if (this->request.state() == http::Request::READ_BAD_REQUEST) {
-			response.setStatusCode(400);
-			response.setStatusInfo("Bad Request");
-		} else if (this->request.state() == http::Request::READ_ERROR) {
-			response.setStatusCode(500);
-			response.setStatusInfo("Internal Server Error");
-		} else {
-			response.setStatusCode(404);
-			response.setStatusInfo("Not found");
-		}
+		return this->response;
+	}
 
-		response.addHeader("Content-Length", "0");
-
-		return response.toString();
+	Request &Client::getRequest()
+	{
+		return this->request;
 	}
 
 	void Client::clear()

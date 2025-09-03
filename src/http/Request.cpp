@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/29 02:04:49 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/03 20:29:40 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,5 +208,14 @@ namespace http
 		_state = READING_REQUEST_LINE;
 		_headers.clear();
 		_body.clear();
+	}
+
+	std::string Request::toString() const
+	{
+		std::ostringstream requestStream;
+		requestStream << _method << " " << _path << " " << _protocol << "\r\n";
+		requestStream << _headers.str();
+		requestStream << _body.str();
+		return requestStream.str();
 	}
 }
