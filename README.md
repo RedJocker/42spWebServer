@@ -64,7 +64,7 @@
 - Http
   - create folder for http module
   - end goal
-    - create class for Request
+    - [X] create class for Request
       - [X] Request Line
         - Method
         - Path
@@ -73,7 +73,7 @@
       - [X] Body
       - [X] create a method to read a request from fd
       - [X] create getter methods for method, path, headers, body
-    - create class for Response
+    - [X] create class for Response
         - Status Line
           - Protocol
           - Status Code Number
