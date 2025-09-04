@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/03 18:44:41 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/04 18:19:19 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -32,6 +32,9 @@ namespace conn
 		std::map<int, http::Client*> clients;
 		http::Dispatcher dispatcher;
 
+		void connectServerToClient(TcpServer *server);
+		void handleClientRequest(http::Client *client, struct epoll_event *clientEvent);
+		void handleClientWriteResponse(http::Client *client);
 	public:
 
 		EventLoop();
