@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 20:25:17 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/04 11:58:23 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,13 @@ namespace http {
 
 			std::string toString(void) const;
 
+			Response &setFileBody(int fd);
+			bool isStreaming(void) const;
+			int getFileFd(void) const;
+			size_t getBytesSent(void) const;
+			void addBytesSent(size_t n);
+			void closeFile(void);
+
 		private:
 			std::string _protocol;
 			int _statusCode;
@@ -49,6 +56,10 @@ namespace http {
 
 			Headers _headers;
 			Body _body;
+
+			int _fileFd;
+			size_t _bytesSent;
+			bool _isStreaming;
 	};
 }
 
