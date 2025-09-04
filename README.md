@@ -120,7 +120,7 @@
 
            hello
         ```
-  - 404 response
+  - [X] 404 response
     - create a 404 response
   - [X] create a HttpClient class that inherits from TcpClient and has a Request and Response
     - Request and Response are initially empty
@@ -143,7 +143,7 @@
         - read client.request.method and if == trace
             - respond 200 Ok with body = client.request.asString()
             - don't forget to add Content-Length header on response
-  - respond a GET request to an existing file
+  - [X] respond a GET request to an existing file
     - if found respond 200 OK with the body containing the file requested on body
     - assume it is a found content file for now, later deal with 404 and directory listing
     - assume only one server for now
@@ -152,6 +152,20 @@
       - / on path is bind to some folder on computer
         - use hardcoded folder on project for now
         - eventually each server has its own docroot defined on configuration file
+    - make a blocking implementation, we will solve the problem of integrating with epool later
+ - respond a POST request by writting the body into a file
+    - if success respond 201 Created
+    - use path as filepath
+      - create file if not exists
+      - for now assume folder exists
+      - take docroot as base folder
+      - lets deal with relative paths later
+    - assume only one server for now
+    - make a blocking implementation, we will solve the problem of integrating with epool later
+ - respond a DELETE request by deleting a file resource
+    - if success respond 204 No Content
+    - use path as filepath
+    - assume only one server for now
     - make a blocking implementation, we will solve the problem of integrating with epool later
 - Connection Handling
   - [X] create folder for connection module
