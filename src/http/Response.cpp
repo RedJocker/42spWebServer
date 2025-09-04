@@ -6,12 +6,13 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/04 12:03:33 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/04 12:28:59 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include <sstream>
+#include <unistd.h>
 
 namespace http {
 	Response::Response(void)

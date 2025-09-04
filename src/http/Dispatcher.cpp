@@ -6,11 +6,15 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/04 12:06:25 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/04 12:28:34 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Dispatcher.hpp"
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sstream>
 
 namespace http {
 
@@ -35,36 +39,44 @@ namespace http {
 	{
 		(void) servers;
 		const std::string &method = client.getRequest().getMethod();
-		const std::string &path = client.getRequest().getPath();
 		Response &response = client.getResponse();
 
-		if (method == "TRACE") {
-			return response
-				.setOk()
-				.setBody(client.getRequest().toString());
-		}
+		if (method == "TRACE")
+			return handleTrace(client, response);
 
-		if (method == "GET") {
-			std::string docroot = "./www";
-			std::string filePath = docroot + path;
-
-			int fd = open(filePath.c_str(), 0_RDONLY | 0_NONBLOCK);
-			if (fd < 0)
-				return response.setNotFound();
-
-			struct stat st;
-			if (::fstat(fd, &st) == 0) {
-				std::ostringstream oss;
-				oss << st.st_size;
-				response.addHeader("Content-Length", oss.str());
-			}
-
-			return response
-				.setOk()
-				.addHeader("Content-Type", "text/html")
-				.setFileBody(fd);
-		}
+		if (method == "GET")
+			return handleGetFile(client, response);
 
 		return response.setNotFound();
+	}
+
+	Response &Dispatcher::handleTrace(http::Client &client, Response &response) {
+		return response
+			.setOk()
+			.setBody(client.getRequest().toString());
+	}
+
+	Response &Dispatcher::handleGetFile(http::Client &client, Response &response) {
+		const std::string &path = client.getRequest().getPath();
+		std::string docroot = "./www";
+		std::string filePath = docroot + path;
+
+		int fd = open(filePath.c_str(), O_RDONLY | O_NONBLOCK);
+		if (fd < 0)
+			return response.setNotFound();
+
+		// Get file size
+		struct stat st;
+		if (::fstat(fd, &st) == 0) {
+			std::ostringstream oss;
+			oss << st.st_size;
+			response.addHeader("Content-Length", oss.str());
+		}
+
+		// Set body as file content
+		return response
+			.setOk()
+			.addHeader("Content-Type", "text/html")
+			.setFileBody(fd);
 	}
 }
