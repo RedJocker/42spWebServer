@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 20:28:50 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/04 12:03:33 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,10 @@
 
 namespace http {
 	Response::Response(void)
-	: _protocol("HTTP/1.1"), _statusCode(200), _statusInfo("OK"), _headers(), _body()
+	: _protocol("HTTP/1.1"), _statusCode(200), _statusInfo("OK"), _headers(), _body(), _fileFd(-1), _bytesSent(0), _isStreaming(false)
 	{}
 	Response::Response(const std::string &protocol, int statusCode, const std::string &statusInfo)
-		: _protocol(protocol), _statusCode(statusCode), _statusInfo(statusInfo), _headers(), _body()
+		: _protocol(protocol), _statusCode(statusCode), _statusInfo(statusInfo), _headers(), _body(), _fileFd(-1), _bytesSent(0), _isStreaming(false)
 	{}
 	Response::Response(const Response &other)
 	{
@@ -32,10 +32,16 @@ namespace http {
 			_statusInfo = other._statusInfo;
 			_headers = other._headers;
 			_body = other._body;
+			_fileFd = other._fileFd;
+			_bytesSent = other._bytesSent;
+			_isStreaming = other._isStreaming;
 		}
 		return *this;
 	}
-	Response::~Response(void) {}
+	Response::~Response(void)
+	{
+		closeFile();
+	}
 
 	Response &Response::setProtocol(const std::string &protocol) {
 		_protocol = protocol;
@@ -118,6 +124,34 @@ namespace http {
 		return responseStream.str();
 	}
 
+	Response &Response::setFileBody(int fd) {
+		_fileFd = fd;
+		_isStreaming = true;
+		_bytesSent = 0;
+		return *this;
+	}
+
+	bool Response::isStreaming(void) const {
+		return _isStreaming;
+	}
+	int Response::getFileFd(void) const {
+		return _fileFd;
+	}
+	size_t Response::getBytesSent(void) const {
+		return _bytesSent;
+	}
+	void Response::addBytesSent(size_t n) {
+		_bytesSent += n;
+	}
+
+	void Response::closeFile(void) {
+		if (_fileFd >= 0) {
+			::close(_fileFd);
+			_fileFd = -1;
+			_isStreaming = false;
+		}
+	}
+
 	void Response::clear()
 	{
 		_protocol = "HTTP/1.1";
@@ -125,5 +159,8 @@ namespace http {
 		_statusInfo = "";
 		_headers.clear();
 		_body.clear();
+		closeFile();
+		_bytesSent = 0;
+		_isStreaming = false;
 	}
 }
