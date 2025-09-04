@@ -6,7 +6,7 @@
 #    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/09/03 17:33:55 by maurodri         ###   ########.fr        #
+#    Updated: 2025/09/03 18:45:15 by maurodri         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -30,7 +30,8 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Headers.cpp \
 					Body.cpp \
 					Client.cpp \
-					Response.cpp)
+					Response.cpp \
+					Dispatcher.cpp)
 MODULE_FILES := $(CONN_FILES) \
 	$(UTIL_FILES) \
 	$(HTTP_FILES) # add other module files here

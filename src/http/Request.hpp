@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/08/28 20:55:06 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/03 20:18:48 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ namespace http
 		std::string getHeader(const std::string &key) const;
 		std::string getBody(void) const;
 
+		std::string toString(void) const;
 	private:
 		std::string _method;
 		std::string _path;

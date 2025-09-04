@@ -130,7 +130,7 @@
       - maybe we will need to clear first before reusing
     - provide a public method to return the state of parsing and the current request
   - [X] exchange message browser and respond 404
-  - detect and respond TRACE http method requests
+  - [X] detect and respond TRACE http method requests
     - response body must have the request in literal form
     - debugging purposes
     - helps start developing routing by reacting to a request with a response production
@@ -143,6 +143,16 @@
         - read client.request.method and if == trace
             - respond 200 Ok with body = client.request.asString()
             - don't forget to add Content-Length header on response
+  - respond a GET request to an existing file
+    - if found respond 200 OK with the body containing the file requested on body
+    - assume it is a found content file for now, later deal with 404 and directory listing
+    - assume only one server for now
+    - docroot
+      - folder that is associated with path
+      - / on path is bind to some folder on computer
+        - use hardcoded folder on project for now
+        - eventually each server has its own docroot defined on configuration file
+    - make a blocking implementation, we will solve the problem of integrating with epool later
 - Connection Handling
   - [X] create folder for connection module
   - tcp

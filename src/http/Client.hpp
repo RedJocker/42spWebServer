@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:34:03 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/02 14:30:52 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/03 20:33:00 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,10 @@ namespace http
 		virtual Client &operator=(const Client &other);
 		virtual Client &operator=(const conn::TcpClient &other);
 		virtual ~Client();
-		Request readHttpRequest();
-		std::string responseAsString() const;
-		std::string responseBadRequest() const;
+		Request &readHttpRequest();
+		Response &getResponse();
+		Request &getRequest();
+
 		void clear(void);
 	};
 }

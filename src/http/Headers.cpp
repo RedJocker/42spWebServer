@@ -6,12 +6,13 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/02 14:06:54 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/03 20:26:13 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Headers.hpp"
 #include <cctype>
+#include <sstream>
 
 namespace http {
 	Headers::Headers(void) {}
@@ -44,6 +45,11 @@ namespace http {
 		return true;
 	}
 
+	bool Headers::addHeader(const std::string &key, const std::string &value) {
+		_headers[key] = value;
+		return true;
+	}
+
 	std::map<std::string, std::string> Headers::getAll(void) const {
 		return this->_headers;
 	}
@@ -58,5 +64,16 @@ namespace http {
 
 	void Headers::clear(void) {
 		this->_headers.clear();
+	}
+
+	std::string Headers::str(void) const
+	{
+		std::ostringstream headerStream;
+		for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
+			 it != _headers.end();
+			 ++it) {
+			headerStream << it->first << ": " << it->second << "\r\n";
+		}
+		return headerStream.str();
 	}
 }
