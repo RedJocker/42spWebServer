@@ -6,11 +6,15 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/04 12:06:25 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/04 17:39:37 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Dispatcher.hpp"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sstream>
 
 namespace http {
 
@@ -48,21 +52,30 @@ namespace http {
 			std::string docroot = "./www";
 			std::string filePath = docroot + path;
 
-			int fd = open(filePath.c_str(), 0_RDONLY | 0_NONBLOCK);
+			int fd = open(filePath.c_str(), O_RDONLY);
 			if (fd < 0)
 				return response.setNotFound();
 
-			struct stat st;
-			if (::fstat(fd, &st) == 0) {
-				std::ostringstream oss;
-				oss << st.st_size;
-				response.addHeader("Content-Length", oss.str());
+			// TODO: subscribe fd on EventLoop, maybe reuse reader from client
+			BufferedReader reader(fd);
+			std::pair<BufferedReader::ReadState, char*> readResult;
+			readResult.first = BufferedReader::READING;
+			while(readResult.first == BufferedReader::READING)
+			{
+				readResult = reader.readAll();
+			}
+
+			std::string body = "";
+			if (readResult.first == BufferedReader::NO_CONTENT)
+			{
+				body = std::string(readResult.second);
+				delete[] readResult.second;
 			}
 
 			return response
 				.setOk()
 				.addHeader("Content-Type", "text/html")
-				.setFileBody(fd);
+				.setBody(body);
 		}
 
 		return response.setNotFound();

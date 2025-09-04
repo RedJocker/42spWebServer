@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/04 11:58:23 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/04 17:07:59 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,6 @@ namespace http {
 
 			Headers _headers;
 			Body _body;
-
-			int _fileFd;
-			size_t _bytesSent;
-			bool _isStreaming;
 	};
 }
 
