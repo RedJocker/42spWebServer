@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/29 02:07:14 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/04 17:41:27 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -134,7 +134,7 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 	}
 }
 
-std::pair<ReadState, char *> BufferedReader::readlineCrlf()
+std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
 {
 	ssize_t currentRead = 0;
 	// read only if does not have buffered content
@@ -180,4 +180,35 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf()
 	return std::make_pair(
 		DONE,
 		messageLineCrlf);
+}
+
+std::pair<ReadState, char *> BufferedReader::readAll(void)
+{
+
+	ssize_t currentRead = ::read(
+		this->fd,
+		this->readBuffer,
+		BUFFER_SIZE);
+
+	if (currentRead < 0)
+	{
+		return std::make_pair(
+			ERROR,
+			const_cast<char *>("read returned negative"));
+	}
+	else if (currentRead == 0)
+	{
+		char *message = this->consumeBufferedContent(buffered.size(), 0);
+		return std::make_pair(
+			NO_CONTENT,
+			message
+		);
+	}
+
+	this->buffered.insert(
+			this->buffered.end(),
+			readBuffer,
+			readBuffer + currentRead);
+
+	return std::make_pair(READING, reinterpret_cast<char *>(0));
 }
