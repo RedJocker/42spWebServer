@@ -6,7 +6,7 @@
 #    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/09/03 18:45:15 by maurodri         ###   ########.fr        #
+#    Updated: 2025/09/06 09:05:20 by maurodri         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -85,6 +85,15 @@ fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
+
+nginx:
+	docker run \
+		--name some-nginx\
+		-v ./www:/usr/share/nginx/html:ro \
+		-v ./nginx.conf:/etc/nginx/nginx.conf:ro \
+		--rm \
+		-p 8080:8080 \
+	nginx
 
 .PHONY: all clean fclean re bonus test_tcp
 
