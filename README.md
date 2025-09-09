@@ -161,12 +161,37 @@
       - take docroot as base folder
       - lets deal with relative paths later
     - assume only one server for now
-    - make a blocking implementation, we will solve the problem of integrating with epool later
+    - make a blocking implementation, we will solve the problem of integrating with EventLoop later
  - respond a DELETE request by deleting a file resource
     - if success respond 204 No Content
     - use path as filepath
     - assume only one server for now
-    - make a blocking implementation, we will solve the problem of integrating with epool later
+    - make a blocking implementation, we will solve the problem of integrating with EventLoop
+ - respond a GET to directory listing contents
+    - if success respond 200 Ok
+    - on body send a generated html all files listed as links
+      - check nginx response for that case
+    - assume our config enable directory listing
+    - use path as filepath
+    - assume only one server for now
+    - make a blocking implementation, we will solve the problem of integrating with EventLoop later
+  - include a route for cgi that will integrate with cgi code
+    - we can start by
+      - checking if is exactly index.php before other static files
+      - responding something
+        - maybe 418 I'm a teapot just to know it is our response
+  - Handle header Connection: close
+  - create a http::Server that is a conn::TcpServer
+    - this class will be responsible for server specific behaviour
+    - will enable running multiple servers concurrently
+    - docroot
+    - hostname
+    - port
+    - routing
+    - Dispatcher will forward request handling to http:Server if it is one of valid methods
+  - Handle header Transfer-Encoding: chunked
+    - a slightly different protocol for reading body
+      - size1\r\ncontent1\r\nsize2\r\ncontent2\r\n0\r\n
 - Connection Handling
   - [X] create folder for connection module
   - tcp
@@ -180,18 +205,36 @@
     - [X] use epoll or something alike
     - handle todos left on EventLoop
     - [X] fix issues of buffered reader: a read may contain several \r\n in a single read
-  - file
-    - create a class to handle file opening
-  - cgi
-    - create a class to handle fd for inter proccess communication (IPC)
-    - use epoll or something alike
+    - Reformat EventLoop
+      - change IO Multiplexing from epoll to poll
+        - epoll does not work with regular files
+	- subject states that
+	  - all reads and writes except configuration file should happen through poll (multiplexer)
+	    - this includes reading regular files while responding to requests
+	    - poll states that it does not make sense to monitor regular files fds
+	      - select and poll always consider regular files ready to read and write
+	        - this is related to in-kernel buffering of io to disk
+	      - but it is still possible to monitor regular files with poll
+	     - epoll does not allow monitoring regular files
+    - handle file reading on EventLoop
+    - handle file writing on EventLoop
+    - handle cgi ipc on EventLoop
 
 - CGI
   - create folder for cgi module
-  - spawn a python or php process
-  - send information to process through IPC
-  - receive information from process through IPC
+  - spawn a php-cgi process
+  - [X] research how to better deal with IPC
   - research how to better deal with spawned process
     - one process only dealing with all requests concurrently
     - one process for each request
-  - research how to better deal with IPC
+  - use socketpair for ipc
+    - pair of connected sockets
+      - each socket is bidirectional
+      - child-cgi
+        - redirect child stdin and stdout to one side of socketpair
+	- close other side of socketpair
+      - server
+        - subscribe read/write to cgi on EventLoop
+	- write body
+	- read cgi-response
+	- write full response
