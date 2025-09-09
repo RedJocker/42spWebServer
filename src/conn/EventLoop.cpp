@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/03 20:33:36 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/04 18:19:25 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -104,6 +104,94 @@ namespace conn
 		return true;
 	}
 
+	void EventLoop::connectServerToClient(TcpServer *server)
+	{
+		std::pair<int, std::string> connResult = server->connectToClient();
+		int clientFd = connResult.first;
+		if (connResult.first < 0)
+		{
+			std::string errorMessage = connResult.second;
+			std::cout << errorMessage << std::endl;
+			return;
+		}
+		bool isSubscribed = this->subscribeHttpClient(clientFd);
+		if (!isSubscribed)
+		{
+			std::string errorMessage = "failed to subscribe client";
+			std::cout << errorMessage << std::endl;
+			close(clientFd);
+		}
+	}
+
+	void EventLoop::handleClientRequest(http::Client *client, struct epoll_event *clientEvent)
+	{
+		http::Request maybeCompleteRequest = client->readHttpRequest();
+		if (maybeCompleteRequest.state() <= http::Request::READING_BODY)
+			return; // has not finished reading, will finish a next epoll_wait
+		else if (maybeCompleteRequest.state() == http::Request::READ_COMPLETE)
+		{
+			// has finished reading has message and client still alive
+			// TODO if headers has Connection: close we should close
+			http::Request request = maybeCompleteRequest;
+			std::cout << "done reading: "
+					  << request.getMethod() << " "
+					  << request.getPath() << " "
+					  << request.getProtocol() << " "
+					  << std::endl;
+
+			http::Response &response = dispatcher.dispatch(*client, this->servers);
+			std::string messageToSend = response.toString();
+			client->setMessageToSend(messageToSend);
+		}
+		else if (maybeCompleteRequest.state() == http::Request::READ_BAD_REQUEST)
+		{
+			// has finished reading has message and client still alive
+			// TODO if headers has Connection: close we should close
+			std::cout << "bad request reading: "
+					  << std::endl;
+			std::string messageToSend =
+				client->getResponse()
+				.setBadRequest()
+				.toString();
+			client->setMessageToSend(messageToSend);
+		}
+		else if (maybeCompleteRequest.state() == http::Request::READ_EOF)
+		{
+			// has finished reading has message but client has closed
+			// TODO confirm that client is always closed on this case
+			std::cout << "eof reading: " << std::endl;
+			unsubscribeHttpClient(client, clientEvent);
+		}
+		else if (maybeCompleteRequest.state() == http::Request::READ_ERROR)
+		{
+			// reading failed for some reason
+			//unsubscribe
+			std::cout << "error reading: "
+					  << std::endl;
+			unsubscribeHttpClient(client, clientEvent);
+			throw std::domain_error("TODO read ERROR");
+		}
+	}
+
+	void EventLoop::handleClientWriteResponse(http::Client *client)
+	{
+		if(client->getWriterState() != BufferedWriter::WRITING)
+			return; // we don't have anything ready to write
+		std::pair<WriteState, char*> flushResult = client->flushMessage();
+		if (flushResult.first == BufferedWriter::DONE)
+		{
+			std::cout << "done writing response: "
+					  << client->getResponse().toString()
+					  << std::endl;
+			client->clear();
+		}
+		else if (flushResult.first == BufferedWriter::ERROR)
+		{
+			throw std::domain_error("TODO write ERROR");
+			client->clear();
+		}
+	}
+
 	bool EventLoop::loop()
 	{
 		if (!this->isOk())
@@ -126,22 +214,7 @@ namespace conn
 				if (serverIt != this->servers.end())
 				{
 					TcpServer *server = serverIt->second;
-					std::pair<int, std::string> connResult = server->connectToClient();
-					int clientFd = connResult.first;
-					if (connResult.first < 0)
-					{
-						std::string errorMessage = connResult.second;
-						std::cout << errorMessage << std::endl;
-						continue;
-					}
-					bool isSubscribed = this->subscribeHttpClient(clientFd);
-					if (!isSubscribed)
-					{
-						std::string errorMessage = "failed to subscribe client";
-						std::cout << errorMessage << std::endl;
-						close(clientFd);
-					}
-					continue;
+					this->connectServerToClient(server);
 				}
 				MapClientIterator clientIt = this->clients.find(events[i].data.fd);
 				if (clientIt != this->clients.end())
@@ -149,70 +222,11 @@ namespace conn
 					http::Client *client = clientIt->second;
 					if (events[i].events & EPOLLIN) // fd has content to read
 					{
-						http::Request maybeCompleteRequest = client->readHttpRequest();
-						if (maybeCompleteRequest.state() <= http::Request::READING_BODY)
-							continue; // has not finished reading, will finish a next epoll_wait
-						else if (maybeCompleteRequest.state() == http::Request::READ_COMPLETE)
-						{
-							// has finished reading has message and client still alive
-							// TODO if headers has Connection: close we should close
-							http::Request request = maybeCompleteRequest;
-							std::cout << "done reading: "
-									  << request.getMethod() << " "
-									  << request.getPath() << " "
-									  << request.getProtocol() << " "
-									  << std::endl;
-
-							http::Response &response = dispatcher.dispatch(*client, this->servers);
-							std::string messageToSend = response.toString();
-							client->setMessageToSend(messageToSend);
-						}
-						else if (maybeCompleteRequest.state() == http::Request::READ_BAD_REQUEST)
-						{
-							// has finished reading has message and client still alive
-							// TODO if headers has Connection: close we should close
-							std::cout << "bad request reading: "
-									  << std::endl;
-							std::string messageToSend =
-								client->getResponse()
-								.setBadRequest()
-								.toString();
-							client->setMessageToSend(messageToSend);
-						}
-						else if (maybeCompleteRequest.state() == http::Request::READ_EOF)
-						{
-							// has finished reading has message but client has closed
-							// TODO confirm that client is always closed on this case
-							std::cout << "eof reading: " << std::endl;
-							unsubscribeHttpClient(client, events + i);
-						}
-						else if (maybeCompleteRequest.state() == http::Request::READ_ERROR)
-						{
-							// reading failed for some reason
-							//unsubscribe
-							std::cout << "error reading: "
-									  << std::endl;
-							unsubscribeHttpClient(client, events + i);
-							throw std::domain_error("TODO read ERROR");
-						}
+						this->handleClientRequest(client, events + i);
 					}
 					else if (events[i].events & EPOLLOUT) // fd is available to write
 					{
-						if(client->getWriterState() != BufferedWriter::WRITING)
-							continue; // we don't have anything ready to write
-						std::pair<WriteState, char*> flushResult = client->flushMessage();
-						if (flushResult.first == BufferedWriter::DONE)
-						{
-							std::cout << "done writing response: "
-									  << client->getResponse().toString()
-									  << std::endl;
-							client->clear();
-						}
-						if (flushResult.first == BufferedWriter::ERROR)
-						{
-							throw std::domain_error("TODO write ERROR");
-							client->clear();
-						}
+						this->handleClientWriteResponse(client);
 					}
 					else
 					{
