@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/29 00:16:28 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 17:57:18 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -39,6 +39,7 @@ namespace conn {
 		std::pair<ReadState, char *> read(size_t length);
 		std::pair<ReadState, char *> readlineCrlf();
 		bool hasBufferedContent() const;
+		int getFd() const;
 	};
 }
 

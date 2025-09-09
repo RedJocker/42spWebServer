@@ -205,7 +205,7 @@
     - [X] use epoll or something alike
     - handle todos left on EventLoop
     - [X] fix issues of buffered reader: a read may contain several \r\n in a single read
-    - [ ] Reformat EventLoop
+    - [X] Reformat EventLoop
       - change IO Multiplexing from epoll to poll
         - epoll does not work with regular files
 	- subject states that

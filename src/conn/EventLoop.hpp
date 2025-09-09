@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/04 18:19:19 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 18:01:13 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,7 +18,7 @@
 #include "TcpClient.hpp"
 #include "Dispatcher.hpp"
 #include "Client.hpp"
-#include <sys/epoll.h>
+#include <poll.h>
 
 # define MAX_EVENTS 6
 
@@ -27,14 +27,15 @@ namespace conn
 
 	class EventLoop
 	{
-		int epollFd;
 		std::map<int, TcpServer*> servers;
 		std::map<int, http::Client*> clients;
+		std::vector<struct pollfd> events;
 		http::Dispatcher dispatcher;
 
 		void connectServerToClient(TcpServer *server);
-		void handleClientRequest(http::Client *client, struct epoll_event *clientEvent);
+		void handleClientRequest(http::Client *client);
 		void handleClientWriteResponse(http::Client *client);
+		bool unsubscribeFd(int fd);
 	public:
 
 		EventLoop();
@@ -45,8 +46,8 @@ namespace conn
 		bool subscribeTcpServer(TcpServer *tcpServer);
 		bool subscribeHttpClient(int fd);
 		bool loop(void);
-		bool isOk() const;
-		bool unsubscribeHttpClient(http::Client *client , struct epoll_event *clientEvent);
+
+		bool unsubscribeHttpClient(int clientFd);
 
 	};
 
