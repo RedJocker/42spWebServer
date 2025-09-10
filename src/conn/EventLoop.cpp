@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 18:02:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 21:06:57 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -73,7 +73,7 @@ namespace conn
 
 	bool EventLoop::unsubscribeFd(int fd)
 	{
-		for (std::vector<struct pollfd>::iterator monitoredIt = this->events.begin();
+		for (EventsList::iterator monitoredIt = this->events.begin();
 			 monitoredIt != this->events.end();
 			 ++monitoredIt)
 		{
@@ -192,8 +192,17 @@ namespace conn
 			// waiting for ready event from epoll
 			int numReadyEvents =
 				poll(this->events.data(), events.size(), -1); // -1 without timeout
-
-			for (std::vector<struct pollfd>::iterator monitoredIt = this->events.begin();
+			if (numReadyEvents < 0)
+			{
+				std::cout << "poll error: " << strerror(errno) << std::endl;
+				continue;
+			}
+			else if (numReadyEvents == 0)
+			{
+				std::cout << "poll timeout: " << std::endl;
+				continue;
+			}
+			for (EventList::iterator monitoredIt = this->events.begin();
 				 monitoredIt != this->events.end() && numReadyEvents > 0;
 				 ++monitoredIt)
 			{
@@ -205,33 +214,36 @@ namespace conn
 					{
 						TcpServer *server = serverIt->second;
 						this->connectServerToClient(server);
+						--numReadyEvents;
+						continue;
 					}
 					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
 					if (clientIt != this->clients.end())
 					{
 						http::Client *client = clientIt->second;
 						this->handleClientRequest(client);
+						--numReadyEvents;
+						continue;
 					}
-					--numReadyEvents;
-
 				} else if (monitoredIt->revents & POLLOUT)
-				{ // fd is avalilable for write
+				{ // fd is available for write
 					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
 					if (clientIt != this->clients.end())
 					{
 						http::Client *client = clientIt->second;
 						this->handleClientWriteResponse(client);
+						--numReadyEvents;
+						continue;
 					}
-					--numReadyEvents;
-
 				} else if (monitoredIt->revents & (POLLHUP | POLLERR))
 				{ // close
 					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
 					if (clientIt != this->clients.end())
 					{
 						this->unsubscribeHttpClient(monitoredIt->fd);
+						--numReadyEvents;
+						continue;
 					}
-					--numReadyEvents;
 				}
 			}
 

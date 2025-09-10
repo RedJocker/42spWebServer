@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 18:01:13 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 20:59:34 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -53,6 +53,7 @@ namespace conn
 
 	typedef std::map<int, TcpServer*>::iterator MapServerIterator;
 	typedef std::map<int, http::Client*>::iterator MapClientIterator;
+	typedef std::vector<struct pollfd> EventList;
 }
 
 #endif
