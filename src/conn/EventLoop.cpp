@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/04 18:19:25 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 22:11:57 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,94 +14,78 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
+#include <cstring>
 
 namespace conn
 {
 
-	EventLoop::EventLoop(): epollFd(epoll_create1(0)) // 0 == no flags
+	EventLoop::EventLoop()
 	{
 	}
 
-	EventLoop::EventLoop(const EventLoop &other) : epollFd(other.epollFd)
+	EventLoop::EventLoop(const EventLoop &other)
 	{
-
+		(void) other;
 	}
 
 	EventLoop &EventLoop::operator=(const EventLoop &other)
 	{
 		if (this == &other)
 			return *this;
-		this->epollFd = other.epollFd;
 		return *this;
 	}
 
 	EventLoop::~EventLoop()
 	{
-		close(this->epollFd);
 	}
 
-	bool EventLoop::isOk() const
-	{
-		return this->epollFd >= 0;
-	}
 
 	bool EventLoop::subscribeTcpServer(TcpServer *tcpServer)
 	{
-		if (!this->isOk())
-		{
-			return false;
-		}
+		struct pollfd event;
 
-		struct epoll_event event;
+		event.events = POLLIN; // subscribe for reads only
+		event.fd = tcpServer->getServerFd();
 
-		event.events = EPOLLIN; // subscribe for reads only, level triggered
-		event.data.fd = tcpServer->getServerFd();
-
-		if (epoll_ctl(epollFd, EPOLL_CTL_ADD, event.data.fd, &event))
-		{
-			return false;
-		}
+		this->events.push_back(event);
 		std::pair<MapServerIterator, bool> insertResult =
-			servers.insert(std::make_pair(event.data.fd, tcpServer));
+			servers.insert(std::make_pair(event.fd, tcpServer));
 		return insertResult.second;
 	}
 
 	bool EventLoop::subscribeHttpClient(int fd)
 	{
-		if (!this->isOk())
-		{
-			return false;
-		}
 
-		struct epoll_event event;
+		struct pollfd event;
 
-		event.events = EPOLLIN|EPOLLOUT; // subscribe for reads and writes, level triggered
-		event.data.fd = fd;
-
-		if (epoll_ctl(epollFd, EPOLL_CTL_ADD, event.data.fd, &event))
-		{
-			return false;
-		}
+		event.events = POLLIN|POLLOUT; // subscribe for reads and writes, level triggered
+		event.fd = fd;
 
 		http::Client *httpClient = new http::Client(fd);
 		if (httpClient != 0)
 		{
+			this->events.push_back(event);
 			std::pair<MapClientIterator, bool> insertResult =
-				clients.insert(std::make_pair(event.data.fd, httpClient));
+				clients.insert(std::make_pair(event.fd, httpClient));
 			return insertResult.second;
 		}
 		return false;
 	}
 
-	bool EventLoop::unsubscribeHttpClient(http::Client *client , struct epoll_event *clientEvent)
+	void EventLoop::unsubscribeFd(EventList::iterator &eventIt)
 	{
-		int clientFd = clientEvent->data.fd;
-		if (epoll_ctl(this->epollFd, EPOLL_CTL_DEL, clientFd, clientEvent) != 0)
-			return false;
-		if (this->clients.erase(clientFd) != 1)
-			return false;
+		close(eventIt->fd);
+		eventIt = this->events.erase(eventIt) - 1;
+	}
+
+	void EventLoop::unsubscribeHttpClient(
+		EventList::iterator &eventIt)
+	{
+		int clientFd = eventIt->fd;
+		this->unsubscribeFd(eventIt);
+		http::Client *client = this->clients.at(clientFd);
+		this->clients.erase(clientFd);
 		delete client;
-		return true;
 	}
 
 	void EventLoop::connectServerToClient(TcpServer *server)
@@ -123,7 +107,8 @@ namespace conn
 		}
 	}
 
-	void EventLoop::handleClientRequest(http::Client *client, struct epoll_event *clientEvent)
+	void EventLoop::handleClientRequest(
+		http::Client *client, EventList::iterator &eventIt)
 	{
 		http::Request maybeCompleteRequest = client->readHttpRequest();
 		if (maybeCompleteRequest.state() <= http::Request::READING_BODY)
@@ -160,7 +145,7 @@ namespace conn
 			// has finished reading has message but client has closed
 			// TODO confirm that client is always closed on this case
 			std::cout << "eof reading: " << std::endl;
-			unsubscribeHttpClient(client, clientEvent);
+			unsubscribeHttpClient(eventIt);
 		}
 		else if (maybeCompleteRequest.state() == http::Request::READ_ERROR)
 		{
@@ -168,21 +153,25 @@ namespace conn
 			//unsubscribe
 			std::cout << "error reading: "
 					  << std::endl;
-			unsubscribeHttpClient(client, clientEvent);
+			unsubscribeHttpClient(eventIt);
 			throw std::domain_error("TODO read ERROR");
 		}
 	}
 
-	void EventLoop::handleClientWriteResponse(http::Client *client)
+	void EventLoop::handleClientWriteResponse(
+		http::Client *client, EventList::iterator &eventIt)
 	{
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			return; // we don't have anything ready to write
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
+        bool shouldClose = client->getRequest()
+			.getHeader("Connection") == "close";
 		if (flushResult.first == BufferedWriter::DONE)
 		{
 			std::cout << "done writing response: "
 					  << client->getResponse().toString()
 					  << std::endl;
+			shouldClose = client->getResponse().getHeader("Connection") == "close";
 			client->clear();
 		}
 		else if (flushResult.first == BufferedWriter::ERROR)
@@ -190,53 +179,71 @@ namespace conn
 			throw std::domain_error("TODO write ERROR");
 			client->clear();
 		}
+		if (shouldClose)
+			unsubscribeHttpClient(eventIt);
 	}
 
 	bool EventLoop::loop()
 	{
-		if (!this->isOk())
-		{
-			return false;
-		}
-
-		struct epoll_event events[MAX_EVENTS];
-
 		while (true)
 		{
 			// waiting for ready event from epoll
-			int numReadyEvents =
-				epoll_wait(this->epollFd, events, MAX_EVENTS, -1); // -1 without timeout
+			 // -1 without timeout
+			int numReadyEvents = poll(this->events.data(), events.size(), -1);
+			if (numReadyEvents < 0)
+			{
+				std::cout << "poll error: " << strerror(errno) << std::endl;
+				continue;
+			}
+			else if (numReadyEvents == 0)
+			{
+				std::cout << "poll timeout: " << std::endl;
+				continue;
+			}
+			for (EventList::iterator monitoredIt = this->events.begin();
+				 monitoredIt != this->events.end() && numReadyEvents > 0;
+				 ++monitoredIt)
+			{
+				if (monitoredIt->revents & POLLIN)
+				{ // fd is available for read
 
-			// iterating through ready events
-			for(int i = 0; i < numReadyEvents; i++) {
-				// checking which fd to know what to do
-				MapServerIterator serverIt = this->servers.find(events[i].data.fd);
-				if (serverIt != this->servers.end())
-				{
-					TcpServer *server = serverIt->second;
-					this->connectServerToClient(server);
-				}
-				MapClientIterator clientIt = this->clients.find(events[i].data.fd);
-				if (clientIt != this->clients.end())
-				{
-					http::Client *client = clientIt->second;
-					if (events[i].events & EPOLLIN) // fd has content to read
+					MapServerIterator serverIt = this->servers.find(monitoredIt->fd);
+					if (serverIt != this->servers.end())
 					{
-						this->handleClientRequest(client, events + i);
+						TcpServer *server = serverIt->second;
+						this->connectServerToClient(server);
+						--numReadyEvents;
+						continue;
 					}
-					else if (events[i].events & EPOLLOUT) // fd is available to write
+					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
+					if (clientIt != this->clients.end())
 					{
-						this->handleClientWriteResponse(client);
+						http::Client *client = clientIt->second;
+						this->handleClientRequest(client, monitoredIt);
+						--numReadyEvents;
+						continue;
 					}
-					else
+				} else if (monitoredIt->revents & POLLOUT)
+				{ // fd is available for write
+					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
+					if (clientIt != this->clients.end())
 					{
-						throw std::domain_error("TODO else error");
-						client->clear();
+						http::Client *client = clientIt->second;
+						this->handleClientWriteResponse(client, monitoredIt);
+						--numReadyEvents;
+						continue;
 					}
-					continue;
+				} else if (monitoredIt->revents & (POLLHUP | POLLERR))
+				{ // close
+					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
+					if (clientIt != this->clients.end())
+					{
+						this->unsubscribeHttpClient(monitoredIt);
+						--numReadyEvents;
+						continue;
+					}
 				}
 			}
-
 		}
 	}
 }

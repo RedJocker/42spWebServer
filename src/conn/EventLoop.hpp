@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/04 18:19:19 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 21:39:06 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,23 +18,29 @@
 #include "TcpClient.hpp"
 #include "Dispatcher.hpp"
 #include "Client.hpp"
-#include <sys/epoll.h>
+#include <poll.h>
 
 # define MAX_EVENTS 6
 
 namespace conn
 {
+	typedef std::map<int, TcpServer*>::iterator MapServerIterator;
+	typedef std::map<int, http::Client*>::iterator MapClientIterator;
+	typedef std::vector<struct pollfd> EventList;
 
 	class EventLoop
 	{
-		int epollFd;
 		std::map<int, TcpServer*> servers;
 		std::map<int, http::Client*> clients;
+		EventList events;
 		http::Dispatcher dispatcher;
 
 		void connectServerToClient(TcpServer *server);
-		void handleClientRequest(http::Client *client, struct epoll_event *clientEvent);
-		void handleClientWriteResponse(http::Client *client);
+		void handleClientRequest(
+			http::Client *client, EventList::iterator &eventIt);
+		void handleClientWriteResponse(
+			http::Client *client, EventList::iterator &eventIt);
+	    void unsubscribeFd(EventList::iterator &eventIt);
 	public:
 
 		EventLoop();
@@ -45,13 +51,11 @@ namespace conn
 		bool subscribeTcpServer(TcpServer *tcpServer);
 		bool subscribeHttpClient(int fd);
 		bool loop(void);
-		bool isOk() const;
-		bool unsubscribeHttpClient(http::Client *client , struct epoll_event *clientEvent);
+
+		void unsubscribeHttpClient(EventList::iterator &eventIt);
 
 	};
 
-	typedef std::map<int, TcpServer*>::iterator MapServerIterator;
-	typedef std::map<int, http::Client*>::iterator MapClientIterator;
 }
 
 #endif

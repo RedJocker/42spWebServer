@@ -205,17 +205,17 @@
     - [X] use epoll or something alike
     - handle todos left on EventLoop
     - [X] fix issues of buffered reader: a read may contain several \r\n in a single read
-    - Reformat EventLoop
+    - [X] Reformat EventLoop
       - change IO Multiplexing from epoll to poll
         - epoll does not work with regular files
-	- subject states that
-	  - all reads and writes except configuration file should happen through poll (multiplexer)
-	    - this includes reading regular files while responding to requests
-	    - poll states that it does not make sense to monitor regular files fds
-	      - select and poll always consider regular files ready to read and write
-	        - this is related to in-kernel buffering of io to disk
-	      - but it is still possible to monitor regular files with poll
-	     - epoll does not allow monitoring regular files
+    - subject states that
+      - all reads and writes except configuration file should happen through poll (multiplexer)
+        - this includes reading regular files while responding to requests
+        - poll states that it does not make sense to monitor regular files fds
+          - select and poll always consider regular files ready to read and write
+            - this is related to in-kernel buffering of io to disk
+          - but it is still possible to monitor regular files with poll
+         - epoll does not allow monitoring regular files
     - handle file reading on EventLoop
     - handle file writing on EventLoop
     - handle cgi ipc on EventLoop
@@ -232,9 +232,9 @@
       - each socket is bidirectional
       - child-cgi
         - redirect child stdin and stdout to one side of socketpair
-	- close other side of socketpair
+        - close other side of socketpair
       - server
         - subscribe read/write to cgi on EventLoop
-	- write body
-	- read cgi-response
-	- write full response
+        - write body
+        - read cgi-response
+        - write full response
