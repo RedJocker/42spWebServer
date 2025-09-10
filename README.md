@@ -216,7 +216,7 @@
             - this is related to in-kernel buffering of io to disk
           - but it is still possible to monitor regular files with poll
          - epoll does not allow monitoring regular files
-    - handle file reading on EventLoop
+    - [ ] handle file reading on EventLoop
     - handle file writing on EventLoop
     - handle cgi ipc on EventLoop
 
