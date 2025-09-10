@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 22:02:11 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 22:11:57 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -75,7 +75,7 @@ namespace conn
 	void EventLoop::unsubscribeFd(EventList::iterator &eventIt)
 	{
 		close(eventIt->fd);
-		eventIt = this->events.erase(eventIt);
+		eventIt = this->events.erase(eventIt) - 1;
 	}
 
 	void EventLoop::unsubscribeHttpClient(
