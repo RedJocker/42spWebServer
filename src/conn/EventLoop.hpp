@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 21:39:06 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/10 08:46:40 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -45,7 +45,7 @@ namespace conn
 
 		EventLoop();
 		EventLoop(const EventLoop &other);
-		virtual EventLoop &operator=(const EventLoop &other);
+		EventLoop &operator=(const EventLoop &other);
 		virtual ~EventLoop();
 
 		bool subscribeTcpServer(TcpServer *tcpServer);

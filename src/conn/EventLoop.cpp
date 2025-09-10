@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 22:11:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/10 08:48:09 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
+#include <cerrno>
 
 namespace conn
 {

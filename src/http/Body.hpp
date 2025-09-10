@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:30 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 19:50:41 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/10 08:46:24 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ namespace http {
 		public:
 			Body(void);
 			Body(const Body& other);
-			virtual Body& operator=(const Body& other);
+			Body& operator=(const Body& other);
 			virtual ~Body(void);
 
 			bool parse(const char *chunk, size_t expectedLength);

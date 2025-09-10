@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 20:18:48 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/10 08:47:27 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ namespace http
 
 		Request(void);
 		Request(const Request &other);
-		virtual Request &operator=(const Request &other);
+		Request &operator=(const Request &other);
 		virtual ~Request(void);
 
 		ReadState readHttpRequest(conn::TcpClient &client);

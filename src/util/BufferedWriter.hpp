@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 22:57:40 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 21:30:11 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/10 08:47:40 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -29,7 +29,7 @@ private:
 public:
 	BufferedWriter(int fd);
 	BufferedWriter(const BufferedWriter &other);
-	virtual BufferedWriter &operator=(const BufferedWriter &other);
+	BufferedWriter &operator=(const BufferedWriter &other);
 	virtual ~BufferedWriter();
 
 	void setMessage(std::string message);

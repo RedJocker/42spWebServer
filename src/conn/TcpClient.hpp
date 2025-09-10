@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 17:57:18 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/10 08:45:40 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,7 +27,7 @@ namespace conn {
 	protected:
 		TcpClient(int clientFd);
 		TcpClient(const TcpClient &other);
-		virtual TcpClient &operator=(const TcpClient &other);
+		TcpClient &operator=(const TcpClient &other);
 		virtual ~TcpClient();
 
 		std::string getMessageToSend() const;

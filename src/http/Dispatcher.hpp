@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:12 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/04 12:28:18 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/10 08:46:50 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ namespace http
 
 		Dispatcher();
 		Dispatcher(const Dispatcher &other);
-		virtual Dispatcher &operator=(const Dispatcher &other);
+		Dispatcher &operator=(const Dispatcher &other);
 		virtual ~Dispatcher();
 
 		http::Response &dispatch(http::Client &client,  http::MapServer &servers);

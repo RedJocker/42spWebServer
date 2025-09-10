@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:20 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 20:22:39 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/10 08:46:02 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ namespace http {
 		public:
 			Headers(void);
 			Headers(const Headers &other);
-			virtual Headers &operator=(const Headers &other);
+			Headers &operator=(const Headers &other);
 			virtual ~Headers(void);
 
 			bool parseLine(const std::string &line);
