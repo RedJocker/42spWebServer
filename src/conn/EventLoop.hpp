@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 20:59:34 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 21:39:06 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,18 +24,23 @@
 
 namespace conn
 {
+	typedef std::map<int, TcpServer*>::iterator MapServerIterator;
+	typedef std::map<int, http::Client*>::iterator MapClientIterator;
+	typedef std::vector<struct pollfd> EventList;
 
 	class EventLoop
 	{
 		std::map<int, TcpServer*> servers;
 		std::map<int, http::Client*> clients;
-		std::vector<struct pollfd> events;
+		EventList events;
 		http::Dispatcher dispatcher;
 
 		void connectServerToClient(TcpServer *server);
-		void handleClientRequest(http::Client *client);
-		void handleClientWriteResponse(http::Client *client);
-		bool unsubscribeFd(int fd);
+		void handleClientRequest(
+			http::Client *client, EventList::iterator &eventIt);
+		void handleClientWriteResponse(
+			http::Client *client, EventList::iterator &eventIt);
+	    void unsubscribeFd(EventList::iterator &eventIt);
 	public:
 
 		EventLoop();
@@ -47,13 +52,10 @@ namespace conn
 		bool subscribeHttpClient(int fd);
 		bool loop(void);
 
-		bool unsubscribeHttpClient(int clientFd);
+		void unsubscribeHttpClient(EventList::iterator &eventIt);
 
 	};
 
-	typedef std::map<int, TcpServer*>::iterator MapServerIterator;
-	typedef std::map<int, http::Client*>::iterator MapClientIterator;
-	typedef std::vector<struct pollfd> EventList;
 }
 
 #endif

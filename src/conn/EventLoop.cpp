@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 21:06:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 21:50:48 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -71,30 +71,20 @@ namespace conn
 		return false;
 	}
 
-	bool EventLoop::unsubscribeFd(int fd)
+	void EventLoop::unsubscribeFd(EventList::iterator &eventIt)
 	{
-		for (EventsList::iterator monitoredIt = this->events.begin();
-			 monitoredIt != this->events.end();
-			 ++monitoredIt)
-		{
-			if (monitoredIt->fd == fd)
-			{
-				this->events.erase(monitoredIt);
-				return true;
-			}
-		}
-		return false;
+		eventIt = this->events.erase(eventIt);
+		close(eventIt->fd);
 	}
 
-	bool EventLoop::unsubscribeHttpClient(int clientFd)
+	void EventLoop::unsubscribeHttpClient(
+		EventList::iterator &eventIt)
 	{
-		if (!this->unsubscribeFd(clientFd))
-			return false;
+		int clientFd = eventIt->fd;
+		this->unsubscribeFd(eventIt);
 		http::Client *client = this->clients.at(clientFd);
-		if (this->clients.erase(clientFd) != 1)
-			return false;
+		this->clients.erase(clientFd);
 		delete client;
-		return true;
 	}
 
 	void EventLoop::connectServerToClient(TcpServer *server)
@@ -116,7 +106,8 @@ namespace conn
 		}
 	}
 
-	void EventLoop::handleClientRequest(http::Client *client)
+	void EventLoop::handleClientRequest(
+		http::Client *client, EventList::iterator &eventIt)
 	{
 		http::Request maybeCompleteRequest = client->readHttpRequest();
 		if (maybeCompleteRequest.state() <= http::Request::READING_BODY)
@@ -153,7 +144,7 @@ namespace conn
 			// has finished reading has message but client has closed
 			// TODO confirm that client is always closed on this case
 			std::cout << "eof reading: " << std::endl;
-			unsubscribeHttpClient(client->getFd());
+			unsubscribeHttpClient(eventIt);
 		}
 		else if (maybeCompleteRequest.state() == http::Request::READ_ERROR)
 		{
@@ -161,21 +152,25 @@ namespace conn
 			//unsubscribe
 			std::cout << "error reading: "
 					  << std::endl;
-			unsubscribeHttpClient(client->getFd());
+			unsubscribeHttpClient(eventIt);
 			throw std::domain_error("TODO read ERROR");
 		}
 	}
 
-	void EventLoop::handleClientWriteResponse(http::Client *client)
+	void EventLoop::handleClientWriteResponse(
+		http::Client *client, EventList::iterator &eventIt)
 	{
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			return; // we don't have anything ready to write
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
+        bool shouldClose = client->getRequest()
+			.getHeader("Connection") == "close";
 		if (flushResult.first == BufferedWriter::DONE)
 		{
 			std::cout << "done writing response: "
 					  << client->getResponse().toString()
 					  << std::endl;
+			shouldClose = client->getResponse().getHeader("Connection") == "close";
 			client->clear();
 		}
 		else if (flushResult.first == BufferedWriter::ERROR)
@@ -183,6 +178,8 @@ namespace conn
 			throw std::domain_error("TODO write ERROR");
 			client->clear();
 		}
+		if (shouldClose)
+			unsubscribeHttpClient(eventIt);
 	}
 
 	bool EventLoop::loop()
@@ -221,7 +218,7 @@ namespace conn
 					if (clientIt != this->clients.end())
 					{
 						http::Client *client = clientIt->second;
-						this->handleClientRequest(client);
+						this->handleClientRequest(client, monitoredIt);
 						--numReadyEvents;
 						continue;
 					}
@@ -231,7 +228,7 @@ namespace conn
 					if (clientIt != this->clients.end())
 					{
 						http::Client *client = clientIt->second;
-						this->handleClientWriteResponse(client);
+						this->handleClientWriteResponse(client, monitoredIt);
 						--numReadyEvents;
 						continue;
 					}
@@ -240,7 +237,7 @@ namespace conn
 					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
 					if (clientIt != this->clients.end())
 					{
-						this->unsubscribeHttpClient(monitoredIt->fd);
+						this->unsubscribeHttpClient(monitoredIt);
 						--numReadyEvents;
 						continue;
 					}
