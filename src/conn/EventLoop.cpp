@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 21:50:48 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/09 22:02:11 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
+#include <cstring>
 
 namespace conn
 {
@@ -73,8 +74,8 @@ namespace conn
 
 	void EventLoop::unsubscribeFd(EventList::iterator &eventIt)
 	{
-		eventIt = this->events.erase(eventIt);
 		close(eventIt->fd);
+		eventIt = this->events.erase(eventIt);
 	}
 
 	void EventLoop::unsubscribeHttpClient(
@@ -187,8 +188,8 @@ namespace conn
 		while (true)
 		{
 			// waiting for ready event from epoll
-			int numReadyEvents =
-				poll(this->events.data(), events.size(), -1); // -1 without timeout
+			 // -1 without timeout
+			int numReadyEvents = poll(this->events.data(), events.size(), -1);
 			if (numReadyEvents < 0)
 			{
 				std::cout << "poll error: " << strerror(errno) << std::endl;
@@ -243,7 +244,6 @@ namespace conn
 					}
 				}
 			}
-
 		}
 	}
 }
