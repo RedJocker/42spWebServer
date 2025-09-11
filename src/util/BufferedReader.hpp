@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:23 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/04 17:30:31 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 03:09:11 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -33,6 +33,7 @@ class BufferedReader
 	char *consumeBufferedContent();
 	char *consumeBufferedContent(size_t len, size_t eraseAfter);
 	ssize_t crlfIndex(size_t start) const;
+	void clear();
 	BufferedReader();
 public:
 	enum ReadState {READING, DONE, ERROR, NO_CONTENT};
@@ -44,6 +45,8 @@ public:
 	std::pair<ReadState, char *> read(size_t length);
 	std::pair<ReadState, char *> readlineCrlf(void);
 	std::pair<ReadState, char *> readAll(void);
+
+	void setFd(int fd);
 	bool hasBufferedContent() const;
 };
 

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/10 08:47:10 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 04:23:06 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ namespace http {
 			Response &setHeaderContentLength();
 			Response &setNotFound();
 			Response &setBadRequest();
+			Response &setCreated();
 			Response &setOk();
 			void clear(void);
 

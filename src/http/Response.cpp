@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/09 21:47:24 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 04:22:37 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,16 @@ namespace http {
 		(*this)
 			.setStatusCode(400)
 			.setStatusInfo("Bad Request")
+			.addHeader("Content-length", "0");
+		return *this;
+	}
+
+	Response &Response::setCreated()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(201)
+			.setStatusInfo("Created")
 			.addHeader("Content-length", "0");
 		return *this;
 	}
