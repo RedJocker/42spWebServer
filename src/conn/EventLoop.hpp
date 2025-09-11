@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/11 03:01:42 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 04:06:07 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -33,6 +33,7 @@ namespace conn
 		MapServer servers;
 		MapClient clients;
 		MapFileReads fileReads;
+		MapFileWrites fileWrites;
 		ListEvents events;
 		SetRemoveFd removeFds;
 		http::Dispatcher dispatcher;
@@ -59,6 +60,7 @@ namespace conn
 		bool subscribeHttpClient(int fd);
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
 		void subscribeFileRead(int fileFd, int clientFd);
+		void subscribeFileWrite(int fileFd, int clientFd, std::string content);
 	};
 
 }

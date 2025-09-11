@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/11 01:42:30 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 05:22:10 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -91,9 +91,8 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 
 	if (toRead == 0)
 	{
-		return std::make_pair(
-			ERROR,
-			const_cast<char *>("called with no content to read"));
+		char *message = this->consumeBufferedContent(length, 0);
+		return std::make_pair(DONE, message);
 	}
 	ssize_t currentRead = ::read(
 		this->fd,
@@ -152,6 +151,10 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
 	else
 	{
 		currentRead = ::read(this->fd, this->readBuffer, BUFFER_SIZE);
+		for (int i = 0; i < currentRead; ++i)
+		{
+			std::cout << this->readBuffer[i] << std::endl;
+		}
 		if (currentRead < 0)
 		{ // read fail
 			return std::make_pair(

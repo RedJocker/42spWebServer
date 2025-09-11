@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/09/10 12:24:03 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/10 23:31:41 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 04:06:25 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,6 +25,7 @@ namespace conn {
 	typedef std::map<int, TcpServer*> MapServer;
 	typedef std::map<int, http::Client*> MapClient;
 	typedef std::map<int, http::Client*> MapFileReads;
+	typedef std::map<int, http::Client*> MapFileWrites;
 	typedef std::vector<struct pollfd> ListEvents;
 	typedef std::set<int> SetRemoveFd;
 	class Monitor
@@ -37,6 +38,7 @@ namespace conn {
 		virtual bool subscribeHttpClient(int fd) = 0;
 		virtual void unsubscribeHttpClient(ListEvents::iterator &eventIt) = 0;
 		virtual void subscribeFileRead(int fileFd, int clientFd) = 0;
+		virtual void subscribeFileWrite(int fileFd, int clientFd, std::string content) = 0;
 	};
 
 }

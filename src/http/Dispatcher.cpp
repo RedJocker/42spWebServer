@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/11 03:08:46 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 05:37:43 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,12 @@ namespace http {
 
 		if (method == "GET") {
 			handleGetFile(client, response, monitor);
+			return ;
+		}
+
+		if (method == "POST") {
+			// call this to subscribe writing to file
+			//monitor.subscribeFileWrite(int fileFd, int clientFd, std::string content)
 			return ;
 		}
 

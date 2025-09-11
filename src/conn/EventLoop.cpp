@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/11 02:58:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 04:23:25 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -141,6 +141,36 @@ namespace conn
 			events.push_back(event);
 			client->setOperationFd(fileFd);
 			this->fileReads.insert(std::make_pair(fileFd, client));
+		}
+	}
+
+	void EventLoop::subscribeFileWrite(int fileFd, int clientFd, std::string content)
+	{
+		http::Client *client = this->clients.at(clientFd);
+		if (client)
+		{
+			std::cout << "subscribeFileWrite " << fileFd << std::endl;
+			BufferedWriter writer(fileFd);
+			writer.setMessage(content);
+			std::pair<WriteState, char*> writeResult;
+			// TODO make proper subscription on EventLoop
+			while (writeResult.first == BufferedWriter::WRITING)
+			{
+				writeResult = writer.flushMessage();
+			}
+			if (writeResult.first == BufferedWriter::DONE)
+			{
+				std::cout << "file writing done done" << fileFd << std::endl;
+				client->getResponse()
+					.setCreated();
+				client->setMessageToSend(client->getResponse().toString());
+			} else
+			{
+				std::cout << "file writing error "
+						  << writeResult.second
+						  << " "
+						  << fileFd << std::endl;
+			}
 		}
 	}
 

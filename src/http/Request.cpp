@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 20:29:40 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 05:37:03 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "BufferedReader.hpp"
 #include <sstream>
 #include <cstdlib>
+#include <iostream>
 
 namespace http
 {
@@ -144,11 +145,12 @@ namespace http
 			expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
 		}
 
-		result = client.read(expectedLength - _body.size());
+		result = client.read(expectedLength);
 		switch(result.first) {
 		case BufferedReader::READING:
 			return _state;
 		case BufferedReader::ERROR: {
+			std::cout << "error:" << result.second << std::endl;
 			_state = READ_ERROR;
 			return _state;
 		}
