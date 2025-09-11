@@ -1,0 +1,43 @@
+AlignAfterOpenBracket: DontAlign
+AlignEscapedNewlines: Left
+AlignOperands: AlignAfterOperator
+AlignConsecutiveDeclarations: Consecutive
+AlignEscapedNewlinesLeft: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+#AlwaysBreakAfterReturnType: All
+AlwaysBreakBeforeMultilineStrings: false
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: false
+ColumnLimit: 80
+IndentWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+PointerAlignment: Right
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakString: 1
+PenaltyExcessCharacter: 0
+SpaceAfterCStyleCast: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 4
+UseTab: ForIndentation
+AllowAllArgumentsOnNextLine: true
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeElse: true
+  IndentBraces: false
+
+
+
