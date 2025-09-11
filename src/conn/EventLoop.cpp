@@ -6,11 +6,12 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/10 08:48:09 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 02:58:50 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "EventLoop.hpp"
+#include "Monitor.hpp"
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
@@ -49,7 +50,7 @@ namespace conn
 		event.fd = tcpServer->getServerFd();
 
 		this->events.push_back(event);
-		std::pair<MapServerIterator, bool> insertResult =
+		std::pair<MapServer::iterator, bool> insertResult =
 			servers.insert(std::make_pair(event.fd, tcpServer));
 		return insertResult.second;
 	}
@@ -59,31 +60,48 @@ namespace conn
 
 		struct pollfd event;
 
-		event.events = POLLIN|POLLOUT; // subscribe for reads and writes, level triggered
+		event.events = POLLIN|POLLOUT; // subscribe for reads and writes
 		event.fd = fd;
 
 		http::Client *httpClient = new http::Client(fd);
 		if (httpClient != 0)
 		{
 			this->events.push_back(event);
-			std::pair<MapClientIterator, bool> insertResult =
+			std::pair<MapClient::iterator, bool> insertResult =
 				clients.insert(std::make_pair(event.fd, httpClient));
 			return insertResult.second;
 		}
 		return false;
 	}
 
-	void EventLoop::unsubscribeFd(EventList::iterator &eventIt)
+	void EventLoop::unsubscribeFd(int fd)
 	{
-		close(eventIt->fd);
-		eventIt = this->events.erase(eventIt) - 1;
+		close(fd);
+		this->removeFds.insert(fd);
+		// defer removing to approriate moment to avoid iterator invalidation
+		// on EventLoop.loop
 	}
 
 	void EventLoop::unsubscribeHttpClient(
-		EventList::iterator &eventIt)
+		ListEvents::iterator &eventIt)
 	{
+		std::cout << "unsubscribeHttpClient " <<  eventIt->fd << std::endl;
 		int clientFd = eventIt->fd;
-		this->unsubscribeFd(eventIt);
+
+		for (MapFileReads::iterator it = fileReads.begin();
+			 it != fileReads.end();
+			 it++)
+		{
+			if (it->second->getFd() == clientFd)
+			{
+				close(it->first);
+				unsubscribeFd(it->first);
+				fileReads.erase(it);
+				break;
+			}
+		}
+
+		this->unsubscribeFd(eventIt->fd);
 		http::Client *client = this->clients.at(clientFd);
 		this->clients.erase(clientFd);
 		delete client;
@@ -105,11 +123,60 @@ namespace conn
 			std::string errorMessage = "failed to subscribe client";
 			std::cout << errorMessage << std::endl;
 			close(clientFd);
+		} else {
+			std::cout << "connected client " << clientFd << std::endl;
 		}
 	}
 
+	void EventLoop::subscribeFileRead(int fileFd, int clientFd)
+	{
+
+		http::Client *client = this->clients.at(clientFd);
+		if (client)
+		{
+			std::cout << "subscribeFileRead " << fileFd << std::endl;
+			struct pollfd event;
+			event.events = POLLIN; // subscribe for reads
+			event.fd = fileFd;
+			events.push_back(event);
+			client->setOperationFd(fileFd);
+			this->fileReads.insert(std::make_pair(fileFd, client));
+		}
+	}
+
+	void EventLoop::handleFileReads(
+		http::Client *client,  ListEvents::iterator &eventIt)
+	{
+		std::cout << "clientFd = " << client->getFd() << std::endl;
+		std::cout << "handleFileReads" << std::endl;
+
+		std::pair<BufferedReader::ReadState, char*> readResult
+			= client->readAllOperationFd();
+
+		if(readResult.first == BufferedReader::READING)
+			return ;
+		std::cout << "handleFileReads after reading" << std::endl;
+		if (readResult.first == BufferedReader::NO_CONTENT)
+		{
+			std::string responseStr = std::string(readResult.second);
+			delete [] readResult.second;
+
+			client->getResponse()
+				.setOk()
+				.setBody(responseStr);
+
+			client->setMessageToSend(client->getResponse().toString());
+		} else
+		{
+			std::cout << "failed handleFileReads " << readResult.second << std::endl;
+		}
+
+		this->unsubscribeFd(eventIt->fd);
+		this->fileReads.erase(this->fileReads.find(eventIt->fd));
+	}
+
 	void EventLoop::handleClientRequest(
-		http::Client *client, EventList::iterator &eventIt)
+		http::Client *client, ListEvents::iterator &eventIt)
 	{
 		http::Request maybeCompleteRequest = client->readHttpRequest();
 		if (maybeCompleteRequest.state() <= http::Request::READING_BODY)
@@ -117,7 +184,6 @@ namespace conn
 		else if (maybeCompleteRequest.state() == http::Request::READ_COMPLETE)
 		{
 			// has finished reading has message and client still alive
-			// TODO if headers has Connection: close we should close
 			http::Request request = maybeCompleteRequest;
 			std::cout << "done reading: "
 					  << request.getMethod() << " "
@@ -125,14 +191,11 @@ namespace conn
 					  << request.getProtocol() << " "
 					  << std::endl;
 
-			http::Response &response = dispatcher.dispatch(*client, this->servers);
-			std::string messageToSend = response.toString();
-			client->setMessageToSend(messageToSend);
+			dispatcher.dispatch(*client, *this);
 		}
 		else if (maybeCompleteRequest.state() == http::Request::READ_BAD_REQUEST)
 		{
 			// has finished reading has message and client still alive
-			// TODO if headers has Connection: close we should close
 			std::cout << "bad request reading: "
 					  << std::endl;
 			std::string messageToSend =
@@ -144,7 +207,6 @@ namespace conn
 		else if (maybeCompleteRequest.state() == http::Request::READ_EOF)
 		{
 			// has finished reading has message but client has closed
-			// TODO confirm that client is always closed on this case
 			std::cout << "eof reading: " << std::endl;
 			unsubscribeHttpClient(eventIt);
 		}
@@ -160,8 +222,9 @@ namespace conn
 	}
 
 	void EventLoop::handleClientWriteResponse(
-		http::Client *client, EventList::iterator &eventIt)
+		http::Client *client, ListEvents::iterator &eventIt)
 	{
+
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			return; // we don't have anything ready to write
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
@@ -201,49 +264,79 @@ namespace conn
 				std::cout << "poll timeout: " << std::endl;
 				continue;
 			}
-			for (EventList::iterator monitoredIt = this->events.begin();
-				 monitoredIt != this->events.end() && numReadyEvents > 0;
-				 ++monitoredIt)
-			{
-				if (monitoredIt->revents & POLLIN)
-				{ // fd is available for read
 
-					MapServerIterator serverIt = this->servers.find(monitoredIt->fd);
+			for (ListEvents::iterator monitoredIt = this->events.begin();
+				 monitoredIt != this->events.end() && numReadyEvents > 0;
+				 )
+			{
+				// remove unsubscrived from last iteration
+				SetRemoveFd::iterator removeIt =
+					this->removeFds.find(monitoredIt->fd);
+				if (removeIt != this->removeFds.end())
+				{
+					std::cout << "removing  " << monitoredIt->fd << std::endl;
+					monitoredIt = this->events.erase(monitoredIt);
+					this->removeFds.erase(removeIt);
+					continue;
+				}
+				//std::cout << "monitoredFd  " << monitoredIt->fd << std::endl;
+				if (monitoredIt->revents & (POLLHUP | POLLERR))
+				{ // close
+					std::cout << "close " << monitoredIt->fd << std::endl;
+					MapClient::iterator clientIt = this->clients.find(monitoredIt->fd);
+					if (clientIt != this->clients.end())
+					{
+						this->unsubscribeHttpClient(monitoredIt);
+						--numReadyEvents;
+						++monitoredIt;
+						continue;
+					}
+				}
+				else if (monitoredIt->revents & POLLIN)
+				{ // fd is available for read
+					std::cout << "in " << monitoredIt->fd << std::endl;
+					MapServer::iterator serverIt = this->servers.find(monitoredIt->fd);
 					if (serverIt != this->servers.end())
 					{
 						TcpServer *server = serverIt->second;
 						this->connectServerToClient(server);
 						--numReadyEvents;
+						++monitoredIt;
 						continue;
 					}
-					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
+					MapClient::iterator clientIt = this->clients.find(monitoredIt->fd);
 					if (clientIt != this->clients.end())
 					{
 						http::Client *client = clientIt->second;
 						this->handleClientRequest(client, monitoredIt);
 						--numReadyEvents;
+						++monitoredIt;
+						continue;
+					}
+					MapFileReads::iterator fileReadsIt =
+						this->fileReads.find(monitoredIt->fd);
+					if (fileReadsIt != this->fileReads.end())
+					{
+						http::Client *client = fileReadsIt->second;
+						this->handleFileReads(client, monitoredIt);
+						--numReadyEvents;
+						++monitoredIt;
 						continue;
 					}
 				} else if (monitoredIt->revents & POLLOUT)
 				{ // fd is available for write
-					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
+					//std::cout << "out "  << monitoredIt->fd << std::endl;
+					MapClient::iterator clientIt = this->clients.find(monitoredIt->fd);
 					if (clientIt != this->clients.end())
 					{
 						http::Client *client = clientIt->second;
 						this->handleClientWriteResponse(client, monitoredIt);
 						--numReadyEvents;
-						continue;
-					}
-				} else if (monitoredIt->revents & (POLLHUP | POLLERR))
-				{ // close
-					MapClientIterator clientIt = this->clients.find(monitoredIt->fd);
-					if (clientIt != this->clients.end())
-					{
-						this->unsubscribeHttpClient(monitoredIt);
-						--numReadyEvents;
+						++monitoredIt;
 						continue;
 					}
 				}
+				++monitoredIt;
 			}
 		}
 	}

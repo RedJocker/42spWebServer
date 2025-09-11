@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/04 17:41:27 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 01:42:30 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -180,6 +180,21 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
 	return std::make_pair(
 		DONE,
 		messageLineCrlf);
+}
+
+void BufferedReader::clear()
+{
+	this->buffered.clear();
+	this->readBefore = 0;
+}
+
+void BufferedReader::setFd(int fd)
+{
+	if (fd != this->fd)
+	{
+		this->clear();
+		this->fd = fd;
+	}
 }
 
 std::pair<ReadState, char *> BufferedReader::readAll(void)
