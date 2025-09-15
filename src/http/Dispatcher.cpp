@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/15 11:10:55 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/15 11:18:13 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,24 @@ namespace http {
 
 			close(fd);
 			response.setCreated();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
+
+		if (method == "DELETE") {
+			const std::string &path = client.getRequest().getPath();
+			std::string docroot = "./www";
+			std::string filePath = docroot + path;
+
+			int result = unlink(filePath.c_str());
+			if (result == 0) {
+				response.clear();
+				response.setStatusCode(204);
+				response.setStatusInfo("No Content");
+			} else {
+				response.setNotFound();
+			}
+
 			client.setMessageToSend(response.toString());
 			return ;
 		}
