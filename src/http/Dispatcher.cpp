@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/11 05:37:43 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/15 11:10:55 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,32 @@ namespace http {
 		if (method == "POST") {
 			// call this to subscribe writing to file
 			//monitor.subscribeFileWrite(int fileFd, int clientFd, std::string content)
+
+			const std::string &path = client.getRequest().getPath();
+			std::string docroot = "./www";
+			std::string filePath = docroot + path;
+
+			int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			if (fd < 0) {
+				std::cerr << "Failed to open file: " << filePath << std::endl;
+				response.setBadRequest();
+				client.setMessageToSend(response.toString());
+				return;
+			}
+
+			const std::string &body = client.getRequest().getBody();
+			ssize_t bytesWritten = write(fd, body.c_str(), body.size());
+			if (bytesWritten < 0 || static_cast<size_t>(bytesWritten) != body.size()) {
+				std::cerr << "Failed to write entire body to file: " << filePath << std::endl;
+				response.setBadRequest();
+				client.setMessageToSend(response.toString());
+				close(fd);
+				return;
+			}
+
+			close(fd);
+			response.setCreated();
+			client.setMessageToSend(response.toString());
 			return ;
 		}
 
