@@ -5,7 +5,7 @@
   - [basic branch workflow](https://br.eheidi.dev/git-github/04-branch-e-pull-request/)
 
 - nginx
-  - [docs](https://nginx.org/en/docs/) 
+  - [docs](https://nginx.org/en/docs/)
   - [nginx config syntax](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/)
   - [http core module reference](https://nginx.org/en/docs/http/ngx_http_core_module.html)
   - [core module reference](https://nginx.org/en/docs/ngx_core_module.html)
@@ -59,7 +59,7 @@
                     }
                 }
       ```
-    - create a public interface for reading parsed configuration 
+    - create a public interface for reading parsed configuration
 
 - Http
   - create folder for http module
@@ -81,7 +81,7 @@
         - Headers
         - Body
         - create a method to create a response
-          - maybe constructor is fine or maybe builder pattern 
+          - maybe constructor is fine or maybe builder pattern
         - create a method that return a response as a string
   - [X] create a class for Body to be able to use on both Request and Response
   - [X] create a class for Headers to be able to use on both Request and Response
@@ -153,7 +153,7 @@
         - use hardcoded folder on project for now
         - eventually each server has its own docroot defined on configuration file
     - make a blocking implementation, we will solve the problem of integrating with epool later
- - respond a POST request by writting the body into a file
+ - [X] respond a POST request by writting the body into a file
     - if success respond 201 Created
     - use path as filepath
       - create file if not exists
@@ -162,7 +162,7 @@
       - lets deal with relative paths later
     - assume only one server for now
     - make a blocking implementation, we will solve the problem of integrating with EventLoop later
- - respond a DELETE request by deleting a file resource
+ - [X] respond a DELETE request by deleting a file resource
     - if success respond 204 No Content
     - use path as filepath
     - assume only one server for now
