@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:12 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/10 13:17:46 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/15 11:31:44 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ namespace http
 		void handleTrace(http::Client &client, Response &response);
 		void handleGetFile(
 			http::Client &client, Response &response, conn::Monitor &monitor);
+		void handlePost(http::Client &client, Response &response);
+		void handleDelete(http::Client &client, Response &response);
 
 	public:
 
