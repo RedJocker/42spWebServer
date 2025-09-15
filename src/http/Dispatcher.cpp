@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/15 11:30:17 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/15 11:52:21 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <iostream>
+#include <dirent.h>
+#include <vector>
 
 namespace http {
 
@@ -47,7 +49,22 @@ namespace http {
 		}
 
 		if (method == "GET") {
-			handleGetFile(client, response, monitor);
+			const std::string &path = client.getRequest().getPath();
+			std::string docroot = "./www";
+			std::string filePath = docroot + path;
+
+			struct stat pathStat;
+			if (stat(filePath.c_str(), &pathStat) != 0) {
+				response.setNotFound();
+				client.setMessageToSend(response.toString());
+				return ;
+			}
+
+			if (S_ISDIR(pathStat.st_mode))
+				handleGetDirectory(client, response);
+			else
+				handleGetFile(client, response, monitor);
+
 			return ;
 		}
 
@@ -92,6 +109,39 @@ namespace http {
 		std::cout << "clientFd = " << client.getFd() << std::endl;
 		// TODO: subscribe fd on EventLoop, maybe reuse reader from client
 		monitor.subscribeFileRead(fd, client.getFd());
+	}
+
+	void Dispatcher::handleGetDirectory(http::Client &client, Response &response) {
+		const std::string &path = client.getRequest().getPath();
+		std::string docroot = "./www";
+		std::string dirPath = docroot + path;
+
+		DIR *dir = opendir(dirPath.c_str());
+		if (!dir) {
+			response.setBadRequest();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
+
+		struct dirent *entry;
+		std::vector<std::string> entries;
+		while ((entry = readdir(dir)) != NULL) {
+			std::string name(entry->d_name);
+			if (name != "." && name != "..") {
+				entries.push_back(name);
+			}
+		}
+		closedir(dir);
+
+		std::string html = "<html><body><ul>";
+		for (std::vector<std::string>::const_iterator it = entries.begin(); it != entries.end(); ++it) {
+			html += "<li><a href=\"" + *it + "\">" + *it + "</a></li>";
+		}
+		html += "</ul></body></html>";
+
+		response.setOk()
+			.setBody(html);
+		client.setMessageToSend(response.toString());
 	}
 
 	void Dispatcher::handlePost(http::Client &client, Response &response) {
