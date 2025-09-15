@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/15 11:52:21 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/15 12:34:39 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ namespace http {
 
 		DIR *dir = opendir(dirPath.c_str());
 		if (!dir) {
-			response.setBadRequest();
+			response.setNotFound();
 			client.setMessageToSend(response.toString());
 			return ;
 		}
