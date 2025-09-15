@@ -6,7 +6,7 @@
 #    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/09/06 09:05:20 by maurodri         ###   ########.fr        #
+#    Updated: 2025/09/11 17:56:05 by maurodri         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -86,15 +86,16 @@ fclean: clean
 
 re: fclean all
 
-nginx:
+nginx: build-nginx
 	docker run \
-		--name some-nginx\
-		-v ./www:/usr/share/nginx/html:ro \
-		-v ./nginx.conf:/etc/nginx/nginx.conf:ro \
+		--name some-nginx \
 		--rm \
 		-p 8080:8080 \
-	nginx
+		nginx-custom
 
-.PHONY: all clean fclean re bonus test_tcp
+build-nginx: ./Dockerfile
+	docker build -t nginx-custom .
+
+.PHONY: all clean fclean re bonus test_tcp nginx build-nginx
 
 -include $(DEP_FILES)
