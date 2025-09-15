@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/10 08:46:40 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 04:06:07 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,28 +19,34 @@
 #include "Dispatcher.hpp"
 #include "Client.hpp"
 #include <poll.h>
+#include "Monitor.hpp"
+#include <iostream>
 
 # define MAX_EVENTS 6
 
+
+
 namespace conn
 {
-	typedef std::map<int, TcpServer*>::iterator MapServerIterator;
-	typedef std::map<int, http::Client*>::iterator MapClientIterator;
-	typedef std::vector<struct pollfd> EventList;
-
-	class EventLoop
+	class EventLoop : public Monitor
 	{
-		std::map<int, TcpServer*> servers;
-		std::map<int, http::Client*> clients;
-		EventList events;
+		MapServer servers;
+		MapClient clients;
+		MapFileReads fileReads;
+		MapFileWrites fileWrites;
+		ListEvents events;
+		SetRemoveFd removeFds;
 		http::Dispatcher dispatcher;
 
 		void connectServerToClient(TcpServer *server);
 		void handleClientRequest(
-			http::Client *client, EventList::iterator &eventIt);
+			http::Client *client, ListEvents::iterator &eventIt);
 		void handleClientWriteResponse(
-			http::Client *client, EventList::iterator &eventIt);
-	    void unsubscribeFd(EventList::iterator &eventIt);
+			http::Client *client, ListEvents::iterator &eventIt);
+		void handleFileReads(
+			http::Client *client,  ListEvents::iterator &eventIt);
+
+	    void unsubscribeFd(int fd);
 	public:
 
 		EventLoop();
@@ -48,12 +54,13 @@ namespace conn
 		EventLoop &operator=(const EventLoop &other);
 		virtual ~EventLoop();
 
-		bool subscribeTcpServer(TcpServer *tcpServer);
-		bool subscribeHttpClient(int fd);
 		bool loop(void);
 
-		void unsubscribeHttpClient(EventList::iterator &eventIt);
-
+		bool subscribeTcpServer(TcpServer *tcpServer);
+		bool subscribeHttpClient(int fd);
+		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
+		void subscribeFileRead(int fileFd, int clientFd);
+		void subscribeFileWrite(int fileFd, int clientFd, std::string content);
 	};
 
 }

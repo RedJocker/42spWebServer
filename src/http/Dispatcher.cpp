@@ -6,15 +6,16 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/04 17:53:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/11 05:37:43 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Dispatcher.hpp"
+#include "Monitor.hpp"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sstream>
+#include <iostream>
 
 namespace http {
 
@@ -35,54 +36,54 @@ namespace http {
 
 	Dispatcher::~Dispatcher() {}
 
-	Response &Dispatcher::dispatch(http::Client &client,  http::MapServer &servers)
+	void Dispatcher::dispatch(http::Client &client, conn::Monitor &monitor)
 	{
-		(void) servers;
 		const std::string &method = client.getRequest().getMethod();
 		Response &response = client.getResponse();
 
-		if (method == "TRACE")
-			return handleTrace(client, response);
+		if (method == "TRACE") {
+			handleTrace(client, response);
+			return ;
+		}
 
-		if (method == "GET")
-			return handleGetFile(client, response);
-		return response.setNotFound();
+		if (method == "GET") {
+			handleGetFile(client, response, monitor);
+			return ;
+		}
+
+		if (method == "POST") {
+			// call this to subscribe writing to file
+			//monitor.subscribeFileWrite(int fileFd, int clientFd, std::string content)
+			return ;
+		}
+
+		response.setNotFound();
+		client.setMessageToSend(response.toString());
 	}
 
-	Response &Dispatcher::handleTrace(http::Client &client, Response &response) {
-		return response
+	void Dispatcher::handleTrace(http::Client &client, Response &response) {
+		response
 			.setOk()
 			.setBody(client.getRequest().toString());
+		client.setMessageToSend(response.toString());
 	}
 
-	Response &Dispatcher::handleGetFile(http::Client &client, Response &response) {
+	void Dispatcher::handleGetFile(
+		http::Client &client, Response &response, conn::Monitor &monitor) {
+
+		std::cout << "Disp::handleGetFile " << std::endl;
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
 		std::string filePath = docroot + path;
 
 		int fd = open(filePath.c_str(), O_RDONLY);
-		if (fd < 0)
-			return response.setNotFound();
-
+		if (fd < 0) {
+			response.setNotFound();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
+		std::cout << "clientFd = " << client.getFd() << std::endl;
 		// TODO: subscribe fd on EventLoop, maybe reuse reader from client
-		BufferedReader reader(fd);
-		std::pair<BufferedReader::ReadState, char*> readResult;
-		readResult.first = BufferedReader::READING;
-		while(readResult.first == BufferedReader::READING)
-		{
-			readResult = reader.readAll();
-		}
-
-		std::string body = "";
-		if (readResult.first == BufferedReader::NO_CONTENT)
-		{
-			body = std::string(readResult.second);
-			delete[] readResult.second;
-		}
-
-		return response
-			.setOk()
-			.addHeader("Content-Type", "text/html")
-			.setBody(body);
+		monitor.subscribeFileRead(fd, client.getFd());
 	}
 }
