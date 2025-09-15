@@ -154,27 +154,27 @@
         - eventually each server has its own docroot defined on configuration file
     - make a blocking implementation, we will solve the problem of integrating with epool later
  - [X] respond a POST request by writting the body into a file
-    - if success respond 201 Created
-    - use path as filepath
-      - create file if not exists
-      - for now assume folder exists
-      - take docroot as base folder
+    - [X] if success respond 201 Created
+    - [X] use path as filepath
+      - [X] create file if not exists
+      - [X] for now assume folder exists
+      - [X] take docroot as base folder
       - lets deal with relative paths later
-    - assume only one server for now
-    - make a blocking implementation, we will solve the problem of integrating with EventLoop later
+    - [X] assume only one server for now
+    - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop later
  - [X] respond a DELETE request by deleting a file resource
-    - if success respond 204 No Content
-    - use path as filepath
-    - assume only one server for now
-    - make a blocking implementation, we will solve the problem of integrating with EventLoop
- - respond a GET to directory listing contents
-    - if success respond 200 Ok
-    - on body send a generated html all files listed as links
+    - [X] if success respond 204 No Content
+    - [X] use path as filepath
+    - [X] assume only one server for now
+    - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop
+ - [X] respond a GET to directory listing contents
+    - [X] if success respond 200 Ok
+    - [X] on body send a generated html all files listed as links
       - check nginx response for that case
-    - assume our config enable directory listing
-    - use path as filepath
-    - assume only one server for now
-    - make a blocking implementation, we will solve the problem of integrating with EventLoop later
+    - [X] assume our config enable directory listing
+    - [X] use path as filepath
+    - [X] assume only one server for now
+    - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop later
   - include a route for cgi that will integrate with cgi code
     - we can start by
       - checking if is exactly index.php before other static files
