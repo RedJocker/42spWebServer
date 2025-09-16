@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/16 17:01:11 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 19:13:25 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,11 @@ namespace http {
 	Response::~Response(void)
 	{
 
+	}
+
+	Headers &Response::headers(void)
+	{
+		return this->_headers;
 	}
 
 	std::string Response::getHeader(const std::string &key) const {

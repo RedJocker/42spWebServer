@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/16 00:42:05 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 19:11:59 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,11 +21,13 @@ namespace conn {
 	{
 		int clientFd;
 		int operationFd;
-		BufferedReader reader;
-		BufferedWriter writer;
+
 		TcpClient();
 
 	protected:
+		BufferedReader reader;
+		BufferedWriter writer;
+
 		TcpClient(int clientFd);
 		TcpClient(const TcpClient &other);
 		TcpClient &operator=(const TcpClient &other);

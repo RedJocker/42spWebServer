@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/16 17:30:48 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 19:12:56 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 #include <dirent.h>
 #include <vector>
 #include "devUtil.hpp"
+#include <sstream>
+#include <string>
 
 namespace http {
 
@@ -44,11 +46,10 @@ namespace http {
 	{
 		// TODO delegate/move_code to http::Server
 		(void) monitor;
-		std::cout << "isCgiRequest" << std::endl;
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
 		std::string filePath = docroot + path;
-		std::cout << filePath << std::endl;
+
 		// TODO implement logic to check if it is cgi request based on server route config
 		return filePath == "./www/todo.cgi";
 	}
@@ -58,15 +59,67 @@ namespace http {
 		(void) client;
 		(void) monitor;
 
+		std::cout << "handleCgiRequest: " <<  client.getFd() << std::endl;
 		// TODO create cgi process
 		// TODO clean eventLoop (fds, memory, etc..)
 		// TODO handle ipc with cgi on child process (socket_pair, redirect child in out)
 		// TODO subscribe ipc fd to eventLoop through monitor
 		// TODO write body to cgi stdin
 		// TODO send env to cgi with Request Meta-Variables (REQUEST_METHOD, CONTENT_LENGTH, ...)
-		// TODO read cgi response
+		// TODO read cgi response from ipc
 		// TODO write final response
-		client.getResponse().setImTeapot();
+
+		const std::string &path = client.getRequest().getPath();
+		std::string docroot = "./www";
+		std::string filePath = docroot + path;
+
+		int fd = open(filePath.c_str(), O_RDONLY);
+		if (fd < 0) {
+			client.getResponse().setNotFound();
+			client.setMessageToSend(client.getResponse().toString());
+			return ;
+		}
+
+		BufferedReader reader(fd);
+
+		std::pair<ReadState, char *> readResult;
+		while(readResult.first == BufferedReader::READING)
+		{
+			readResult = reader.readAll();
+		}
+
+		if (readResult.first != BufferedReader::NO_CONTENT)
+		{
+			// TODO error on cgi reading
+			client.getResponse().setInternalServerError();
+			client.setMessageToSend(client.getResponse().toString());
+			return  ;
+		}
+		std::string cgiResponseString = std::string(readResult.second);
+		delete[] readResult.second;
+		size_t separatorIndex = cgiResponseString.find("\r\n\r\n");
+		if (separatorIndex == std::string::npos)
+		{
+			TODO("cgi response had no header body separation");
+			// either respond 500 or consider all cgi content as response body
+		}
+
+		std::string cgiHeadersStr =  cgiResponseString.substr(0, separatorIndex); 
+
+		Headers &cgiHeaders = client.getResponse().headers();
+
+		size_t index = 0;
+		while(index != std::string::npos)
+		{
+			size_t index_next = cgiHeadersStr.find("\r\n", index);
+			if (!cgiHeaders.parseLine(cgiHeadersStr.substr(index, index_next)))
+			{
+				client.getResponse().setInternalServerError();
+				client.setMessageToSend(client.getResponse().toString());
+			}
+			index = index_next;
+		}
+		client.getResponse().setOk().setBody(cgiResponseString.substr(separatorIndex + 4));
 		client.setMessageToSend(client.getResponse().toString());
 	}
 

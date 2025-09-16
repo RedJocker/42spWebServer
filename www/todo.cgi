@@ -1,3 +1,3 @@
 Content-type: text/html; charset=UTF-8
 
-hello cgi
+doing some cgi
