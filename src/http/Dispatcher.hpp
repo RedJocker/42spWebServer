@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:12 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/15 22:46:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 17:17:28 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,9 @@ namespace http
 			http::Client &client, Response &response);
 		void handlePost(http::Client &client, Response &response, conn::Monitor &monitor);
 		void handleDelete(http::Client &client, Response &response);
+
+		bool isCgiRequest(http::Client &client, conn::Monitor &monitor);
+		void handleCgiRequest(http::Client &client, conn::Monitor &monitor);
 
 	public:
 

@@ -175,7 +175,7 @@
     - [X] use path as filepath
     - [X] assume only one server for now
     - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop later
-  - [ ] include a route for cgi that will integrate with cgi code
+  - [X] include a route for cgi that will integrate with cgi code
     - we can start by
       - checking if is exactly index.php before other static files
       - responding something
@@ -237,4 +237,7 @@
         - subscribe read/write to cgi on EventLoop
         - write body
         - read cgi-response
+	  - read a file as if it was a cgi-response with cgi-response content
+	  - send response based on file read
+	  - read a cgi-response from ipc to a process without processing any request input
         - write full response

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/15 22:57:31 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 17:30:48 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <iostream>
 #include <dirent.h>
 #include <vector>
+#include "devUtil.hpp"
 
 namespace http {
 
@@ -38,6 +39,37 @@ namespace http {
 
 	Dispatcher::~Dispatcher() {}
 
+
+	bool Dispatcher::isCgiRequest(http::Client &client, conn::Monitor &monitor)
+	{
+		// TODO delegate/move_code to http::Server
+		(void) monitor;
+		std::cout << "isCgiRequest" << std::endl;
+		const std::string &path = client.getRequest().getPath();
+		std::string docroot = "./www";
+		std::string filePath = docroot + path;
+		std::cout << filePath << std::endl;
+		// TODO implement logic to check if it is cgi request based on server route config
+		return filePath == "./www/todo.cgi";
+	}
+
+	void Dispatcher::handleCgiRequest(http::Client &client, conn::Monitor &monitor)
+	{
+		(void) client;
+		(void) monitor;
+
+		// TODO create cgi process
+		// TODO clean eventLoop (fds, memory, etc..)
+		// TODO handle ipc with cgi on child process (socket_pair, redirect child in out)
+		// TODO subscribe ipc fd to eventLoop through monitor
+		// TODO write body to cgi stdin
+		// TODO send env to cgi with Request Meta-Variables (REQUEST_METHOD, CONTENT_LENGTH, ...)
+		// TODO read cgi response
+		// TODO write final response
+		client.getResponse().setImTeapot();
+		client.setMessageToSend(client.getResponse().toString());
+	}
+
 	void Dispatcher::dispatch(http::Client &client, conn::Monitor &monitor)
 	{
 		const std::string &method = client.getRequest().getMethod();
@@ -45,6 +77,12 @@ namespace http {
 
 		if (method == "TRACE") {
 			handleTrace(client, response);
+			return ;
+		}
+
+		if (isCgiRequest(client, monitor))
+		{
+			handleCgiRequest(client, monitor);
 			return ;
 		}
 
