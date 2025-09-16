@@ -237,7 +237,7 @@
         - subscribe read/write to cgi on EventLoop
         - write body
         - read cgi-response
-	  - read a file as if it was a cgi-response with cgi-response content
+	  - [ ] read a file as if it was a cgi-response with cgi-response content
 	  - send response based on file read
 	  - read a cgi-response from ipc to a process without processing any request input
         - write full response
