@@ -175,7 +175,7 @@
     - [X] use path as filepath
     - [X] assume only one server for now
     - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop later
-  - include a route for cgi that will integrate with cgi code
+  - [ ] include a route for cgi that will integrate with cgi code
     - we can start by
       - checking if is exactly index.php before other static files
       - responding something
