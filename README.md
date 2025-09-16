@@ -217,7 +217,7 @@
           - but it is still possible to monitor regular files with poll
          - epoll does not allow monitoring regular files
     - [X] handle file reading on EventLoop
-    - [  ] handle file writing on EventLoop
+    - [X] handle file writing on EventLoop
     - handle cgi ipc on EventLoop
 
 - CGI

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 22:58:25 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 21:31:07 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 00:43:17 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -43,6 +43,14 @@ BufferedWriter::~BufferedWriter()
 {
 
 }
+
+
+void BufferedWriter::setMessage(int fd, std::string message)
+{
+	this->setFd(fd);
+	this->setMessage(message);
+}
+
 
 void BufferedWriter::setMessage(std::string message)
 {
@@ -87,4 +95,9 @@ std::pair<WriteState, char *>  BufferedWriter::flushMessage()
 		this->state = BufferedWriter::DONE;
 		return std::make_pair(this->state, reinterpret_cast<char *>(0));
 	}
+}
+
+void BufferedWriter::setFd(int fd)
+{
+	this->fd = fd;
 }

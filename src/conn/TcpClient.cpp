@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/11 01:56:46 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 01:06:04 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -71,7 +71,7 @@ namespace conn
 	void TcpClient::setMessageToSend(std::string message)
 	{
 		std::cout << "setMessage: " << message <<std::endl;
-		this->writer.setMessage(message);
+		this->writer.setMessage(this->clientFd, message);
 	}
 
 	WriteState TcpClient::getWriterState() const
@@ -89,6 +89,16 @@ namespace conn
 		return this->writer.flushMessage();
 	}
 
+	std::pair<WriteState, char*> TcpClient::flushOperation()
+	{
+		std::pair<WriteState, char*> result = this->writer.flushMessage();
+		if (result.first != BufferedWriter::WRITING)
+		{
+			this->clearWriteOperation();
+		}
+		return result;
+	}
+
 	bool TcpClient::hasBufferedContent() const
 	{
 		return this->reader.hasBufferedContent();
@@ -103,13 +113,29 @@ namespace conn
 	{
 		return this->operationFd;
 	}
+
 	void TcpClient::setOperationFd(int operationFd)
 	{
 		this->operationFd = operationFd;
 	}
 
+	void TcpClient::setOperationFd(int operationFd, std::string writeContent)
+	{
+		if (this->operationFd != operationFd) {
+			this->operationFd = operationFd;
+			this->writer.setMessage(operationFd, writeContent);
+		}
+	}
+
 	void TcpClient::clearReadOperation()
 	{
 		this->reader.setFd(clientFd);
+		this->operationFd = -1;
+	}
+
+	void TcpClient::clearWriteOperation()
+	{
+		this->writer.setFd(clientFd);
+		this->operationFd = -1;
 	}
 }
