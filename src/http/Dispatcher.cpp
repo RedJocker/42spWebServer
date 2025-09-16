@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/15 12:34:39 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/15 22:57:31 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,10 +69,7 @@ namespace http {
 		}
 
 		if (method == "POST") {
-			// call this to subscribe writing to file
-			//monitor.subscribeFileWrite(int fileFd, int clientFd, std::string content)
-
-			handlePost(client, response);
+			handlePost(client, response, monitor);
 			return ;
 		}
 
@@ -144,7 +141,7 @@ namespace http {
 		client.setMessageToSend(response.toString());
 	}
 
-	void Dispatcher::handlePost(http::Client &client, Response &response) {
+	void Dispatcher::handlePost(http::Client &client, Response &response, conn::Monitor &monitor) {
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
 		std::string filePath = docroot + path;
@@ -152,24 +149,12 @@ namespace http {
 		int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd < 0) {
 			std::cerr << "Failed to open file: " << filePath << std::endl;
-			response.setBadRequest();
+			response.setInternalServerError();
 			client.setMessageToSend(response.toString());
 			return;
 		}
 
-		const std::string &body = client.getRequest().getBody();
-		ssize_t bytesWritten = write(fd, body.c_str(), body.size());
-		if (bytesWritten < 0 || static_cast<size_t>(bytesWritten) != body.size()) {
-			std::cerr << "Failed to write entire body to file: " << filePath << std::endl;
-			response.setBadRequest();
-			client.setMessageToSend(response.toString());
-			close(fd);
-			return;
-		}
-
-		close(fd);
-		response.setCreated();
-		client.setMessageToSend(response.toString());
+		monitor.subscribeFileWrite(fd, client.getFd(), client.getRequest().getBody());
 	}
 
 	void Dispatcher::handleDelete(http::Client &client, Response &response) {

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/15 22:17:55 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/15 22:45:00 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -151,6 +151,7 @@ namespace conn
 		if (client)
 		{
 			std::cout << "subscribeFileWrite " << fileFd << std::endl;
+			client->setOperationFd(fileFd);
 			BufferedWriter writer(fileFd);
 			writer.setMessage(content);
 			std::pair<WriteState, char*> writeResult;
@@ -172,6 +173,7 @@ namespace conn
 						  << " "
 						  << fileFd << std::endl;
 			}
+			close(client->getOperationFd());
 		}
 	}
 
@@ -255,7 +257,6 @@ namespace conn
 	void EventLoop::handleClientWriteResponse(
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
-
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			throw std::domain_error("called handleClientWriteResponse without content to write");
 		std::pair<WriteState, char*> flushResult = client->flushMessage();

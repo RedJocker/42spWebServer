@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/11 04:23:06 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/15 22:57:15 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ namespace http {
 			Response &setBody(const std::string &body);
 			Response &setHeaderContentLength();
 			Response &setNotFound();
+			Response &setInternalServerError();
 			Response &setBadRequest();
 			Response &setCreated();
 			Response &setOk();
