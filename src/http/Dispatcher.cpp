@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/16 19:12:56 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/17 00:07:10 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,16 @@
 #include "Monitor.hpp"
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
 #include <dirent.h>
 #include <vector>
+#include <cerrno>
 #include "devUtil.hpp"
 #include <sstream>
 #include <string>
+#include <cstdio>
 
 namespace http {
 
@@ -60,14 +63,59 @@ namespace http {
 		(void) monitor;
 
 		std::cout << "handleCgiRequest: " <<  client.getFd() << std::endl;
-		// TODO create cgi process
-		// TODO clean eventLoop (fds, memory, etc..)
-		// TODO handle ipc with cgi on child process (socket_pair, redirect child in out)
+		// TODO child read stdin body of client request
+		// TODO execve
+
 		// TODO subscribe ipc fd to eventLoop through monitor
 		// TODO write body to cgi stdin
 		// TODO send env to cgi with Request Meta-Variables (REQUEST_METHOD, CONTENT_LENGTH, ...)
 		// TODO read cgi response from ipc
 		// TODO write final response
+		int sockets[2];
+
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0)
+		{
+			std::cerr << "errno " << errno << ": "
+					  << strerror(errno) << std::endl;
+			TODO("socketpair error");
+		}
+		switch(fork())
+		{
+		case 0:
+		{//child;
+			std::cout << "child" << std::endl;
+			monitor.shutdown();
+			close(sockets[1]);
+			dup2(sockets[0], 0);
+			dup2(sockets[0], 1);
+			std::cout << "child says hello from socket as stdout" << std::endl;
+			// execve
+			//error exit
+			close(sockets[0]);
+			::exit(0);
+		}
+		default:
+		{//parent
+			std::cout << "parent" << std::endl;
+			close(sockets[0]);
+			BufferedReader socketReader(sockets[1]);
+			std::pair<ReadState, char *> readResult;
+			while(readResult.first == BufferedReader::READING)
+			{
+				readResult = socketReader.readAll();
+			}
+
+			if (readResult.first != BufferedReader::NO_CONTENT)
+			{
+				TODO("error socket read");
+				return  ;
+			}
+			std::string childMessage = std::string(readResult.second);
+			delete[] readResult.second;
+			std::cout << "childMessage: " << childMessage;
+			close(sockets[1]);
+		}
+		}
 
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
