@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/17 00:07:10 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/17 02:01:47 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,7 @@ namespace http {
 		// TODO subscribe ipc fd to eventLoop through monitor
 		// TODO write body to cgi stdin
 		// TODO send env to cgi with Request Meta-Variables (REQUEST_METHOD, CONTENT_LENGTH, ...)
-		// TODO read cgi response from ipc
-		// TODO write final response
+
 		int sockets[2];
 
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0)
@@ -84,11 +83,37 @@ namespace http {
 		case 0:
 		{//child;
 			std::cout << "child" << std::endl;
+			const std::string &path = client.getRequest().getPath();
 			monitor.shutdown();
 			close(sockets[1]);
 			dup2(sockets[0], 0);
 			dup2(sockets[0], 1);
-			std::cout << "child says hello from socket as stdout" << std::endl;
+
+			std::string docroot = "./www";
+			std::string filePath = docroot + path;
+			int fd = open(filePath.c_str(), O_RDONLY);
+			if (fd < 0) {
+				std::cout << "error!!!" << std::endl;
+				::exit(96);
+			}
+
+			BufferedReader reader(fd);
+
+			std::pair<ReadState, char *> readResult;
+			while(readResult.first == BufferedReader::READING)
+			{
+				readResult = reader.readAll();
+			}
+
+			if (readResult.first != BufferedReader::NO_CONTENT)
+			{
+				std::cout << "error!!!" << std::endl;
+				::exit(99);
+			}
+
+			std::string toParentMessage = std::string(readResult.second);
+			std::cout << toParentMessage;
+			delete[] readResult.second;
 			// execve
 			//error exit
 			close(sockets[0]);
@@ -96,39 +121,12 @@ namespace http {
 		}
 		default:
 		{//parent
-			std::cout << "parent" << std::endl;
-			close(sockets[0]);
-			BufferedReader socketReader(sockets[1]);
-			std::pair<ReadState, char *> readResult;
-			while(readResult.first == BufferedReader::READING)
-			{
-				readResult = socketReader.readAll();
-			}
+			break;
+		}}
 
-			if (readResult.first != BufferedReader::NO_CONTENT)
-			{
-				TODO("error socket read");
-				return  ;
-			}
-			std::string childMessage = std::string(readResult.second);
-			delete[] readResult.second;
-			std::cout << "childMessage: " << childMessage;
-			close(sockets[1]);
-		}
-		}
-
-		const std::string &path = client.getRequest().getPath();
-		std::string docroot = "./www";
-		std::string filePath = docroot + path;
-
-		int fd = open(filePath.c_str(), O_RDONLY);
-		if (fd < 0) {
-			client.getResponse().setNotFound();
-			client.setMessageToSend(client.getResponse().toString());
-			return ;
-		}
-
-		BufferedReader reader(fd);
+		std::cout << "parent" << std::endl;
+		close(sockets[0]);
+		BufferedReader reader(sockets[1]);
 
 		std::pair<ReadState, char *> readResult;
 		while(readResult.first == BufferedReader::READING)
@@ -144,7 +142,7 @@ namespace http {
 			return  ;
 		}
 		std::string cgiResponseString = std::string(readResult.second);
-		delete[] readResult.second;
+		//delete[] readResult.second;
 		size_t separatorIndex = cgiResponseString.find("\r\n\r\n");
 		if (separatorIndex == std::string::npos)
 		{
@@ -169,6 +167,11 @@ namespace http {
 		}
 		client.getResponse().setOk().setBody(cgiResponseString.substr(separatorIndex + 4));
 		client.setMessageToSend(client.getResponse().toString());
+		std::string childMessage = std::string(readResult.second);
+		std::cout << "childMessage: " << childMessage;
+		delete[] readResult.second;
+		close(sockets[1]);
+
 	}
 
 	void Dispatcher::dispatch(http::Client &client, conn::Monitor &monitor)
