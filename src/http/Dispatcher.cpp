@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/17 02:01:47 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/17 03:28:08 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,15 +59,10 @@ namespace http {
 
 	void Dispatcher::handleCgiRequest(http::Client &client, conn::Monitor &monitor)
 	{
-		(void) client;
-		(void) monitor;
-
 		std::cout << "handleCgiRequest: " <<  client.getFd() << std::endl;
 		// TODO child read stdin body of client request
-		// TODO execve
-
 		// TODO subscribe ipc fd to eventLoop through monitor
-		// TODO write body to cgi stdin
+		// TODO write request body to cgi stdin
 		// TODO send env to cgi with Request Meta-Variables (REQUEST_METHOD, CONTENT_LENGTH, ...)
 
 		int sockets[2];
@@ -91,33 +86,20 @@ namespace http {
 
 			std::string docroot = "./www";
 			std::string filePath = docroot + path;
-			int fd = open(filePath.c_str(), O_RDONLY);
-			if (fd < 0) {
-				std::cout << "error!!!" << std::endl;
-				::exit(96);
-			}
 
-			BufferedReader reader(fd);
+			const char *args[3];
+			args[0] = "/usr/bin/php-cgi";
+			args[1] = filePath.c_str();
+			args[2] = 0;
 
-			std::pair<ReadState, char *> readResult;
-			while(readResult.first == BufferedReader::READING)
-			{
-				readResult = reader.readAll();
-			}
-
-			if (readResult.first != BufferedReader::NO_CONTENT)
-			{
-				std::cout << "error!!!" << std::endl;
-				::exit(99);
-			}
-
-			std::string toParentMessage = std::string(readResult.second);
-			std::cout << toParentMessage;
-			delete[] readResult.second;
+			const char *envp[1];
+			envp[0] = 0;
+			execve(args[0], const_cast<char **>(args), const_cast<char**>(envp));
 			// execve
 			//error exit
+			std::cout << "error child" << strerror(errno) << std::endl;
 			close(sockets[0]);
-			::exit(0);
+			::exit(11);
 		}
 		default:
 		{//parent
@@ -127,43 +109,62 @@ namespace http {
 		std::cout << "parent" << std::endl;
 		close(sockets[0]);
 		BufferedReader reader(sockets[1]);
-
+		shutdown(sockets[1], SHUT_WR);
 		std::pair<ReadState, char *> readResult;
 		while(readResult.first == BufferedReader::READING)
 		{
+			std::cout << "parent reading" << std::endl;
 			readResult = reader.readAll();
 		}
-
+		std::cout << "parent done reading" << std::endl;
 		if (readResult.first != BufferedReader::NO_CONTENT)
 		{
+			std::cout << "error exit" << std::endl;
 			// TODO error on cgi reading
 			client.getResponse().setInternalServerError();
 			client.setMessageToSend(client.getResponse().toString());
 			return  ;
 		}
+
 		std::string cgiResponseString = std::string(readResult.second);
-		//delete[] readResult.second;
+		std::cout << cgiResponseString << std::endl;
+
 		size_t separatorIndex = cgiResponseString.find("\r\n\r\n");
 		if (separatorIndex == std::string::npos)
 		{
+			std::cout << cgiResponseString << std::endl;
 			TODO("cgi response had no header body separation");
 			// either respond 500 or consider all cgi content as response body
 		}
 
-		std::string cgiHeadersStr =  cgiResponseString.substr(0, separatorIndex); 
+		std::string cgiHeadersStr =  cgiResponseString.substr(0, separatorIndex);
 
 		Headers &cgiHeaders = client.getResponse().headers();
 
 		size_t index = 0;
-		while(index != std::string::npos)
+		while(1)
 		{
 			size_t index_next = cgiHeadersStr.find("\r\n", index);
-			if (!cgiHeaders.parseLine(cgiHeadersStr.substr(index, index_next)))
+			std::string headerLine;
+			if (index_next == std::string::npos)
 			{
-				client.getResponse().setInternalServerError();
-				client.setMessageToSend(client.getResponse().toString());
+				 headerLine = cgiHeadersStr.substr(index);
+			} else
+			{
+				headerLine = cgiHeadersStr
+					.substr(index, index_next - index);
 			}
-			index = index_next;
+			std::cout << index_next << std::endl;
+			std::cout << headerLine <<std::endl;
+		    if (!cgiHeaders.parseLine(headerLine))
+		    {
+				client.getResponse().setInternalServerError();
+				client.setMessageToSend(client.getResponse()
+										.toString());
+			}
+			if (index_next == std::string::npos)
+				break;
+			index = index_next + 2;
 		}
 		client.getResponse().setOk().setBody(cgiResponseString.substr(separatorIndex + 4));
 		client.setMessageToSend(client.getResponse().toString());
@@ -171,7 +172,6 @@ namespace http {
 		std::cout << "childMessage: " << childMessage;
 		delete[] readResult.second;
 		close(sockets[1]);
-
 	}
 
 	void Dispatcher::dispatch(http::Client &client, conn::Monitor &monitor)
