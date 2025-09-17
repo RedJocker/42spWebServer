@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/16 19:13:25 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 23:05:01 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,6 @@ namespace http {
 
 	Response &Response::setOk()
 	{
-		this->clear();
 		return (*this)
 			.setStatusCode(200)
 			.setStatusInfo("Ok");
@@ -102,7 +101,6 @@ namespace http {
 
 	Response &Response::setNotFound()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(404)
 			.setStatusInfo("Not Found")
@@ -112,7 +110,6 @@ namespace http {
 
 	Response &Response::setImTeapot()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(418)
 			.setStatusInfo("I'm a teapot")
@@ -122,7 +119,6 @@ namespace http {
 
 	Response &Response::setInternalServerError()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(500)
 			.setStatusInfo("Internal Server Error")
@@ -132,7 +128,6 @@ namespace http {
 
 	Response &Response::setBadRequest()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(400)
 			.setStatusInfo("Bad Request")
@@ -142,7 +137,6 @@ namespace http {
 
 	Response &Response::setCreated()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(201)
 			.setStatusInfo("Created")
