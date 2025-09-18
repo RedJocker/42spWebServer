@@ -180,6 +180,12 @@
       - checking if is exactly index.php before other static files
       - responding something
         - maybe 418 I'm a teapot just to know it is our response
+  - Handle relative url path
+    - it should be possible to use relative path on url
+	  - - create subdirectories on www to test relative path works
+	- it should not be possible to go outside docroot
+	  - `GET /../Makefile HTTP/1.1` should return 404 not found
+		  - test on terminal, browsers make some url cleaning on request
   - Handle header Connection: close
   - create a http::Server that is a conn::TcpServer
     - this class will be responsible for server specific behaviour
@@ -231,13 +237,17 @@
     - pair of connected sockets
       - each socket is bidirectional
       - child-cgi
-        - redirect child stdin and stdout to one side of socketpair
-        - close other side of socketpair
+        - [x] redirect child stdin and stdout to one side of socketpair
+        - [x]close other side of socketpair
+		- [ ] create envp with cgi variables
+		- [x] call execve
+		- handle error if failed execve and exit
       - server
         - subscribe read/write to cgi on EventLoop
-        - write body
-        - read cgi-response
+        - write request body to cgi
+        - [x] read cgi-response
 	  - [x] read a file as if it was a cgi-response with cgi-response content
 	  - [x] send response based on file read
-	  - [ ] read a cgi-response from ipc to a process without processing any request input
+	  - [x] read a cgi-response from ipc to a process without processing any request input
+	  
         - write full response
