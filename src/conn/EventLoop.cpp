@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/15 22:17:55 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 00:51:59 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -151,28 +151,54 @@ namespace conn
 		if (client)
 		{
 			std::cout << "subscribeFileWrite " << fileFd << std::endl;
-			BufferedWriter writer(fileFd);
-			writer.setMessage(content);
-			std::pair<WriteState, char*> writeResult;
-			// TODO make proper subscription on EventLoop
-			while (writeResult.first == BufferedWriter::WRITING)
-			{
-				writeResult = writer.flushMessage();
-			}
-			if (writeResult.first == BufferedWriter::DONE)
-			{
-				std::cout << "file writing done done" << fileFd << std::endl;
-				client->getResponse()
-					.setCreated();
-				client->setMessageToSend(client->getResponse().toString());
-			} else
-			{
-				std::cout << "file writing error "
-						  << writeResult.second
-						  << " "
-						  << fileFd << std::endl;
-			}
+			struct pollfd event;
+			event.events = POLLOUT; // subscribe for writes
+			event.fd = fileFd;
+			events.push_back(event);
+			client->setOperationFd(fileFd, content);
+			this->fileWrites.insert(std::make_pair(fileFd, client));
 		}
+	}
+
+	void EventLoop::handleFileWrite(
+		http::Client &client,  ListEvents::iterator &eventIt)
+	{
+		std::cout << "clientFd = " << client.getFd() << std::endl;
+		std::cout << "handleFileWrite: " << eventIt->fd << std::endl;
+
+		if (client.getWriterState() != BufferedWriter::WRITING)
+		{
+			throw std::domain_error("called handleFileWrite without"
+									"content to write");
+		}
+
+		std::pair<WriteState, char*> writeResult =
+			client.flushOperation();
+
+		if (writeResult.first == BufferedWriter::WRITING)
+		{
+			return ;
+		}
+		if (writeResult.first == BufferedWriter::DONE)
+		{
+			std::cout << "file writing done" << eventIt->fd << std::endl;
+			client.clearWriteOperation();
+			client.getResponse()
+				.setCreated();
+			client.setMessageToSend(client.getResponse().toString());
+		} else
+		{
+			std::cout << "file writing error "
+					  << writeResult.second
+					  << " "
+					  << eventIt->fd << std::endl;
+			client.getResponse()
+				.setInternalServerError();
+			client.setMessageToSend(client.getResponse().toString());
+		}
+
+		this->unsubscribeFd(eventIt->fd);
+		this->fileWrites.erase(this->fileWrites.find(eventIt->fd));
 	}
 
 	void EventLoop::handleFileReads(
@@ -204,6 +230,7 @@ namespace conn
 
 		this->unsubscribeFd(eventIt->fd);
 		this->fileReads.erase(this->fileReads.find(eventIt->fd));
+		client->clearReadOperation();
 	}
 
 	void EventLoop::handleClientRequest(
@@ -255,7 +282,6 @@ namespace conn
 	void EventLoop::handleClientWriteResponse(
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
-
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			throw std::domain_error("called handleClientWriteResponse without content to write");
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
@@ -294,11 +320,22 @@ namespace conn
 		if (monitoredIt->revents & POLLOUT)
 		{ // fd is available for write
 			//std::cout << "out "  << monitoredIt->fd << std::endl;
+			MapFileWrites::iterator fileWritesIt =
+				this->fileWrites.find(monitoredIt->fd);
+			if (fileWritesIt != this->fileWrites.end())
+			{
+				http::Client *client = fileWritesIt->second;
+				if (client) {
+					this->handleFileWrite(*client, monitoredIt);
+				}
+				return;
+			}
 			MapClient::iterator clientIt = this->clients.find(monitoredIt->fd);
 			if (clientIt != this->clients.end())
 			{
 				http::Client *client = clientIt->second;
-				if (client->getWriterState() == BufferedWriter::WRITING)
+				if (client->getOperationFd() < 0
+					&& client->getWriterState() == BufferedWriter::WRITING)
 				{
 					this->handleClientWriteResponse(client, monitoredIt);
 					return;

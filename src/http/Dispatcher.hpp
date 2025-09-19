@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:12 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/15 11:42:21 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/15 22:46:52 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ namespace http
 			http::Client &client, Response &response, conn::Monitor &monitor);
 		void handleGetDirectory(
 			http::Client &client, Response &response);
-		void handlePost(http::Client &client, Response &response);
+		void handlePost(http::Client &client, Response &response, conn::Monitor &monitor);
 		void handleDelete(http::Client &client, Response &response);
 
 	public:

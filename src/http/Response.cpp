@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/11 04:22:37 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/15 22:57:39 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,16 @@ namespace http {
 		(*this)
 			.setStatusCode(404)
 			.setStatusInfo("Not Found")
+			.addHeader("Content-length", "0");
+		return *this;
+	}
+
+	Response &Response::setInternalServerError()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(500)
+			.setStatusInfo("Internal Server Error")
 			.addHeader("Content-length", "0");
 		return *this;
 	}

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/15 22:09:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 00:46:58 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -45,6 +45,8 @@ namespace conn
 			http::Client *client, ListEvents::iterator &eventIt);
 		void handleFileReads(
 			http::Client *client,  ListEvents::iterator &eventIt);
+		void handleFileWrite(
+			http::Client &client,  ListEvents::iterator &eventIt);
 
 		void handleFdEvent(ListEvents::iterator &monitoredIt);
 	    void unsubscribeFd(int fd);
