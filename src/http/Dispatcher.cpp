@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/17 03:28:08 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/19 21:54:48 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,9 @@ namespace http {
 		{//child;
 			std::cout << "child" << std::endl;
 			const std::string &path = client.getRequest().getPath();
+			std::vector<char *> envp;
+			client.getRequest().envpInit(envp);
+
 			monitor.shutdown();
 			close(sockets[1]);
 			dup2(sockets[0], 0);
@@ -92,11 +95,12 @@ namespace http {
 			args[1] = filePath.c_str();
 			args[2] = 0;
 
-			const char *envp[1];
-			envp[0] = 0;
-			execve(args[0], const_cast<char **>(args), const_cast<char**>(envp));
+			execve(args[0],
+				   const_cast<char **>(args),
+				   reinterpret_cast<char**>(envp.data()));
 			// execve
 			//error exit
+			// TODO if envp or args contains allocated char* should free
 			std::cout << "error child" << strerror(errno) << std::endl;
 			close(sockets[0]);
 			::exit(11);
@@ -127,49 +131,48 @@ namespace http {
 		}
 
 		std::string cgiResponseString = std::string(readResult.second);
-		std::cout << cgiResponseString << std::endl;
+		std::cout << "CGI Response: "<< cgiResponseString << std::endl;
 
 		size_t separatorIndex = cgiResponseString.find("\r\n\r\n");
 		if (separatorIndex == std::string::npos)
 		{
-			std::cout << cgiResponseString << std::endl;
-			TODO("cgi response had no header body separation");
-			// either respond 500 or consider all cgi content as response body
-		}
-
-		std::string cgiHeadersStr =  cgiResponseString.substr(0, separatorIndex);
-
-		Headers &cgiHeaders = client.getResponse().headers();
-
-		size_t index = 0;
-		while(1)
+			client.getResponse().setOk().setBody(cgiResponseString);
+			client.setMessageToSend(client.getResponse().toString());
+		} else
 		{
-			size_t index_next = cgiHeadersStr.find("\r\n", index);
-			std::string headerLine;
-			if (index_next == std::string::npos)
+			std::string cgiHeadersStr =  cgiResponseString.substr(0, separatorIndex);
+
+			Headers &cgiHeaders = client.getResponse().headers();
+
+			size_t index = 0;
+
+			while(1)
 			{
-				 headerLine = cgiHeadersStr.substr(index);
-			} else
-			{
-				headerLine = cgiHeadersStr
-					.substr(index, index_next - index);
+				size_t index_next = cgiHeadersStr.find("\r\n", index);
+				std::string headerLine;
+				if (index_next == std::string::npos)
+				{
+					headerLine = cgiHeadersStr.substr(index);
+				} else
+				{
+					headerLine = cgiHeadersStr
+						.substr(index, index_next - index);
+				}
+				if (!cgiHeaders.parseLine(headerLine))
+				{
+					client.getResponse().setInternalServerError();
+					client.setMessageToSend(client.getResponse()
+											.toString());
+				}
+				if (index_next == std::string::npos)
+					break;
+				index = index_next + 2;
 			}
-			std::cout << index_next << std::endl;
-			std::cout << headerLine <<std::endl;
-		    if (!cgiHeaders.parseLine(headerLine))
-		    {
-				client.getResponse().setInternalServerError();
-				client.setMessageToSend(client.getResponse()
-										.toString());
-			}
-			if (index_next == std::string::npos)
-				break;
-			index = index_next + 2;
+			client.getResponse().setOk().setBody(cgiResponseString.substr(separatorIndex + 4));
+			client.setMessageToSend(client.getResponse().toString());
 		}
-		client.getResponse().setOk().setBody(cgiResponseString.substr(separatorIndex + 4));
-		client.setMessageToSend(client.getResponse().toString());
-		std::string childMessage = std::string(readResult.second);
-		std::cout << "childMessage: " << childMessage;
+
+
 		delete[] readResult.second;
 		close(sockets[1]);
 	}

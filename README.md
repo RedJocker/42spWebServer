@@ -240,6 +240,8 @@
         - [x] redirect child stdin and stdout to one side of socketpair
         - [x]close other side of socketpair
 		- [ ] create envp with cgi variables
+			- [x] send hardcoded values
+			- send valued based on request
 		- [x] call execve
 		- handle error if failed execve and exit
       - server
