@@ -6,7 +6,7 @@
 #    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/09/11 17:56:05 by maurodri         ###   ########.fr        #
+#    Updated: 2025/09/16 16:53:11 by maurodri         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -25,7 +25,9 @@ CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp \
 					TcpClient.cpp \
 					EventLoop.cpp)
 UTIL_FILES := $(addprefix $(UTIL_DIR)/, BufferedReader.cpp\
-					BufferedWriter.cpp)
+					BufferedWriter.cpp \
+					devUtil.cpp)
+
 HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Headers.cpp \
 					Body.cpp \

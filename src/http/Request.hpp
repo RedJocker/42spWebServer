@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/10 08:47:27 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/19 21:51:25 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ namespace http
 		Request &operator=(const Request &other);
 		virtual ~Request(void);
 
-		ReadState readHttpRequest(conn::TcpClient &client);
+		ReadState readHttpRequest(BufferedReader &reader);
 		ReadState state(void) const { return _state; }
 		void clear(void);
 
@@ -50,6 +50,7 @@ namespace http
 		std::string getBody(void) const;
 
 		std::string toString(void) const;
+		void envpInit(std::vector<char *> &envp);
 	private:
 		std::string _method;
 		std::string _path;
@@ -61,9 +62,10 @@ namespace http
 		ReadState _state;
 
 		bool parseRequestLine(const std::string &line);
-		ReadState readRequestLine(conn::TcpClient &client);
-		ReadState readHeaderLine(conn::TcpClient &client);
-		ReadState readBody(conn::TcpClient &client);
+		ReadState readRequestLine(BufferedReader &reader);
+		ReadState readHeaderLine(BufferedReader &reader);
+		ReadState readBody(BufferedReader &reader);
+
 	};
 }
 

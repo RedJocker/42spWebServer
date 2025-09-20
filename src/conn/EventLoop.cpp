@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/16 00:51:59 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/17 00:04:06 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -368,6 +368,32 @@ namespace conn
 				return;
 			}
 		}
+	}
+
+	void EventLoop::shutdown(void)
+	{
+		for (ListEvents::iterator monitoredIt = events.begin();
+			 monitoredIt < events.end();
+			 monitoredIt++)
+		{
+			close(monitoredIt->fd);
+		}
+		events.clear();
+		servers.clear();
+		for (MapClient::iterator clientIt = clients.begin();
+			 clientIt != clients.end();
+			 ++clientIt)
+		{
+			http::Client *client = clientIt->second;
+			if (client)
+			{
+				delete client;
+			}
+		}
+		clients.clear();
+		fileReads.clear();
+		fileWrites.clear();
+		removeFds.clear();
 	}
 
 	bool EventLoop::loop()

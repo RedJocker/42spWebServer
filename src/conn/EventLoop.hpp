@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/16 00:46:58 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/17 00:04:19 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -30,11 +30,11 @@ namespace conn
 {
 	class EventLoop : public Monitor
 	{
+		ListEvents events;
 		MapServer servers;
 		MapClient clients;
 		MapFileReads fileReads;
 		MapFileWrites fileWrites;
-		ListEvents events;
 		SetRemoveFd removeFds;
 		http::Dispatcher dispatcher;
 
@@ -64,6 +64,7 @@ namespace conn
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
 		void subscribeFileRead(int fileFd, int clientFd);
 		void subscribeFileWrite(int fileFd, int clientFd, std::string content);
+		void shutdown(void);
 	};
 
 }
