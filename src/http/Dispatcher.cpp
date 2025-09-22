@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/19 21:54:48 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/22 18:32:34 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,15 @@ namespace http {
 			//error exit
 			// TODO if envp or args contains allocated char* should free
 			std::cout << "error child" << strerror(errno) << std::endl;
+			std::cout << "retry" << std::endl;
+			// TODO either use path from 42
+			//      or find php-cgi on path
+			//      or make it a configuration on file
+			args[0] = "/opt/homebrew/bin/php-cgi";
+			execve(args[0],
+				   const_cast<char **>(args),
+				   reinterpret_cast<char**>(envp.data()));
+
 			close(sockets[0]);
 			::exit(11);
 		}
@@ -171,7 +180,6 @@ namespace http {
 			client.getResponse().setOk().setBody(cgiResponseString.substr(separatorIndex + 4));
 			client.setMessageToSend(client.getResponse().toString());
 		}
-
 
 		delete[] readResult.second;
 		close(sockets[1]);
