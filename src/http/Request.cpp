@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/19 21:55:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/22 20:16:46 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,11 +223,26 @@ namespace http
 
 	void Request::envpInit(std::vector<char *> &envp)
 	{
-		// TODO fill envp with variables for cgi process
-		// taken from request data
-		envp.push_back(const_cast<char *>("REQUEST_METHOD=POST"));
-		envp.push_back(const_cast<char *>("REDIRECT_STATUS=0"));
-		envp.push_back(const_cast<char *>("SCRIPT_FILENAME=./www/todo.cgi"));
+	    // TODO fill envp with variables for cgi process
+	    // taken from request data
+
+	    //// headers required for all cgi request
+			envp.push_back(const_cast<char *>("REQUEST_METHOD=POST")); // take from request method
+			envp.push_back(const_cast<char *>("REDIRECT_STATUS=0")); // always 0?
+	    	envp.push_back(const_cast<char *>("SCRIPT_FILENAME=./www/todo.cgi")); // build from request path and docroot
+	    ////
+
+	    /// headers required for cgi request with body (body is passed by parent on stdin)
+	    	envp.push_back(const_cast<char *>("CONTENT_TYPE=application/"
+											  "x-www-form-urlencoded")); // take from request header
+			envp.push_back(const_cast<char *>("CONTENT_LENGTH=19")); // take from request header
+		////
+
+		//// headers required for passing query string
+			//envp.push_back(const_cast<char *>("QUERY_STRING=hello=there&yyy=xxx"));  build from request path
+		////
+
+		//// envp must terminate with NULL
 		envp.push_back((char *) 0);
 	}
 }

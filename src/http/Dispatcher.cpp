@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/22 18:32:34 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/22 20:16:12 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,8 @@ namespace http {
 	void Dispatcher::handleCgiRequest(http::Client &client, conn::Monitor &monitor)
 	{
 		std::cout << "handleCgiRequest: " <<  client.getFd() << std::endl;
-		// TODO child read stdin body of client request
 		// TODO subscribe ipc fd to eventLoop through monitor
-		// TODO write request body to cgi stdin
-		// TODO send env to cgi with Request Meta-Variables (REQUEST_METHOD, CONTENT_LENGTH, ...)
+		// TODO either use path from 42 or find php-cgi on path or make it a configuration
 
 		int sockets[2];
 
@@ -117,12 +115,25 @@ namespace http {
 		default:
 		{//parent
 			break;
-		}}
+	    }
+	    }
 
 		std::cout << "parent" << std::endl;
-		close(sockets[0]);
+	    close(sockets[0]);
+
+		std::cout << "parent writing to cgi: " << std::endl;
+	    BufferedWriter writer(sockets[1]);
+		writer.setMessage("hello=there&abc=def");
+		std::pair<WriteState, char *> flushResult(
+			BufferedWriter::WRITING, 0);
+
+		std::cout << writer.getState() << std::endl;
+		while (flushResult.first == BufferedWriter::WRITING)
+		    flushResult = writer.flushMessage();
+		shutdown(sockets[1],SHUT_WR);
+		std::cout << "parent done writing to cgi:" << std::endl;
 		BufferedReader reader(sockets[1]);
-		shutdown(sockets[1], SHUT_WR);
+
 		std::pair<ReadState, char *> readResult;
 		while(readResult.first == BufferedReader::READING)
 		{
@@ -148,7 +159,8 @@ namespace http {
 			client.getResponse().setOk().setBody(cgiResponseString);
 			client.setMessageToSend(client.getResponse().toString());
 		} else
-		{
+	    {
+
 			std::string cgiHeadersStr =  cgiResponseString.substr(0, separatorIndex);
 
 			Headers &cgiHeaders = client.getResponse().headers();
