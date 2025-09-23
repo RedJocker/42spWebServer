@@ -6,12 +6,13 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/22 20:16:12 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/23 12:10:43 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Dispatcher.hpp"
 #include "Monitor.hpp"
+#include "pathUtils.hpp"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -20,6 +21,7 @@
 #include <dirent.h>
 #include <vector>
 #include <cerrno>
+#include <cstring>
 #include "devUtil.hpp"
 #include <sstream>
 #include <string>
@@ -51,10 +53,13 @@ namespace http {
 		(void) monitor;
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
-		std::string filePath = docroot + path;
+		std::string filePath;
+		if (!utils::normalizeUrlPath(docroot, path, filePath))
+			return false;
 
 		// TODO implement logic to check if it is cgi request based on server route config
-		return filePath == "./www/todo.cgi";
+		std::string expected = std::string(docroot) + "/todo.cgi";
+		return filePath == expected;
 	}
 
 	void Dispatcher::handleCgiRequest(http::Client &client, conn::Monitor &monitor)
@@ -86,7 +91,15 @@ namespace http {
 			dup2(sockets[0], 1);
 
 			std::string docroot = "./www";
-			std::string filePath = docroot + path;
+			std::string filePath;
+			if (!utils::normalizeUrlPath(docroot, path, filePath))
+			{
+				// invalid path = immediate internal server error or 404;
+				client.getResponse().setNotFound();
+				client.setMessageToSend(client.getResponse().toString());
+				close(sockets[0]);
+				return;
+			}
 
 			const char *args[3];
 			args[0] = "/usr/bin/php-cgi";
@@ -216,7 +229,12 @@ namespace http {
 		if (method == "GET") {
 			const std::string &path = client.getRequest().getPath();
 			std::string docroot = "./www";
-			std::string filePath = docroot + path;
+			std::string filePath;
+			if (!utils::normalizeUrlPath(docroot, path, filePath)) {
+				response.setNotFound();
+				client.setMessageToSend(response.toString());
+				return ;
+			}
 
 			struct stat pathStat;
 			if (stat(filePath.c_str(), &pathStat) != 0) {
@@ -260,7 +278,12 @@ namespace http {
 		std::cout << "Disp::handleGetFile " << std::endl;
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
-		std::string filePath = docroot + path;
+		std::string filePath;
+		if (!utils::normalizeUrlPath(docroot, path, filePath)) {
+			response.setNotFound();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
 
 		int fd = open(filePath.c_str(), O_RDONLY);
 		if (fd < 0) {
@@ -276,7 +299,12 @@ namespace http {
 	void Dispatcher::handleGetDirectory(http::Client &client, Response &response) {
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
-		std::string dirPath = docroot + path;
+		std::string dirPath;
+		if (!utils::normalizeUrlPath(docroot, path, dirPath)) {
+			response.setNotFound();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
 
 		DIR *dir = opendir(dirPath.c_str());
 		if (!dir) {
@@ -309,7 +337,12 @@ namespace http {
 	void Dispatcher::handlePost(http::Client &client, Response &response, conn::Monitor &monitor) {
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
-		std::string filePath = docroot + path;
+		std::string filePath;
+		if (!utils::normalizeUrlPath(docroot, path, filePath)) {
+			response.setNotFound();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
 
 		int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd < 0) {
@@ -325,7 +358,12 @@ namespace http {
 	void Dispatcher::handleDelete(http::Client &client, Response &response) {
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = "./www";
-		std::string filePath = docroot + path;
+		std::string filePath;
+		if (!utils::normalizeUrlPath(docroot, path, filePath)) {
+			response.setNotFound();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
 
 		int result = unlink(filePath.c_str());
 		if (result == 0) {

@@ -1,14 +1,14 @@
-#******************************************************************************#
+# **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         #
+#    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/09/16 16:53:11 by maurodri         ###   ########.fr        #
+#    Updated: 2025/09/23 12:11:51 by vcarrara         ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# **************************************************************************** #
 
 BASE_DIR := ./src
 TEST_DIR := ./test
@@ -26,7 +26,8 @@ CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp \
 					EventLoop.cpp)
 UTIL_FILES := $(addprefix $(UTIL_DIR)/, BufferedReader.cpp\
 					BufferedWriter.cpp \
-					devUtil.cpp)
+					devUtil.cpp \
+					pathUtils.cpp)
 
 HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Headers.cpp \
@@ -63,7 +64,7 @@ $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $^ $(INCLUDES) -o $@
 
 $(OBJS): $(OBJ_DIR)%.o : %.cpp | $(OBJ_DIR)
-	@mkdir -p $(dir $@) 
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(DEP_FLAGS) -o $@ -c $< $(INCLUDES)
 
 $(OBJ_DIR):
@@ -73,10 +74,10 @@ $(OBJ_DIR):
 test_tcp: $(MODULE_FILES) $(TEST_DIR)/test_tcp.cpp $(TEST_DIR)/test_tcp.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_tcp.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
-test_buff_read: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_read.cpp $(TEST_DIR)/test_bufferedReader_read.sh 
+test_buff_read: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_read.cpp $(TEST_DIR)/test_bufferedReader_read.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_bufferedReader_read.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
-test_buff_readlineCrlf: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp $(TEST_DIR)/test_bufferedReader_readlineCrlf.sh 
+test_buff_readlineCrlf: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp $(TEST_DIR)/test_bufferedReader_readlineCrlf.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
 clean:
