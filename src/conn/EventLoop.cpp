@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   EventLoop.cpp                                      :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/17 00:04:06 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   EventLoop.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
+/*   Updated: 2025/09/23 12:46:53 by vcarrara         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "EventLoop.hpp"
 #include "BufferedWriter.hpp"
@@ -237,45 +237,66 @@ namespace conn
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
 		http::Request maybeCompleteRequest = client->readHttpRequest();
-		if (maybeCompleteRequest.state() <= http::Request::READING_BODY)
-			return; // has not finished reading, will finish a next epoll_wait
-		else if (maybeCompleteRequest.state() == http::Request::READ_COMPLETE)
-		{
-			// has finished reading has message and client still alive
-			http::Request request = maybeCompleteRequest;
-			std::cout << "done reading: "
+
+		switch (maybeCompleteRequest.state()) {
+			case http::Request::READING_REQUEST_LINE:
+			case http::Request::READING_HEADERS:
+			case http::Request::READING_BODY:
+				// has not finished reading, will finish a next epoll_wait
+				return;
+
+			case http::Request::READ_COMPLETE: {
+				// has finished reading has message and client still alive
+				http::Request &request = maybeCompleteRequest;
+				std::cout << "done reading: "
 					  << request.getMethod() << " "
 					  << request.getPath() << " "
 					  << request.getProtocol() << " "
 					  << std::endl;
 
-			dispatcher.dispatch(*client, *this);
-		}
-		else if (maybeCompleteRequest.state() == http::Request::READ_BAD_REQUEST)
-		{
-			// has finished reading has message and client still alive
-			std::cout << "bad request reading: "
+				dispatcher.dispatch(*client, *this);
+
+				if (request.getHeader("Connection") == "close") {
+					std::cout << "Request requested Connection: close, scheduling shutdown" << std::endl;
+					unsubscribeHttpClient(eventIt);
+				}
+
+				break;
+			}
+
+			case http::Request::READ_BAD_REQUEST: {
+				// has finished reading has message and client still alive
+				std::cout << "bad request reading: "
 					  << std::endl;
-			std::string messageToSend =
-				client->getResponse()
-				.setBadRequest()
-				.toString();
-			client->setMessageToSend(messageToSend);
-		}
-		else if (maybeCompleteRequest.state() == http::Request::READ_EOF)
-		{
-			// has finished reading has message but client has closed
-			std::cout << "eof reading: " << std::endl;
-			unsubscribeHttpClient(eventIt);
-		}
-		else if (maybeCompleteRequest.state() == http::Request::READ_ERROR)
-		{
-			// reading failed for some reason
-			//unsubscribe
-			std::cout << "error reading: "
-					  << std::endl;
-			unsubscribeHttpClient(eventIt);
-			throw std::domain_error("TODO read ERROR");
+				std::string messageToSend =
+					client->getResponse()
+					.setBadRequest()
+					.toString();
+				client->setMessageToSend(messageToSend);
+
+				// Close connection after bad request
+				unsubscribeHttpClient(eventIt);
+				break;
+			}
+
+			case http::Request::READ_EOF: {
+				// has finished reading has message but client has closed
+				std::cout << "eof reading: " << std::endl;
+				unsubscribeHttpClient(eventIt);
+				break;
+			}
+
+			case http::Request::READ_ERROR: {
+				// reading failed for some reason
+				//unsubscribe
+				std::cout << "error reading: "
+						<< std::endl;
+				unsubscribeHttpClient(eventIt);
+				throw std::domain_error("TODO read ERROR");
+			}
+
+			default:
+				throw std::domain_error("unknown request state");
 		}
 	}
 
@@ -284,23 +305,27 @@ namespace conn
 	{
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			throw std::domain_error("called handleClientWriteResponse without content to write");
+
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
-        bool shouldClose = client->getRequest()
-			.getHeader("Connection") == "close";
-		if (flushResult.first == BufferedWriter::DONE)
-		{
-			std::cout << "done writing response: "
-					  << client->getResponse().toString()
-					  << std::endl;
-			shouldClose = client->getResponse().getHeader("Connection") == "close";
+
+		// Check if client requested connection close
+		bool requestClose = client->getRequest().getHeader("Connection") == "close";
+
+		if (flushResult.first == BufferedWriter::DONE) {
+			// Add Connection: close header if the client requested it
+			if (requestClose)
+				client->getResponse().addHeader("Connection", "close");
+
+			// Clear client request/response for next request
+			client->clear();
+		} else if (flushResult.first == BufferedWriter::ERROR) {
+			// Handle write errors
+			throw std::domain_error("write ERROR");
 			client->clear();
 		}
-		else if (flushResult.first == BufferedWriter::ERROR)
-		{
-			throw std::domain_error("TODO write ERROR");
-			client->clear();
-		}
-		if (shouldClose)
+
+		// Unsubscribe the client if connection must close
+		if (requestClose)
 			unsubscribeHttpClient(eventIt);
 	}
 

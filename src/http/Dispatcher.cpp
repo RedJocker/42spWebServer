@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 12:10:43 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/23 12:31:46 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,21 +128,21 @@ namespace http {
 		default:
 		{//parent
 			break;
-	    }
-	    }
+		}
+		}
 
 		std::cout << "parent" << std::endl;
-	    close(sockets[0]);
+		close(sockets[0]);
 
 		std::cout << "parent writing to cgi: " << std::endl;
-	    BufferedWriter writer(sockets[1]);
+		BufferedWriter writer(sockets[1]);
 		writer.setMessage("hello=there&abc=def");
 		std::pair<WriteState, char *> flushResult(
 			BufferedWriter::WRITING, 0);
 
 		std::cout << writer.getState() << std::endl;
 		while (flushResult.first == BufferedWriter::WRITING)
-		    flushResult = writer.flushMessage();
+			flushResult = writer.flushMessage();
 		shutdown(sockets[1],SHUT_WR);
 		std::cout << "parent done writing to cgi:" << std::endl;
 		BufferedReader reader(sockets[1]);
@@ -172,7 +172,7 @@ namespace http {
 			client.getResponse().setOk().setBody(cgiResponseString);
 			client.setMessageToSend(client.getResponse().toString());
 		} else
-	    {
+		{
 
 			std::string cgiHeadersStr =  cgiResponseString.substr(0, separatorIndex);
 
