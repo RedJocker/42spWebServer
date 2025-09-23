@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/15 22:57:39 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 23:05:01 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,11 @@ namespace http {
 	Response::~Response(void)
 	{
 
+	}
+
+	Headers &Response::headers(void)
+	{
+		return this->_headers;
 	}
 
 	std::string Response::getHeader(const std::string &key) const {
@@ -89,7 +94,6 @@ namespace http {
 
 	Response &Response::setOk()
 	{
-		this->clear();
 		return (*this)
 			.setStatusCode(200)
 			.setStatusInfo("Ok");
@@ -97,7 +101,6 @@ namespace http {
 
 	Response &Response::setNotFound()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(404)
 			.setStatusInfo("Not Found")
@@ -105,9 +108,17 @@ namespace http {
 		return *this;
 	}
 
+	Response &Response::setImTeapot()
+	{
+		(*this)
+			.setStatusCode(418)
+			.setStatusInfo("I'm a teapot")
+			.addHeader("Content-length", "0");
+		return *this;
+	}
+
 	Response &Response::setInternalServerError()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(500)
 			.setStatusInfo("Internal Server Error")
@@ -117,7 +128,6 @@ namespace http {
 
 	Response &Response::setBadRequest()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(400)
 			.setStatusInfo("Bad Request")
@@ -127,7 +137,6 @@ namespace http {
 
 	Response &Response::setCreated()
 	{
-		this->clear();
 		(*this)
 			.setStatusCode(201)
 			.setStatusInfo("Created")

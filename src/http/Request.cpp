@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/11 05:37:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/22 20:16:46 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ namespace http
 		return true;
 	}
 
-	Request::ReadState Request::readRequestLine(conn::TcpClient &client)
+	Request::ReadState Request::readRequestLine(BufferedReader &client)
 	{
 		std::pair<BufferedReader::ReadState, char*> result;
 		result = client.readlineCrlf();
@@ -89,11 +89,11 @@ namespace http
 		}
 	}
 
-	Request::ReadState Request::readHeaderLine(conn::TcpClient &client)
+	Request::ReadState Request::readHeaderLine(BufferedReader &reader)
 	{
 		std::pair<BufferedReader::ReadState, char*> result;
 
-		result = client.readlineCrlf();
+		result = reader.readlineCrlf();
 
 		switch(result.first) {
 		case BufferedReader::READING:
@@ -122,11 +122,11 @@ namespace http
 			else if (!_headers.parseLine(line)) { // unexpected format
 				_state = READ_BAD_REQUEST;
 			}
-			if (client.hasBufferedContent()) {
+			if (reader.hasBufferedContent()) {
 				if (_state == READING_HEADERS)
-					return readHeaderLine(client);
+					return readHeaderLine(reader);
  				else if (_state == READING_BODY)
-					return readBody(client);
+					return readBody(reader);
 			}
 			return _state;
 		}
@@ -135,7 +135,7 @@ namespace http
 		}
 	}
 
-	Request::ReadState Request::readBody(conn::TcpClient &client)
+	Request::ReadState Request::readBody(BufferedReader &reader)
 	{
 		std::pair<BufferedReader::ReadState, char*> result;
 
@@ -145,7 +145,7 @@ namespace http
 			expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
 		}
 
-		result = client.read(expectedLength);
+		result = reader.read(expectedLength);
 		switch(result.first) {
 		case BufferedReader::READING:
 			return _state;
@@ -177,14 +177,14 @@ namespace http
 	}
 	
 
-	Request::ReadState Request::readHttpRequest(conn::TcpClient &client) {
+	Request::ReadState Request::readHttpRequest(BufferedReader &reader) {
 		switch (_state) {
 		case READING_REQUEST_LINE:
-			return readRequestLine(client);
+			return readRequestLine(reader);
 		case READING_HEADERS: 
-			return readHeaderLine(client);
+			return readHeaderLine(reader);
 		case READING_BODY:
-			return readBody(client);
+			return readBody(reader);
 		case READ_BAD_REQUEST:
 		case READ_EOF:
 		case READ_ERROR:
@@ -219,5 +219,30 @@ namespace http
 		requestStream << _headers.str();
 		requestStream << _body.str();
 		return requestStream.str();
+	}
+
+	void Request::envpInit(std::vector<char *> &envp)
+	{
+	    // TODO fill envp with variables for cgi process
+	    // taken from request data
+
+	    //// headers required for all cgi request
+			envp.push_back(const_cast<char *>("REQUEST_METHOD=POST")); // take from request method
+			envp.push_back(const_cast<char *>("REDIRECT_STATUS=0")); // always 0?
+	    	envp.push_back(const_cast<char *>("SCRIPT_FILENAME=./www/todo.cgi")); // build from request path and docroot
+	    ////
+
+	    /// headers required for cgi request with body (body is passed by parent on stdin)
+	    	envp.push_back(const_cast<char *>("CONTENT_TYPE=application/"
+											  "x-www-form-urlencoded")); // take from request header
+			envp.push_back(const_cast<char *>("CONTENT_LENGTH=19")); // take from request header
+		////
+
+		//// headers required for passing query string
+			//envp.push_back(const_cast<char *>("QUERY_STRING=hello=there&yyy=xxx"));  build from request path
+		////
+
+		//// envp must terminate with NULL
+		envp.push_back((char *) 0);
 	}
 }

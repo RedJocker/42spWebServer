@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/09/10 12:24:03 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/11 04:06:25 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/16 23:27:24 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -39,6 +39,7 @@ namespace conn {
 		virtual void unsubscribeHttpClient(ListEvents::iterator &eventIt) = 0;
 		virtual void subscribeFileRead(int fileFd, int clientFd) = 0;
 		virtual void subscribeFileWrite(int fileFd, int clientFd, std::string content) = 0;
+		virtual void shutdown(void) = 0;
 	};
 
 }
