@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 13:34:13 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/23 20:59:12 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,20 +325,23 @@ namespace http {
 		std::vector<std::string> entries;
 		while ((entry = readdir(dir)) != NULL) {
 			std::string name(entry->d_name);
-			if (name != "." && name != "..") {
-				entries.push_back(name);
-			}
+			entries.push_back(name);
 		}
 		closedir(dir);
 
-		std::string html = "<html><body><ul>";
+		std::stringstream html;
+		html << "<html><body>"
+			 << "<h1> Index of " << dirPath.substr(docroot.size())
+			 << "</h1>"
+			 << "<hr>"
+			 << "<ul>";
 		for (std::vector<std::string>::const_iterator it = entries.begin(); it != entries.end(); ++it) {
-			html += "<li><a href=\"" + *it + "\">" + *it + "</a></li>";
+			html << "<li><a href=\"" << *it << "\">" << *it << "</a></li>";
 		}
-		html += "</ul></body></html>";
+		html << "</ul></body></html>";
 
 		response.setOk()
-			.setBody(html);
+			.setBody(html.str());
 		client.setMessageToSend(response.toString());
 	}
 
