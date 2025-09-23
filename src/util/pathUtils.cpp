@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/23 19:59:29 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/23 20:01:36 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ namespace utils {
 				continue;
 			} else if (seg == "..") {
 				if (segments.empty())
-					return false;
+					continue;
 				segments.pop_back();
 			} else {
 				segments.push_back(seg);
