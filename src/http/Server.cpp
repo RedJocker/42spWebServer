@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/23 13:06:50 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/23 19:24:13 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,9 @@ namespace http {
 	Server::Server(const std::string &hostname,
 			const std::string &docroot,
 			unsigned short port)
-		: hostname(hostname), docroot(docroot), port(port) {}
+		: conn::TcpServer(port), hostname(hostname), docroot(docroot) {}
 
-	Server::Server(const Server &other) {
+	Server::Server(const Server &other) : conn::TcpServer(other.port) {
 		*this = other;
 	}
 
@@ -39,9 +39,5 @@ namespace http {
 
 	std::string Server::getDocroot() const {
 		return this->docroot;
-	}
-
-	unsigned short Server::getPort() const {
-		return this->port;
 	}
 }

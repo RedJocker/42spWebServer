@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/23 13:10:12 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/23 19:12:06 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ namespace http {
 	class Server : public conn::TcpServer {
 		std::string hostname;
 		std::string docroot;
-		unsigned short port;
+
 
 		public:
 			Server(const std::string &hostname,
@@ -32,7 +32,6 @@ namespace http {
 
 			std::string getHostname() const;
 			std::string getDocroot() const;
-			unsigned short getPort() const;
 	};
 }
 
