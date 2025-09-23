@@ -6,29 +6,24 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/16 18:11:59 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/23 13:24:13 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include "Server.hpp"
 
 namespace http {
 
-	Client::Client(): conn::TcpClient(0)
-	{
-	}
+	Client::Client(): conn::TcpClient(0) {}
 
-	Client::Client(int clientFd): conn::TcpClient(clientFd)
-	{
-	}
+	Client::Client(int clientFd, Server *server): conn::TcpClient(clientFd), server(server) {}
 
-	Client::Client(const Client &other): conn::TcpClient(other)
-	{
+	Client::Client(const Client &other): conn::TcpClient(other) {
 		//TODO
 	}
 
-	Client &Client::operator=(const Client &other)
-	{
+	Client &Client::operator=(const Client &other) {
 		if (this == &other)
 			return *this;
 		//TODO
@@ -36,25 +31,25 @@ namespace http {
 		return *this;
 	}
 
-	Client::~Client()
-	{
+	Client::~Client() {
 		//TODO
 	}
 
-	Request &Client::readHttpRequest()
-	{
+	Request &Client::readHttpRequest() {
 		this->request.readHttpRequest(this->reader);
 		return this->request;
 	}
 
-	Response &Client::getResponse()
-	{
+	Response &Client::getResponse() {
 		return this->response;
 	}
 
-	Request &Client::getRequest()
-	{
+	Request &Client::getRequest() {
 		return this->request;
+	}
+
+	Server *Client::getServer() const {
+		return this->server;
 	}
 
 	void Client::clear()

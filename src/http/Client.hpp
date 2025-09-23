@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:34:03 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/09 17:49:38 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/23 13:23:09 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,11 @@
 
 namespace http
 {
+	class Server;
 
 	class Client : public conn::TcpClient
 	{
-
+		Server *server;
 		Request request;
 		Response response;
 
@@ -30,14 +31,16 @@ namespace http
 
 	public:
 
-
+		Client(int clientFd, Server *server);
 		Client(const Client &other);
-		Client(int clientFd);
 		Client &operator=(const Client &other);
 		virtual ~Client();
+
 		Request &readHttpRequest();
-		Response &getResponse();
 		Request &getRequest();
+		Response &getResponse();
+
+		Server *getServer() const;
 
 		void clear(void);
 	};

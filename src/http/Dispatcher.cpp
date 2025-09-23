@@ -6,13 +6,14 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 12:31:46 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/23 13:34:13 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Dispatcher.hpp"
 #include "Monitor.hpp"
 #include "pathUtils.hpp"
+#include "Server.hpp"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -214,6 +215,13 @@ namespace http {
 	{
 		const std::string &method = client.getRequest().getMethod();
 		Response &response = client.getResponse();
+		http::Server *server = client.getServer();
+
+		if (!server) {
+			response.setInternalServerError();
+			client.setMessageToSend(response.toString());
+			return ;
+		}
 
 		if (method == "TRACE") {
 			handleTrace(client, response);
@@ -228,7 +236,7 @@ namespace http {
 
 		if (method == "GET") {
 			const std::string &path = client.getRequest().getPath();
-			std::string docroot = "./www";
+			std::string docroot = server->getDocroot();
 			std::string filePath;
 			if (!utils::normalizeUrlPath(docroot, path, filePath)) {
 				response.setNotFound();
@@ -277,7 +285,7 @@ namespace http {
 
 		std::cout << "Disp::handleGetFile " << std::endl;
 		const std::string &path = client.getRequest().getPath();
-		std::string docroot = "./www";
+		std::string docroot = client.getServer()->getDocroot();
 		std::string filePath;
 		if (!utils::normalizeUrlPath(docroot, path, filePath)) {
 			response.setNotFound();
@@ -298,7 +306,7 @@ namespace http {
 
 	void Dispatcher::handleGetDirectory(http::Client &client, Response &response) {
 		const std::string &path = client.getRequest().getPath();
-		std::string docroot = "./www";
+		std::string docroot = client.getServer()->getDocroot();
 		std::string dirPath;
 		if (!utils::normalizeUrlPath(docroot, path, dirPath)) {
 			response.setNotFound();
@@ -336,7 +344,7 @@ namespace http {
 
 	void Dispatcher::handlePost(http::Client &client, Response &response, conn::Monitor &monitor) {
 		const std::string &path = client.getRequest().getPath();
-		std::string docroot = "./www";
+		std::string docroot = client.getServer()->getDocroot();
 		std::string filePath;
 		if (!utils::normalizeUrlPath(docroot, path, filePath)) {
 			response.setNotFound();
@@ -357,7 +365,7 @@ namespace http {
 
 	void Dispatcher::handleDelete(http::Client &client, Response &response) {
 		const std::string &path = client.getRequest().getPath();
-		std::string docroot = "./www";
+		std::string docroot = client.getServer()->getDocroot();
 		std::string filePath;
 		if (!utils::normalizeUrlPath(docroot, path, filePath)) {
 			response.setNotFound();
