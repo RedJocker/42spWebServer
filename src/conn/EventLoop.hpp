@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 13:41:31 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/23 19:04:43 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ namespace conn
 
 		bool loop(void);
 
-		bool subscribeTcpServer(http::Server *server);
+		bool subscribeHttpServer(http::Server *server);
 		bool subscribeHttpClient(int fd, http::Server *server);
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
 		void subscribeFileRead(int fileFd, int clientFd);

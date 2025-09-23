@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 13:48:27 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/23 19:22:32 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,24 +43,15 @@ namespace conn
 	}
 
 
-	bool EventLoop::subscribeTcpServer(http::Server *server)
+	bool EventLoop::subscribeHttpServer(http::Server *server)
 	{
-		std::pair<int, std::string> maybeFd = server->createAndListen(server->getPort());
-		int serverFd = maybeFd.first;
-		if (serverFd < 0) {
-			std::cout << maybeFd.second << std::endl;
-			return false;
-		}
-
 		struct pollfd event;
 		event.events = POLLIN; // subscribe for reads only
 		event.fd = server->getServerFd();
 
 		this->events.push_back(event);
 
-		servers.insert(std::make_pair(serverFd, server));
-
-		std::cout << "listening on port " << server->getPort() << " (fd " << serverFd << ")" << std::endl;
+		servers.insert(std::make_pair(server->getServerFd(), server));
 
 		return true;
 	}

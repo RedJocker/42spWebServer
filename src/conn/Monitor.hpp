@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/10 12:24:03 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 13:17:41 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/23 19:04:42 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 # include <map>
 # include "Client.hpp"
 # include "Server.hpp"
-# include "TcpServer.hpp"
 # include <poll.h>
 # include <set>
 
@@ -35,8 +34,8 @@ namespace conn {
 	public:
 		virtual ~Monitor() {};
 
-		virtual bool subscribeTcpServer(http::Server *server) = 0;
-		virtual bool subscribeHttpClient(int fd) = 0;
+		virtual bool subscribeHttpServer(http::Server *server) = 0;
+		virtual bool subscribeHttpClient(int fd, http::Server *server) = 0;
 		virtual void unsubscribeHttpClient(ListEvents::iterator &eventIt) = 0;
 		virtual void subscribeFileRead(int fileFd, int clientFd) = 0;
 		virtual void subscribeFileWrite(int fileFd, int clientFd, std::string content) = 0;
