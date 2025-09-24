@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   EventLoop.hpp                                      :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/17 00:04:19 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   EventLoop.hpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
+//   Updated: 2025/09/23 19:04:43 by maurodri         ###   ########.fr       //
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef EVENTLOOP_HPP
 # define EVENTLOOP_HPP
@@ -38,7 +38,7 @@ namespace conn
 		SetRemoveFd removeFds;
 		http::Dispatcher dispatcher;
 
-		void connectServerToClient(TcpServer *server);
+		void connectServerToClient(http::Server *server);
 		void handleClientRequest(
 			http::Client *client, ListEvents::iterator &eventIt);
 		void handleClientWriteResponse(
@@ -59,8 +59,8 @@ namespace conn
 
 		bool loop(void);
 
-		bool subscribeTcpServer(TcpServer *tcpServer);
-		bool subscribeHttpClient(int fd);
+		bool subscribeHttpServer(http::Server *server);
+		bool subscribeHttpClient(int fd, http::Server *server);
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
 		void subscribeFileRead(int fileFd, int clientFd);
 		void subscribeFileWrite(int fileFd, int clientFd, std::string content);

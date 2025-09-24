@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:36:49 by maurodri          #+#    #+#             //
-//   Updated: 2025/08/26 17:26:15 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/23 19:14:12 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,7 +21,11 @@
 
 namespace conn
 {
-	TcpServer::TcpServer()
+	TcpServer::TcpServer() : port(8080)
+	{
+	}
+
+	TcpServer::TcpServer(unsigned short port) : port(port)
 	{
 	}
 
@@ -51,10 +55,9 @@ namespace conn
 		}
 	}
 
-	std::pair<int, std::string> TcpServer::createAndListen(int port)
+	std::pair<int, std::string> TcpServer::createAndListen()
 	{
 		this->serverFd = socket(AF_INET, SOCK_STREAM, 0);
-		this->port = port;
 		if (this->serverFd < 0)
 		{
 			std::string errorMessage = "Error creating server: " + std::string(strerror(errno));
@@ -71,7 +74,7 @@ namespace conn
 		}
 		sockaddr_in serverAddress;
     	serverAddress.sin_family = AF_INET; // use ipv4
-    	serverAddress.sin_port = htons(port); // bind to port
+    	serverAddress.sin_port = htons(this->port); // bind to port
     	serverAddress.sin_addr.s_addr = INADDR_ANY; // any ip address
 		int bindResult = bind(
 			this->serverFd, 
@@ -110,6 +113,10 @@ namespace conn
 	int TcpServer::getServerFd() const
 	{
 		return this->serverFd;
+	}
+
+	unsigned short TcpServer::getPort() const {
+		return this->port;
 	}
 }
 

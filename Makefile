@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/09/23 12:11:51 by vcarrara         ###   ########.fr        #
+#    Updated: 2025/09/23 19:07:13 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,6 +34,7 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Body.cpp \
 					Client.cpp \
 					Response.cpp \
+					Server.cpp \
 					Dispatcher.cpp)
 MODULE_FILES := $(CONN_FILES) \
 	$(UTIL_FILES) \

@@ -1,32 +1,33 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   main.cpp                                           :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/09 17:24:17 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
+//   Updated: 2025/09/23 19:23:07 by maurodri         ###   ########.fr       //
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "EventLoop.hpp"
 #include <iostream>
-
+#include "devUtil.hpp"
 
 int main(void)
 {
 	conn::EventLoop eventLoop;
 
-	conn::TcpServer server;
-	std::pair<int, std::string> maybeServerFd = server.createAndListen(8080);
+	http::Server server("localhost", "./www", 8080);
+	std::pair<int, std::string> maybeServerFd = server.createAndListen();
 	if (maybeServerFd.first < 0)
 	{
 		std::cout << maybeServerFd.second << std::endl;
 		return 11;
 	}
 
-	eventLoop.subscribeTcpServer(&server);
+	eventLoop.subscribeHttpServer(&server);
+
 	bool resLoop = eventLoop.loop();
 
 	if (!resLoop)

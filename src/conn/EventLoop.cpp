@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 12:46:53 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/09/23 19:22:32 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,20 +43,20 @@ namespace conn
 	}
 
 
-	bool EventLoop::subscribeTcpServer(TcpServer *tcpServer)
+	bool EventLoop::subscribeHttpServer(http::Server *server)
 	{
 		struct pollfd event;
-
 		event.events = POLLIN; // subscribe for reads only
-		event.fd = tcpServer->getServerFd();
+		event.fd = server->getServerFd();
 
 		this->events.push_back(event);
-		std::pair<MapServer::iterator, bool> insertResult =
-			servers.insert(std::make_pair(event.fd, tcpServer));
-		return insertResult.second;
+
+		servers.insert(std::make_pair(server->getServerFd(), server));
+
+		return true;
 	}
 
-	bool EventLoop::subscribeHttpClient(int fd)
+	bool EventLoop::subscribeHttpClient(int fd, http::Server *server)
 	{
 
 		struct pollfd event;
@@ -64,7 +64,7 @@ namespace conn
 		event.events = POLLIN|POLLOUT; // subscribe for reads and writes
 		event.fd = fd;
 
-		http::Client *httpClient = new http::Client(fd);
+		http::Client *httpClient = new http::Client(fd, server);
 		if (httpClient != 0)
 		{
 			this->events.push_back(event);
@@ -108,24 +108,24 @@ namespace conn
 		delete client;
 	}
 
-	void EventLoop::connectServerToClient(TcpServer *server)
+	void EventLoop::connectServerToClient(http::Server *server)
 	{
 		std::pair<int, std::string> connResult = server->connectToClient();
 		int clientFd = connResult.first;
-		if (connResult.first < 0)
+		if (clientFd < 0)
 		{
 			std::string errorMessage = connResult.second;
 			std::cout << errorMessage << std::endl;
 			return;
 		}
-		bool isSubscribed = this->subscribeHttpClient(clientFd);
+		bool isSubscribed = this->subscribeHttpClient(clientFd, server);
 		if (!isSubscribed)
 		{
 			std::string errorMessage = "failed to subscribe client";
 			std::cout << errorMessage << std::endl;
 			close(clientFd);
 		} else {
-			std::cout << "connected client " << clientFd << std::endl;
+			std::cout << "connected client " << clientFd << " on server " << server->getPort() << std::endl;
 		}
 	}
 
@@ -373,7 +373,7 @@ namespace conn
 			MapServer::iterator serverIt = this->servers.find(monitoredIt->fd);
 			if (serverIt != this->servers.end())
 			{
-				TcpServer *server = serverIt->second;
+				http::Server *server = serverIt->second;
 				this->connectServerToClient(server);
 				return;
 			}

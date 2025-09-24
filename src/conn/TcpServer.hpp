@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:24:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/10 08:47:00 by maurodri         ###   ########.fr       //
+//   Updated: 2025/09/23 19:11:27 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -20,21 +20,23 @@ namespace conn
 {
 	class TcpServer
 	{
+	protected:
 		int serverFd;
-		int port;
-
-	public:
+		unsigned short port;
 
 		TcpServer();
+	public:
+		TcpServer(unsigned short port);
+
 		TcpServer(const TcpServer &other);
 		TcpServer &operator=(const TcpServer &other);
 		virtual ~TcpServer();
 
-		std::pair<int, std::string> createAndListen(int port);
+		std::pair<int, std::string> createAndListen();
 		std::pair<int, std::string> connectToClient();
+		unsigned short getPort() const;
 		int getServerFd() const;
 	};
-
 }
 
 #endif
