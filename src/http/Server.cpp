@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/23 19:24:13 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/25 18:47:49 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,5 +39,17 @@ namespace http {
 
 	std::string Server::getDocroot() const {
 		return this->docroot;
+	}
+	
+	void Server::addCgiRoute(const std::string &route) {
+		for (std::vector<std::string>::const_iterator it = cgiRoutes.begin(); it != cgiRoutes.end(); ++it) {
+			if (*it == route)
+				return;
+		}
+		cgiRoutes.push_back(route);
+	}
+	
+	const std::vector<std::string> &Server::getCgiRoutes() const {
+		return cgiRoutes;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/23 19:12:06 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/25 18:48:07 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,13 @@
 
 # include "../conn/TcpServer.hpp"
 # include <string>
+# include <vector>
 
 namespace http {
 	class Server : public conn::TcpServer {
 		std::string hostname;
 		std::string docroot;
+		std::vector<std::string> cgiRoutes;
 
 
 		public:
@@ -32,6 +34,9 @@ namespace http {
 
 			std::string getHostname() const;
 			std::string getDocroot() const;
+			
+			void addCgiRoute(const std::string &route);
+			const std::vector<std::string> &getCgiRoutes() const;
 	};
 }
 
