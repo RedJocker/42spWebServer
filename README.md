@@ -62,50 +62,50 @@
     - create a public interface for reading parsed configuration
 
 - Http
-  - create folder for http module
+  - [X] create folder for http module
   - end goal
     - [X] create class for Request
       - [X] Request Line
-        - Method
-        - Path
-        - Protocol
+        - [X] Method
+        - [X] Path
+        - [X] Protocol
       - [X] Headers
       - [X] Body
       - [X] create a method to read a request from fd
       - [X] create getter methods for method, path, headers, body
     - [X] create class for Response
-        - Status Line
-          - Protocol
-          - Status Code Number
-          - Status Code Description
-        - Headers
-        - Body
-        - create a method to create a response
-          - maybe constructor is fine or maybe builder pattern
-        - create a method that return a response as a string
+        - [X] Status Line
+          - [X] Protocol
+          - [X] Status Code Number
+          - [X] Status Code Description
+        - [X] Headers
+        - [X] Body
+        - [X] create a method to create a response
+          - [X] maybe constructor is fine or maybe builder pattern
+        - [X] create a method that return a response as a string
   - [X] create a class for Body to be able to use on both Request and Response
   - [X] create a class for Headers to be able to use on both Request and Response
-    - maybe it is a good idea to inherit from std::map<std::string, std::string>
+    - [X] maybe it is a good idea to inherit from std::map<std::string, std::string>
   - [X] change parse Request, do not read from fd, read from TcpClient instead
-    - change readFromfd(int fd) to readFromTcpClient(TcpClient client)
-      - use client.readlineCrlf to read a \r\n delimited line
-      - use client.read(len) to read a fixed size content for body parsing
-        - length is part of headers
-      - create a enum for request read state
-        - {READING_REQUEST_LINE, READING_HEADERS, READING_BODY, ERROR, DONE}
-      - return this request read state from readFromTcpClient
-      - it may be a good idea to delegate to Header class responsabillity to parse headers
-      - it may be a good idea to delegate to Body class responsability to parse body
-    - remember we cannot by requirement check errno on read and writes to socket
-      - do not use EAGAIN nor EWOULDBLOCK
+    - [X] change readFromfd(int fd) to readFromTcpClient(TcpClient client)
+      - [X] use client.readlineCrlf to read a \r\n delimited line
+      - [X] use client.read(len) to read a fixed size content for body parsing
+        - [X] length is part of headers
+      - [X] create a enum for request read state
+        - [X] {READING_REQUEST_LINE, READING_HEADERS, READING_BODY, ERROR, DONE}
+      - [X] return this request read state from readFromTcpClient
+      - [X] it may be a good idea to delegate to Header class responsabillity to parse headers
+      - [X] it may be a good idea to delegate to Body class responsability to parse body
+    - [X] remember we cannot by requirement check errno on read and writes to socket
+      - [X] do not use EAGAIN nor EWOULDBLOCK
   - [X] hello Request
-    - parse a get request containing only request line
-      - `GET / HTTP/1.1`
+    - [X] parse a get request containing only request line
+      - [X] `GET / HTTP/1.1`
   - setup tests for http module
-    - test response based on method that return response as a string
+    - [ ] test response based on method that return response as a string
     - [X] test request based on method that accepts fd and create a request object
   - [X] get Request with headers
-    - parse a get request containing some headers
+    - [X] parse a get request containing some headers
       - ```
            GET / HTTP/1.1
            Connection: close
@@ -121,83 +121,84 @@
            hello
         ```
   - [X] 404 response
-    - create a 404 response
+    - [X] create a 404 response
   - [X] create a HttpClient class that inherits from TcpClient and has a Request and Response
-    - Request and Response are initially empty
-    - we parse Request using Request.readFromTcpClient()
-    - generate some Response and send it back to client
-    - next message from client overwrites previous Request
-      - maybe we will need to clear first before reusing
-    - provide a public method to return the state of parsing and the current request
+    - [X] Request and Response are initially empty
+    - [X] we parse Request using Request.readFromTcpClient()
+    - [X] generate some Response and send it back to client
+    - [X] next message from client overwrites previous Request
+      - [X] maybe we will need to clear first before reusing
+    - [X] provide a public method to return the state of parsing and the current request
   - [X] exchange message browser and respond 404
   - [X] detect and respond TRACE http method requests
-    - response body must have the request in literal form
-    - debugging purposes
-    - helps start developing routing by reacting to a request with a response production
-      - at some point we will need to be able, following configuration:
-        - to run multiple servers
-        - each server having their own internal routing
-        - support for some routes processing their request through cgi on response production
-      - create a class Dispatcher
-        - whith a method http::Response dispatch(http::Client &client)
-        - read client.request.method and if == trace
-            - respond 200 Ok with body = client.request.asString()
-            - don't forget to add Content-Length header on response
+    - [X] response body must have the request in literal form
+    - [X] debugging purposes
+    - [X] helps start developing routing by reacting to a request with a response production
+      - [X] at some point we will need to be able, following configuration:
+        - [X] to run multiple servers
+        - [X] each server having their own internal routing
+        - [X] support for some routes processing their request through cgi on response production
+      - [X] create a class Dispatcher
+        - [X] whith a method http::Response dispatch(http::Client &client)
+        - [X] read client.request.method and if == trace
+            - [X] respond 200 Ok with body = client.request.asString()
+            - [X] don't forget to add Content-Length header on response
   - [X] respond a GET request to an existing file
-    - if found respond 200 OK with the body containing the file requested on body
-    - assume it is a found content file for now, later deal with 404 and directory listing
-    - assume only one server for now
-    - docroot
-      - folder that is associated with path
-      - / on path is bind to some folder on computer
-        - use hardcoded folder on project for now
-        - eventually each server has its own docroot defined on configuration file
-    - make a blocking implementation, we will solve the problem of integrating with epool later
- - [X] respond a POST request by writting the body into a file
+    - [X] if found respond 200 OK with the body containing the file requested on body
+    - [X] assume it is a found content file for now, later deal with 404 and directory listing
+    - [X] assume only one server for now
+    - [X] docroot
+      - [X] folder that is associated with path
+      - [X] / on path is bind to some folder on computer
+        - [X] use hardcoded folder on project for now
+        - [X] eventually each server has its own docroot defined on configuration file
+    - [X] make a blocking implementation, we will solve the problem of integrating with epool later
+  - [X] respond a POST request by writting the body into a file
     - [X] if success respond 201 Created
     - [X] use path as filepath
       - [X] create file if not exists
       - [X] for now assume folder exists
       - [X] take docroot as base folder
-      - lets deal with relative paths later
+      - [X] lets deal with relative paths later
     - [X] assume only one server for now
     - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop later
- - [X] respond a DELETE request by deleting a file resource
+  - [X] respond a DELETE request by deleting a file resource
     - [X] if success respond 204 No Content
     - [X] use path as filepath
     - [X] assume only one server for now
     - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop
- - [X] respond a GET to directory listing contents
+  - [X] respond a GET to directory listing contents
     - [X] if success respond 200 Ok
     - [X] on body send a generated html all files listed as links
-      - check nginx response for that case
+      - [X] check nginx response for that case
     - [X] assume our config enable directory listing
     - [X] use path as filepath
     - [X] assume only one server for now
     - [X] make a blocking implementation, we will solve the problem of integrating with EventLoop later
   - [X] include a route for cgi that will integrate with cgi code
-    - we can start by
-      - checking if is exactly index.php before other static files
-      - responding something
-        - maybe 418 I'm a teapot just to know it is our response
-  - Handle relative url path
-    - it should be possible to use relative path on url
-	  - - create subdirectories on www to test relative path works
-	- it should not be possible to go outside docroot
-	  - `GET /../Makefile HTTP/1.1` should return 404 not found
-		  - test on terminal, browsers make some url cleaning on request
-  - Handle header Connection: close
-  - create a http::Server that is a conn::TcpServer
-    - this class will be responsible for server specific behaviour
-    - will enable running multiple servers concurrently
-    - docroot
-    - hostname
-    - port
-    - routing
-    - Dispatcher will forward request handling to http:Server if it is one of valid methods
-  - Handle header Transfer-Encoding: chunked
-    - a slightly different protocol for reading body
-      - size1\r\ncontent1\r\nsize2\r\ncontent2\r\n0\r\n
+    - [X] we can start by
+      - [X] checking if is exactly index.php before other static files
+      - [X] responding something
+        - [X] maybe 418 I'm a teapot just to know it is our response
+  - [ ] Handle relative url path
+    - [ ] it should be possible to use relative path on url
+    - [ ] create subdirectories on www to test relative path works
+    - [ ] it should not be possible to go outside docroot
+      - [ ] `GET /../Makefile HTTP/1.1` should return 404 not found
+      - [ ] test on terminal, browsers make some url cleaning on request
+  - [X] Handle header Connection: close
+  - [X] create a http::Server that is a conn::TcpServer
+    - [X] this class will be responsible for server specific behaviour
+    - [X] will enable running multiple servers concurrently
+    - [X] docroot
+    - [X] hostname
+    - [X] port
+    - [X] routing
+    - [X] Dispatcher will forward request handling to http:Server if it is one of valid methods
+  - [ ] Handle header Transfer-Encoding: chunked
+    - [ ] a slightly different protocol for reading body
+      - [ ] size1\r\ncontent1\r\nsize2\r\ncontent2\r\n0\r\n
+
 - Connection Handling
   - [X] create folder for connection module
   - tcp
