@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/25 18:37:52 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/26 12:45:26 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <sstream>
 #include <string>
 #include <cstdio>
+#include <cstdlib>
 
 namespace http {
 
@@ -161,7 +162,6 @@ namespace http {
 					// TODO error on cgi reading
 					client.getResponse().setInternalServerError();
 					client.setMessageToSend(client.getResponse().toString());
-					delete[] readResult.second;
 					close(sockets[1]);
 					return ;
 				}
