@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:34:03 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/23 13:23:09 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/09/25 16:56:36 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ namespace http
 		Response &getResponse();
 
 		Server *getServer() const;
+		void setServer(Server *server);
 
 		void clear(void);
 	};

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/23 19:22:32 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/09/25 16:53:13 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,9 +236,9 @@ namespace conn
 	void EventLoop::handleClientRequest(
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
-		http::Request maybeCompleteRequest = client->readHttpRequest();
+		http::Request &req = client->readHttpRequest();
 
-		switch (maybeCompleteRequest.state()) {
+		switch (req.state()) {
 			case http::Request::READING_REQUEST_LINE:
 			case http::Request::READING_HEADERS:
 			case http::Request::READING_BODY:
@@ -247,50 +247,43 @@ namespace conn
 
 			case http::Request::READ_COMPLETE: {
 				// has finished reading has message and client still alive
-				http::Request &request = maybeCompleteRequest;
 				std::cout << "done reading: "
-					  << request.getMethod() << " "
-					  << request.getPath() << " "
-					  << request.getProtocol() << " "
-					  << std::endl;
+					  << req.getMethod() << " "
+					  << req.getPath() << " "
+					  << req.getProtocol() << std::endl;
+
+				http::Server &server = dispatcher.resolveServer(*client);
+				client->setServer(&server);
 
 				dispatcher.dispatch(*client, *this);
 
-				if (request.getHeader("Connection") == "close") {
-					std::cout << "Request requested Connection: close, scheduling shutdown" << std::endl;
-					unsubscribeHttpClient(eventIt);
+				if (req.getHeader("Connection") == "close") {
+					std::cout << "Request requested Connection: close" << std::endl;
+					client->getResponse().addHeader("Connection", "close");
 				}
 
-				break;
+				return;
 			}
 
 			case http::Request::READ_BAD_REQUEST: {
 				// has finished reading has message and client still alive
-				std::cout << "bad request reading: "
-					  << std::endl;
-				std::string messageToSend =
-					client->getResponse()
-					.setBadRequest()
-					.toString();
-				client->setMessageToSend(messageToSend);
-
-				// Close connection after bad request
-				unsubscribeHttpClient(eventIt);
-				break;
+				std::cout << "bad request reading" << std::endl;
+				
+				client->getResponse().setBadRequest();
+				client->getResponse().addHeader("Connection", "close");
+				client->setMessageToSend(client->getResponse().toString());
+				
+				return;
 			}
 
 			case http::Request::READ_EOF: {
-				// has finished reading has message but client has closed
-				std::cout << "eof reading: " << std::endl;
+				std::cout << "eof reading: client closed connection" << std::endl;
 				unsubscribeHttpClient(eventIt);
-				break;
+				return;
 			}
 
 			case http::Request::READ_ERROR: {
-				// reading failed for some reason
-				//unsubscribe
-				std::cout << "error reading: "
-						<< std::endl;
+				std::cout << "error reading request" << std::endl;
 				unsubscribeHttpClient(eventIt);
 				throw std::domain_error("TODO read ERROR");
 			}
