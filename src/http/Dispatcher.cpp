@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/26 12:45:26 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/01 18:50:21 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,11 +58,11 @@ namespace http {
 	bool Dispatcher::isCgiRequest(http::Client &client, conn::Monitor &monitor)
 	{
 		(void)monitor;
-		
+
 		// Resolve server for this client docroot CGI route
 		http::Server &server = resolveServer(client);
 		const std::string &path = client.getRequest().getPath();
-		
+
 		// Normalize requested path
 		std::string filePath;
 		if (!utils::normalizeUrlPath(server.getDocroot(), path, filePath))
@@ -71,7 +71,8 @@ namespace http {
 		// Check if this path matches any of the server's configured CGI routes
 		const std::vector<std::string> &cgiRoutes = server.getCgiRoutes();
 		for (std::vector<std::string>::const_iterator it = cgiRoutes.begin(); it != cgiRoutes.end(); ++it) {
-			std::string expectedPath = server.getDocroot() + "/" + *it;
+		    std::string expectedPath = server.getDocroot() + "/" + *it;
+
 			if (filePath == expectedPath)
 				return true; // Path matches a configured CGI route
 		}
@@ -124,10 +125,17 @@ namespace http {
 				execve(args[0],
 						const_cast<char **>(args),
 						reinterpret_cast<char **>(envp.data()));
-				
+
 				// If execve fails, exit child
-				std::cerr << "Failed to exec php-cgi: " << strerror(errno) << std::endl;
-				close(sockets[0]);
+		        std::cerr << "Failed to exec php-cgi: " << strerror(errno) << std::endl;
+
+				std::cerr << "Retrying in a different location " <<std::endl;
+		        args[0] = "/opt/homebrew/bin/php-cgi";
+				execve(args[0],
+						const_cast<char **>(args),
+						reinterpret_cast<char **>(envp.data()));
+				std::cerr << "Failed to exec on retry: " << strerror(errno) << std::endl;
+		        close(sockets[0]);
 				::exit(11);
 			}
 			
@@ -176,9 +184,11 @@ namespace http {
 				size_t separatorIndex = cgiResponseString.find("\r\n\r\n");
 				if (separatorIndex == std::string::npos) {
 					client.getResponse().setOk().setBody(cgiResponseString);
-					client.setMessageToSend(client.getResponse().toString());
+			        client.setMessageToSend(
+						client.getResponse().toString());
 				} else {
-					std::string cgiHeadersStr = cgiResponseString.substr(0, separatorIndex);
+			        std::string cgiHeadersStr = cgiResponseString
+			            .substr(0, separatorIndex);
 					Headers &cgiHeaders = client.getResponse().headers();
 
 					size_t index = 0;
