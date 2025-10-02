@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/02 00:16:15 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/02 01:21:51 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,6 +198,45 @@ namespace http
 		client.setMessageToSend(client.getResponse().toString());
 	}
 
+	void Server::onCgiResponse(
+		http::Client &client, const std::string cgiResponse)
+	{
+		// Parse headers and body from cgiResponse
+		size_t separatorIndex = cgiResponse.find("\r\n\r\n");
+		if (separatorIndex == std::string::npos)
+		{
+			client.getResponse().setOk().setBody(cgiResponse);
+			client.setMessageToSend(client.getResponse().toString());
+		}
+		else
+		{
+			std::string cgiHeadersStr = cgiResponse
+				.substr(0, separatorIndex);
+			http::Headers &cgiHeaders = client.getResponse().headers();
+
+			size_t index = 0;
+			while (1)
+			{
+				size_t index_next = cgiHeadersStr.find("\r\n", index);
+				std::string headerLine = (index_next == std::string::npos)
+					? cgiHeadersStr.substr(index)
+					: cgiHeadersStr.substr(index, index_next - index);
+
+				if (!cgiHeaders.parseLine(headerLine))
+				{
+					client.getResponse().setInternalServerError();
+					client.setMessageToSend(client.getResponse().toString());
+				}
+				if (index_next == std::string::npos)
+					break;
+				index = index_next + 2;
+			}
+			client.getResponse()
+				.setOk()
+				.setBody(cgiResponse.substr(separatorIndex + 4));
+			client.setMessageToSend(client.getResponse().toString());
+		}
+	}
 	void Server::handleGetFile(http::Client &client, conn::Monitor &monitor)
 	{
 

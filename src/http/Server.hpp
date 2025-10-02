@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/02 00:07:33 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/02 01:20:35 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ namespace http
 		void addCgiRoute(const std::string &route);
 		void onFileRead(http::Client &client, const std::string fileContent);
 		void onFileWritten(http::Client &client);
+		void onCgiResponse(http::Client &client, const std::string cgiResponse);
 		void onServerError(http::Client &client);
 		void serve(Client &client, conn::Monitor &monitor);
 		const std::vector<std::string> &getCgiRoutes() const;

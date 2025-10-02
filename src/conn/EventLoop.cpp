@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/01 23:59:29 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/02 01:27:06 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <cerrno>
 
 #include "Headers.hpp"
-
+#include "devUtil.hpp"
 namespace conn
 {
 
@@ -83,6 +83,14 @@ namespace conn
 		this->removeFds.insert(fd);
 		// defer removing to approriate moment to avoid iterator invalidation
 		// on EventLoop.loop
+	}
+
+	void EventLoop::unsubscribeOperation(int operationFd)
+	{
+		close(operationFd);
+		this->unsubscribeFd(operationFd);
+		Operation op = {Operation::ANY, operationFd};
+		this->operations.erase(this->operations.find(op));
 	}
 
 	void EventLoop::unsubscribeHttpClient(
@@ -178,82 +186,9 @@ namespace conn
 			event.events = POLLIN | POLLOUT; // subscribe for reads and writes
 			event.fd = cgiFd;
 			events.push_back(event);
-			client.setOperationFd(cgiFd);
+			client.setOperationFd(cgiFd, "hello=there&abc=def"); // TODO send request body
 			Operation op = {Operation::CGI, cgiFd};
 			this->operations.insert(std::make_pair(op, clientPtr));
-
-			std::cout << "parent writing to cgi: " << std::endl;
-			BufferedWriter writer(cgiFd);
-			writer.setMessage("hello=there&abc=def");
-			std::pair<WriteState, char *> flushResult(
-				BufferedWriter::WRITING, 0);
-			std::cout << writer.getState() << std::endl;
-			while (flushResult.first == BufferedWriter::WRITING)
-				flushResult = writer.flushMessage();
-			//shutdown(cgiFd,SHUT_WR);
-
-			// Read CGI response
-			std::cout << "parent done writing to cgi:" << std::endl;
-			BufferedReader reader(cgiFd);
-			std::pair<ReadState, char *> readResult;
-			while(readResult.first == BufferedReader::READING)
-			{
-				std::cout << "parent reading" << std::endl;
-				readResult = reader.readAll();
-			}
-			std::cout << "parent done reading" << std::endl;
-			if (readResult.first != BufferedReader::NO_CONTENT)
-			{
-				std::cout << "error exit" << std::endl;
-				// TODO error on cgi reading
-				client.getResponse().setInternalServerError();
-				client.setMessageToSend(client.getResponse().toString());
-				close(cgiFd);
-				return ;
-			}
-
-			std::string cgiResponseString(readResult.second);
-			delete[] readResult.second;
-			close(cgiFd);
-			client.clearReadOperation();
-			client.clearWriteOperation();
-			std::cout << "CGI Response: "<< cgiResponseString << std::endl;
-
-			// Parse headers and body
-			size_t separatorIndex = cgiResponseString.find("\r\n\r\n");
-			if (separatorIndex == std::string::npos)
-			{
-				client.getResponse().setOk().setBody(cgiResponseString);
-				client.setMessageToSend(client.getResponse().toString());
-			}
-			else
-			{
-				std::string cgiHeadersStr = cgiResponseString
-					.substr(0, separatorIndex);
-				http::Headers &cgiHeaders = client.getResponse().headers();
-
-				size_t index = 0;
-				while (1)
-				{
-					size_t index_next = cgiHeadersStr.find("\r\n", index);
-					std::string headerLine = (index_next == std::string::npos)
-						? cgiHeadersStr.substr(index)
-						: cgiHeadersStr.substr(index, index_next - index);
-
-					if (!cgiHeaders.parseLine(headerLine))
-					{
-						client.getResponse().setInternalServerError();
-						client.setMessageToSend(client.getResponse().toString());
-					}
-					if (index_next == std::string::npos)
-						break;
-					index = index_next + 2;
-				}
-				client.getResponse()
-					.setOk()
-					.setBody(cgiResponseString.substr(separatorIndex + 4));
-				client.setMessageToSend(client.getResponse().toString());
-			}
 		}
 	}
 
@@ -294,9 +229,8 @@ namespace conn
 				server->onServerError(client);
 		}
 
-		this->unsubscribeFd(eventIt->fd);
-		Operation op = {Operation::FILE_WRITE, eventIt->fd};
-		this->operations.erase(this->operations.find(op));
+		this->unsubscribeOperation(eventIt->fd);
+		client.clearWriteOperation();
 	}
 
 	void EventLoop::handleFileReads(
@@ -325,10 +259,71 @@ namespace conn
 					  << readResult.second << std::endl;
 		}
 
-		this->unsubscribeFd(eventIt->fd);
-		Operation op = {Operation::FILE_READ, eventIt->fd};
-		this->operations.erase(this->operations.find(op));
+		this->unsubscribeOperation(eventIt->fd);
 		client->clearReadOperation();
+	}
+
+	void EventLoop::handleCgiWrite(
+		http::Client &client, ListEvents::iterator &eventIt)
+	{
+
+		if (client.getWriterState() != BufferedWriter::WRITING)
+			return ;
+		int cgiFd = eventIt->fd;
+		// Write CGI request
+		std::cout << "parent writing to cgi: " << std::endl;
+
+		std::pair<WriteState, char *> flushResult = client.flushOperation();
+		if (flushResult.first == BufferedWriter::WRITING)
+			return;
+
+		if (flushResult.first == BufferedWriter::ERROR)
+		{
+			TODO("handle error writing to cgi process");
+			http::Server *server = client.getServer();
+			if (server)
+				server->onServerError(client);
+		}
+		std::cout << "parent done writing to cgi:" << std::endl;
+		client.clearWriteOperation();
+		client.setOperationFd(cgiFd);
+		return;
+	}
+
+	void EventLoop::handleCgiRead(
+		http::Client &client, ListEvents::iterator &eventIt)
+	{
+		int cgiFd = eventIt->fd;
+		// Read CGI response
+		std::pair<ReadState, char *> readResult = client.readAllOperationFd();
+		if(readResult.first == BufferedReader::READING)
+		{
+			std::cout << "parent reading" << std::endl;
+			return ;
+		}
+		std::cout << "parent done reading" << std::endl;
+		if (readResult.first != BufferedReader::NO_CONTENT)
+		{
+			std::cout << "error exit" << std::endl;
+			// TODO error on cgi reading
+			TODO("error on cgi reading");
+			client.getResponse().setInternalServerError();
+			client.setMessageToSend(client.getResponse().toString());
+			close(cgiFd);
+			return ;
+		}
+
+		std::string cgiResponseString(readResult.second);
+		delete[] readResult.second;
+
+		std::cout << "CGI Response: "<< cgiResponseString << std::endl;
+
+		this->unsubscribeOperation(eventIt->fd);
+		client.clearReadOperation();
+
+		http::Server *server = client.getServer();
+		if (server)
+			server->onCgiResponse(client, cgiResponseString);
 	}
 
 	void EventLoop::handleClientRequest(
@@ -423,7 +418,7 @@ namespace conn
 
 	void EventLoop::handleFdEvent(ListEvents::iterator &monitoredIt)
 	{
-		std::cout << "monitoredFd  " << monitoredIt->fd << std::endl;
+		// std::cout << "monitoredFd  " << monitoredIt->fd << std::endl;
 		if (monitoredIt->revents & (POLLHUP | POLLERR))
 		{ // close
 			std::cout << "close: " << monitoredIt->fd << std::endl;
@@ -437,7 +432,7 @@ namespace conn
 
 		if (monitoredIt->revents & POLLOUT)
 		{ // fd is available for write
-			std::cout << "out "  << monitoredIt->fd << std::endl;
+			// std::cout << "out "  << monitoredIt->fd << std::endl;
 			Operation op = {Operation::ANY, monitoredIt->fd};
 			MapOperations::iterator operationIt = this->operations.find(op);
 			if (operationIt != this->operations.end()
@@ -446,6 +441,15 @@ namespace conn
 				http::Client *client = operationIt->second;
 				if (client) {
 					this->handleFileWrite(*client, monitoredIt);
+				}
+				return;
+			}
+			if (operationIt != this->operations.end()
+				&& operationIt->first.type == Operation::CGI)
+			{
+				http::Client *client = operationIt->second;
+				if (client) {
+					this->handleCgiWrite(*client, monitoredIt);
 				}
 				return;
 			}
@@ -486,6 +490,14 @@ namespace conn
 			{
 				http::Client *client = operationIt->second;
 				this->handleFileReads(client, monitoredIt);
+				return;
+			}
+			if (operationIt != this->operations.end()
+				&& operationIt->first.type == Operation::CGI)
+			{
+				http::Client *client = operationIt->second;
+				if (client)
+					this->handleCgiRead(*client, monitoredIt);
 				return;
 			}
 		}
