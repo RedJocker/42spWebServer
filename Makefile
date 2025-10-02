@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/09/23 19:07:13 by maurodri         ###   ########.fr        #
+#    Updated: 2025/10/01 22:08:46 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,7 @@ INCLUDE_DIRS := $(BASE_DIR) \
 BASE_FILES := $(addprefix $(BASE_DIR)/, main.cpp)
 CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp \
 					TcpClient.cpp \
+					Operation.cpp \
 					EventLoop.cpp)
 UTIL_FILES := $(addprefix $(UTIL_DIR)/, BufferedReader.cpp\
 					BufferedWriter.cpp \
