@@ -39,6 +39,7 @@ namespace conn {
 		virtual void unsubscribeHttpClient(ListEvents::iterator &eventIt) = 0;
 		virtual void subscribeFileRead(int fileFd, int clientFd) = 0;
 		virtual void subscribeFileWrite(int fileFd, int clientFd, std::string content) = 0;
+		virtual void subscribeCgi(int fileFd, int clientFd) = 0;
 		virtual void shutdown(void) = 0;
 	};
 

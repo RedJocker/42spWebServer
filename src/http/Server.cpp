@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/02 00:13:58 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/02 00:16:15 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,81 +172,6 @@ namespace http
 
 		// Write request body to CGI
 		int cgiFd = sockets[1];
-
-
-
-		std::cout << "parent writing to cgi: " << std::endl;
-		BufferedWriter writer(cgiFd);
-		writer.setMessage("hello=there&abc=def");
-		std::pair<WriteState, char *> flushResult(
-												  BufferedWriter::WRITING, 0);
-		std::cout << writer.getState() << std::endl;
-		while (flushResult.first == BufferedWriter::WRITING)
-			flushResult = writer.flushMessage();
-		//shutdown(cgiFd,SHUT_WR);
-
-		// Read CGI response
-		std::cout << "parent done writing to cgi:" << std::endl;
-		BufferedReader reader(cgiFd);
-		std::pair<ReadState, char *> readResult;
-		while(readResult.first == BufferedReader::READING)
-		{
-			std::cout << "parent reading" << std::endl;
-			readResult = reader.readAll();
-		}
-		std::cout << "parent done reading" << std::endl;
-		if (readResult.first != BufferedReader::NO_CONTENT)
-		{
-			std::cout << "error exit" << std::endl;
-			// TODO error on cgi reading
-			client.getResponse().setInternalServerError();
-			client.setMessageToSend(client.getResponse().toString());
-			close(cgiFd);
-			return ;
-		}
-
-		std::string cgiResponseString(readResult.second);
-		delete[] readResult.second;
-		close(cgiFd);
-		client.clearReadOperation();
-		client.clearWriteOperation();
-		std::cout << "CGI Response: "<< cgiResponseString << std::endl;
-
-		// Parse headers and body
-		size_t separatorIndex = cgiResponseString.find("\r\n\r\n");
-		if (separatorIndex == std::string::npos)
-		{
-			client.getResponse().setOk().setBody(cgiResponseString);
-			client.setMessageToSend(client.getResponse().toString());
-		}
-		else
-		{
-			std::string cgiHeadersStr = cgiResponseString
-				.substr(0, separatorIndex);
-			http::Headers &cgiHeaders = client.getResponse().headers();
-
-			size_t index = 0;
-			while (1)
-			{
-				size_t index_next = cgiHeadersStr.find("\r\n", index);
-				std::string headerLine = (index_next == std::string::npos)
-					? cgiHeadersStr.substr(index)
-					: cgiHeadersStr.substr(index, index_next - index);
-
-				if (!cgiHeaders.parseLine(headerLine))
-				{
-					client.getResponse().setInternalServerError();
-					client.setMessageToSend(client.getResponse().toString());
-				}
-				if (index_next == std::string::npos)
-					break;
-				index = index_next + 2;
-			}
-			client.getResponse()
-				.setOk()
-				.setBody(cgiResponseString.substr(separatorIndex + 4));
-			client.setMessageToSend(client.getResponse().toString());
-		}
 
 		monitor.subscribeCgi(cgiFd, client.getFd());
 	}

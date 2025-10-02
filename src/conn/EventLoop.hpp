@@ -63,6 +63,7 @@ namespace conn
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
 		void subscribeFileRead(int fileFd, int clientFd);
 		void subscribeFileWrite(int fileFd, int clientFd, std::string content);
+		void subscribeCgi(int fileFd, int clientFd);
 		void shutdown(void);
 	};
 
