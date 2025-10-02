@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/10 12:24:03 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/23 19:04:42 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/02 00:01:13 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,13 @@
 # include "Server.hpp"
 # include <poll.h>
 # include <set>
+# include "Operation.hpp"
 
 namespace conn {
 
 	typedef std::map<int, http::Server*> MapServer;
 	typedef std::map<int, http::Client*> MapClient;
-	typedef std::map<int, http::Client*> MapFileReads;
-	typedef std::map<int, http::Client*> MapFileWrites;
+	typedef std::map<Operation, http::Client*> MapOperations;
 	typedef std::vector<struct pollfd> ListEvents;
 	typedef std::set<int> SetRemoveFd;
 	class Monitor

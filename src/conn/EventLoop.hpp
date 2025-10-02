@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/23 19:04:43 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/01 23:02:50 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,7 @@ namespace conn
 		ListEvents events;
 		MapServer servers;
 		MapClient clients;
-		MapFileReads fileReads;
-		MapFileWrites fileWrites;
+		MapOperations operations;
 		SetRemoveFd removeFds;
 		http::Dispatcher dispatcher;
 

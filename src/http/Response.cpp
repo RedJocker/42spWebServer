@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/16 23:05:01 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/01 19:16:50 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,10 +119,11 @@ namespace http {
 
 	Response &Response::setInternalServerError()
 	{
-		(*this)
-			.setStatusCode(500)
-			.setStatusInfo("Internal Server Error")
-			.addHeader("Content-length", "0");
+	    (*this)
+	        .setStatusCode(500)
+	        .setStatusInfo("Internal Server Error")
+	        .addHeader("Content-length", "0")
+	        .addHeader("Connection", "Close");
 		return *this;
 	}
 
