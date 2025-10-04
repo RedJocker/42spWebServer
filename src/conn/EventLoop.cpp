@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/04 05:22:15 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/04 05:47:48 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -453,7 +453,6 @@ namespace conn
 				if (client) {
 					this->handleCgiWrite(*client, monitoredIt);
 				}
-				return;
 			}
 			MapClient::iterator clientIt = this->clients.find(monitoredIt->fd);
 			if (clientIt != this->clients.end())
