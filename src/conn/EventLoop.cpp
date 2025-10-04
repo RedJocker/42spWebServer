@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/02 01:27:06 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/04 05:22:15 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 #include "devUtil.hpp"
 namespace conn
 {
+
+	bool EventLoop::shouldExit = false;
 
 	EventLoop::EventLoop()
 	{
@@ -526,11 +528,12 @@ namespace conn
 		clients.clear();
 		operations.clear();
 		removeFds.clear();
+		EventLoop::shouldExit = true;
 	}
 
 	bool EventLoop::loop()
 	{
-		while (true)
+		while (!EventLoop::shouldExit)
 		{
 			// waiting for ready event from epoll
 			 // -1 without timeout
@@ -550,7 +553,7 @@ namespace conn
 				 monitoredIt != this->events.end() && numReadyEvents > 0;
 				 )
 			{
-				// remove unsubscrived from last iteration
+				// remove unsubscribed from last iteration
 				SetRemoveFd::iterator removeIt =
 					this->removeFds.find(monitoredIt->fd);
 				if (removeIt != this->removeFds.end())
@@ -568,5 +571,7 @@ namespace conn
 				++monitoredIt;
 			}
 		}
+		this->shutdown();
+		return true;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/02 01:04:29 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/04 05:18:39 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ namespace conn
 {
 	class EventLoop : public Monitor
 	{
+
 		ListEvents events;
 		MapServer servers;
 		MapClient clients;
@@ -55,6 +56,7 @@ namespace conn
 	    void unsubscribeFd(int fd);
 		void unsubscribeOperation(int operationFd);
 	public:
+		static bool shouldExit;
 
 		EventLoop();
 		EventLoop(const EventLoop &other);

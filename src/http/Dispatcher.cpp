@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/01 21:43:09 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/04 05:17:43 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdlib>
+#include "EventLoop.hpp"
 
 namespace http {
 
@@ -59,12 +60,21 @@ namespace http {
 	{
 		const std::string &method = client.getRequest().getMethod();
 
-
 	    if (method == "TRACE")
 		{
 			handleTrace(client);
 			return ;
 	    }
+
+		//TODO: handle sigint signal setting shouldExit to true
+		// and remove this if statement 
+		if(method == "GET" && client.getRequest().getPath() == "/exit")
+		{
+			conn::EventLoop::shouldExit = true;
+			return ;
+		}
+		// 
+
 
 	    http::Server *server = client.getServer();
 
