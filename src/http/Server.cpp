@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/02 01:21:51 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/04 05:48:25 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@
 #include <dirent.h>
 #include <iostream>
 #include <sstream>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 
 namespace http
 {
@@ -124,11 +127,6 @@ namespace http
 			std::vector<char *> envp;
 			client.getRequest().envpInit(envp);
 
-			monitor.shutdown(); // shutdown EventLoop
-			close(sockets[1]);
-			dup2(sockets[0], 0); // stdin
-			dup2(sockets[0], 1); // stdout
-
 			// Dynamic server docroot
 			std::string docroot = this->getDocroot();
 			std::string filePath;
@@ -145,6 +143,11 @@ namespace http
 			args[0] = "/usr/bin/php-cgi";
 			args[1] = filePath.c_str();
 			args[2] = 0;
+
+			close(sockets[1]);
+			dup2(sockets[0], 0); // stdin
+			dup2(sockets[0], 1); // stdout
+			monitor.shutdown(); // shutdown EventLoop
 
 			execve(args[0],
 				   const_cast<char **>(args),
