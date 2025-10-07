@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/06 20:59:52 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/07 00:59:30 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -312,7 +312,7 @@ namespace http
 			 it != entries.end();
 			 ++it)
 		{
-			html << "<li><a href=\"" << *it << "\">" << *it << "</a></li>";
+			html << "<li><a href=\"./" << *it << "\">" << *it << "</a></li>";
 		}
 		html << "</ul></body></html>";
 
