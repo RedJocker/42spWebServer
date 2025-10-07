@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-//   Updated: 2025/09/23 19:04:43 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/04 05:18:39 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@ namespace conn
 {
 	class EventLoop : public Monitor
 	{
+
 		ListEvents events;
 		MapServer servers;
 		MapClient clients;
-		MapFileReads fileReads;
-		MapFileWrites fileWrites;
+		MapOperations operations;
 		SetRemoveFd removeFds;
 		http::Dispatcher dispatcher;
 
@@ -47,10 +47,16 @@ namespace conn
 			http::Client *client,  ListEvents::iterator &eventIt);
 		void handleFileWrite(
 			http::Client &client,  ListEvents::iterator &eventIt);
+		void handleCgiWrite(
+			http::Client &client,  ListEvents::iterator &eventIt);
+		void handleCgiRead(
+			http::Client &client,  ListEvents::iterator &eventIt);
 
 		void handleFdEvent(ListEvents::iterator &monitoredIt);
 	    void unsubscribeFd(int fd);
+		void unsubscribeOperation(int operationFd);
 	public:
+		static bool shouldExit;
 
 		EventLoop();
 		EventLoop(const EventLoop &other);
@@ -64,6 +70,7 @@ namespace conn
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
 		void subscribeFileRead(int fileFd, int clientFd);
 		void subscribeFileWrite(int fileFd, int clientFd, std::string content);
+		void subscribeCgi(int fileFd, int clientFd);
 		void shutdown(void);
 	};
 

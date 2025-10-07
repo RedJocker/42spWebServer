@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/22 20:16:46 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/07 01:12:46 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
+#include <cstring>
 
 namespace http
 {
@@ -221,28 +222,44 @@ namespace http
 		return requestStream.str();
 	}
 
-	void Request::envpInit(std::vector<char *> &envp)
+	char **Request::envp() const
+	{
+		std::vector<std::string> envp;
+		this->envpInit(envp);
+
+		size_t envp_len = envp.size() + 1;
+		char **envp_on_heap = new char*[envp_len];
+
+		for (size_t i = 0; i < envp_len - 1; ++i)
+		{
+			size_t strSize = envp.at(i).size() + 1;
+			char *str = new char[strSize];
+			::strncpy(str, envp.at(i).c_str(), strSize);
+			str[strSize - 1] = '\0';
+			envp_on_heap[i] = str;
+		}
+		envp_on_heap[envp_len - 1] = reinterpret_cast<char *>(0);
+		return envp_on_heap;
+	}
+
+	void Request::envpInit(std::vector<std::string> &envp) const
 	{
 	    // TODO fill envp with variables for cgi process
 	    // taken from request data
 
 	    //// headers required for all cgi request
-			envp.push_back(const_cast<char *>("REQUEST_METHOD=POST")); // take from request method
-			envp.push_back(const_cast<char *>("REDIRECT_STATUS=0")); // always 0?
-	    	envp.push_back(const_cast<char *>("SCRIPT_FILENAME=./www/todo.cgi")); // build from request path and docroot
+			envp.push_back("REQUEST_METHOD=" + this->_method); // take from request method
+			envp.push_back("REDIRECT_STATUS=0"); // always 0?
+	    	envp.push_back("SCRIPT_FILENAME=./www/todo.cgi"); // build from request path and docroot
 	    ////
 
 	    /// headers required for cgi request with body (body is passed by parent on stdin)
-	    	envp.push_back(const_cast<char *>("CONTENT_TYPE=application/"
-											  "x-www-form-urlencoded")); // take from request header
-			envp.push_back(const_cast<char *>("CONTENT_LENGTH=19")); // take from request header
+	    	envp.push_back("CONTENT_TYPE=application/x-www-form-urlencoded"); // take from request header
+			envp.push_back("CONTENT_LENGTH=19"); // take from request header
 		////
 
 		//// headers required for passing query string
-			//envp.push_back(const_cast<char *>("QUERY_STRING=hello=there&yyy=xxx"));  build from request path
+			envp.push_back("QUERY_STRING=hello=there&yyy=xxx"); //  build from request path
 		////
-
-		//// envp must terminate with NULL
-		envp.push_back((char *) 0);
 	}
 }

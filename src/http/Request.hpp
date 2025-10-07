@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/19 21:51:25 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/06 20:21:11 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ namespace http
 		std::string getBody(void) const;
 
 		std::string toString(void) const;
-		void envpInit(std::vector<char *> &envp);
+		char **envp() const;
 	private:
 		std::string _method;
 		std::string _path;
@@ -61,6 +61,7 @@ namespace http
 
 		ReadState _state;
 
+		void envpInit(std::vector<std::string> &envp) const;
 		bool parseRequestLine(const std::string &line);
 		ReadState readRequestLine(BufferedReader &reader);
 		ReadState readHeaderLine(BufferedReader &reader);

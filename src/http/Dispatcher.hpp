@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:12 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/25 17:02:05 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/10/01 19:41:41 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,16 +24,7 @@ namespace http
 
 	class Dispatcher {
 
-		void handleTrace(http::Client &client, Response &response);
-		void handleGetFile(
-			http::Client &client, Response &response, conn::Monitor &monitor);
-		void handleGetDirectory(
-			http::Client &client, Response &response);
-		void handlePost(http::Client &client, Response &response, conn::Monitor &monitor);
-		void handleDelete(http::Client &client, Response &response);
-
-		bool isCgiRequest(http::Client &client, conn::Monitor &monitor);
-		void handleCgiRequest(http::Client &client, conn::Monitor &monitor);
+		void handleTrace(http::Client &client);
 
 	public:
 

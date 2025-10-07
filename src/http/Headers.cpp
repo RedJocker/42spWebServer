@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 20:26:13 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/02 15:32:21 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,10 @@ namespace http {
 			this->_headers = other._headers;
 		return *this;
 	}
-	Headers::~Headers(void) {}
+	Headers::~Headers(void)
+	{
+		this->clear();
+	}
 
 	// Single header line
 	bool Headers::parseLine(const std::string &line) {

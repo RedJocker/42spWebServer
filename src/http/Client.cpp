@@ -6,12 +6,13 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/25 16:57:32 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/06 20:02:32 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "Server.hpp"
+#include <iostream>
 
 namespace http {
 
@@ -32,7 +33,7 @@ namespace http {
 	}
 
 	Client::~Client() {
-		//TODO
+
 	}
 
 	Request &Client::readHttpRequest() {
