@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/04 02:52:55 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/06 20:02:32 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ namespace http {
 	}
 
 	Client::~Client() {
-		std::cout << "Client::~Client()" << std::endl;
+
 	}
 
 	Request &Client::readHttpRequest() {

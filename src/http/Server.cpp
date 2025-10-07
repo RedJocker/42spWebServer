@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/04 05:48:25 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/06 20:59:52 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,8 +124,7 @@ namespace http
 			const std::string &path = client.getRequest().getPath();
 
 			// Init CGI env
-			std::vector<char *> envp;
-			client.getRequest().envpInit(envp);
+			char **envp = client.getRequest().envp();
 
 			// Dynamic server docroot
 			std::string docroot = this->getDocroot();
@@ -151,7 +150,7 @@ namespace http
 
 			execve(args[0],
 				   const_cast<char **>(args),
-				   reinterpret_cast<char **>(envp.data()));
+				   envp);
 
 			// If execve fails, exit child
 			std::cerr << "Failed to exec php-cgi: "
@@ -161,9 +160,14 @@ namespace http
 			args[0] = "/opt/homebrew/bin/php-cgi";
 			execve(args[0],
 				   const_cast<char **>(args),
-				   reinterpret_cast<char **>(envp.data()));
+				   envp);
 			std::cerr << "Failed to exec on retry: "
 					  << strerror(errno) << std::endl;
+			for (size_t i = 0; envp[i] != 0; ++i)
+			{
+				delete envp[i];
+			}
+			delete[] envp;
 			close(sockets[0]);
 			::exit(11);
 		}
