@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/07 00:59:30 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/07 19:00:04 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,9 @@ namespace http
 
 	void Server::onFileRead(http::Client &client, std::string fileContent)
 	{
+
 		client.getResponse()
+			.addHeader("Content-Type", "text/html") // TODO infer file type from extension
 			.setOk()
 			.setBody(fileContent);
 		client.setMessageToSend(client.getResponse().toString());
@@ -267,7 +269,6 @@ namespace http
 			return ;
 		}
 		std::cout << "clientFd = " << client.getFd() << std::endl;
-		// TODO: subscribe fd on EventLoop, maybe reuse reader from client
 		monitor.subscribeFileRead(fd, client.getFd());
 	}
 
@@ -317,6 +318,7 @@ namespace http
 		html << "</ul></body></html>";
 
 		response.setOk()
+			.addHeader("Content-Type", "text/html")
 			.setBody(html.str());
 		client.setMessageToSend(response.toString());
 	}

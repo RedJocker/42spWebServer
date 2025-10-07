@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/01 19:16:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/07 17:55:29 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ namespace http {
 		(*this)
 			.setStatusCode(404)
 			.setStatusInfo("Not Found")
-			.addHeader("Content-length", "0");
+			.addHeader("Content-Length", "0");
 		return *this;
 	}
 
@@ -113,7 +113,7 @@ namespace http {
 		(*this)
 			.setStatusCode(418)
 			.setStatusInfo("I'm a teapot")
-			.addHeader("Content-length", "0");
+			.addHeader("Content-Length", "0");
 		return *this;
 	}
 
@@ -122,7 +122,7 @@ namespace http {
 	    (*this)
 	        .setStatusCode(500)
 	        .setStatusInfo("Internal Server Error")
-	        .addHeader("Content-length", "0")
+	        .addHeader("Content-Length", "0")
 	        .addHeader("Connection", "Close");
 		return *this;
 	}
@@ -132,7 +132,7 @@ namespace http {
 		(*this)
 			.setStatusCode(400)
 			.setStatusInfo("Bad Request")
-			.addHeader("Content-length", "0");
+			.addHeader("Content-Length", "0");
 		return *this;
 	}
 
@@ -141,7 +141,7 @@ namespace http {
 		(*this)
 			.setStatusCode(201)
 			.setStatusInfo("Created")
-			.addHeader("Content-length", "0");
+			.addHeader("Content-Length", "0");
 		return *this;
 	}
 
