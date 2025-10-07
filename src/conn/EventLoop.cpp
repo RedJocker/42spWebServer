@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/04 05:47:48 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/07 00:56:24 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,9 @@ namespace conn
 		http::Client *httpClient = new http::Client(fd, server);
 		if (httpClient != 0)
 		{
-			this->events.push_back(event);
 			std::pair<MapClient::iterator, bool> insertResult =
 				clients.insert(std::make_pair(event.fd, httpClient));
+			this->events.push_back(event);
 			return insertResult.second;
 		}
 		return false;

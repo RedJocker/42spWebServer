@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/06 20:59:20 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/07 01:12:46 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
+#include <cstring>
 
 namespace http
 {
@@ -233,7 +234,8 @@ namespace http
 		{
 			size_t strSize = envp.at(i).size() + 1;
 			char *str = new char[strSize];
-			::strlcpy(str, envp.at(i).c_str(), strSize);
+			::strncpy(str, envp.at(i).c_str(), strSize);
+			str[strSize - 1] = '\0';
 			envp_on_heap[i] = str;
 		}
 		envp_on_heap[envp_len - 1] = reinterpret_cast<char *>(0);

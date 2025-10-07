@@ -6,7 +6,7 @@
 ;    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/10/06 19:13:04 by maurodri          #+#    #+#              ;
-;    Updated: 2025/10/06 20:56:57 by maurodri         ###   ########.fr        ;
+;    Updated: 2025/10/07 00:39:50 by maurodri         ###   ########.fr        ;
 ;                                                                              ;
 ;******************************************************************************;
 
@@ -54,5 +54,6 @@ Content-Length: %d\r\n\
 (httpGet connection "/42/..")
 (httpGet connection "/42/../42")
 (httpGet connection "/42/index.html")
-(delete-process conn) ; close tcp connection
+(httpGet connection "/exit")
+(delete-process connection) ; close tcp connection
 
