@@ -6,16 +6,28 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/01 18:41:13 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/08 03:53:48 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventLoop.hpp"
 #include <iostream>
 #include "devUtil.hpp"
+#include <signal.h>
+
+
+void signalHandler(int sig)
+{
+	if (sig == SIGINT)
+	{
+		std::cout << "Server shutdown required: "<< std::endl;
+		conn::EventLoop::shouldExit = true;
+	}
+}
 
 int main(void)
 {
+	signal(SIGINT, &signalHandler);
 	conn::EventLoop eventLoop;
 
 	http::Server server("localhost", "./www", 8080);
