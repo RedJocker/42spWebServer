@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/07 00:56:24 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/07 17:44:43 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -343,9 +343,11 @@ namespace conn
 			case http::Request::READ_COMPLETE: {
 				// has finished reading has message and client still alive
 				std::cout << "done reading: "
-					  << req.getMethod() << " "
-					  << req.getPath() << " "
-					  << req.getProtocol() << std::endl;
+					  // << req.getMethod() << " "
+					  // << req.getPath() << " "
+					  // << req.getProtocol()
+						  << req.toString()
+						  << std::endl;
 
 				dispatcher.dispatch(*client, *this);
 

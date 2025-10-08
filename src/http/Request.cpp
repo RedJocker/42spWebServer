@@ -6,12 +6,11 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/07 01:12:46 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/07 19:28:46 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include "TcpClient.hpp"
 #include "BufferedReader.hpp"
 #include <sstream>
 #include <cstdlib>
@@ -114,7 +113,8 @@ namespace http
 			delete[] result.second;
 
 			if (line.empty()) { // End of Headers
-				std::string contentLength = _headers.getHeader("Content-Length");
+				std::string contentLength =
+					_headers.getHeader("Content-Length");
 				if (!contentLength.empty())
 					_state = READING_BODY; // Body to read
 				else
