@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/08 03:54:59 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/08 10:39:03 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ namespace conn
 		event.events = POLLIN; // subscribe for reads only
 		event.fd = server->getServerFd();
 
-		this->events.push_back(event);
+		this->subscribeFds.push_back(event);
 
 		servers.insert(std::make_pair(server->getServerFd(), server));
 
@@ -62,7 +62,6 @@ namespace conn
 
 	bool EventLoop::subscribeHttpClient(int fd, http::Server *server)
 	{
-
 		struct pollfd event;
 
 		event.events = POLLIN|POLLOUT; // subscribe for reads and writes
@@ -73,7 +72,7 @@ namespace conn
 		{
 			std::pair<MapClient::iterator, bool> insertResult =
 				clients.insert(std::make_pair(event.fd, httpClient));
-			this->events.push_back(event);
+			this->subscribeFds.push_back(event);
 			return insertResult.second;
 		}
 		return false;
@@ -81,7 +80,6 @@ namespace conn
 
 	void EventLoop::unsubscribeFd(int fd)
 	{
-		close(fd);
 		this->removeFds.insert(fd);
 		// defer removing to approriate moment to avoid iterator invalidation
 		// on EventLoop.loop
@@ -89,7 +87,7 @@ namespace conn
 
 	void EventLoop::unsubscribeOperation(int operationFd)
 	{
-		close(operationFd);
+		std::cout << "unsubscribeOperation " <<  operationFd << std::endl;
 		this->unsubscribeFd(operationFd);
 		Operation op = {Operation::ANY, operationFd};
 		this->operations.erase(this->operations.find(op));
@@ -107,7 +105,6 @@ namespace conn
 		{
 			if (it->second->getFd() == clientFd)
 			{
-				close(it->first.fd);
 				unsubscribeFd(it->first.fd);
 				operations.erase(it);
 				break;
@@ -152,7 +149,7 @@ namespace conn
 			struct pollfd event;
 			event.events = POLLIN; // subscribe for reads
 			event.fd = fileFd;
-			events.push_back(event);
+			this->subscribeFds.push_back(event);
 			client->setOperationFd(fileFd);
 			Operation op = {Operation::FILE_READ, fileFd};
 			this->operations.insert(std::make_pair(op, client));
@@ -169,7 +166,7 @@ namespace conn
 			struct pollfd event;
 			event.events = POLLOUT; // subscribe for writes
 			event.fd = fileFd;
-			events.push_back(event);
+			this->subscribeFds.push_back(event);
 			client->setOperationFd(fileFd, content);
 			Operation op = {Operation::FILE_WRITE, fileFd};
 			this->operations.insert(std::make_pair(op, client));
@@ -187,7 +184,7 @@ namespace conn
 			struct pollfd event;
 			event.events = POLLIN | POLLOUT; // subscribe for reads and writes
 			event.fd = cgiFd;
-			events.push_back(event);
+			this->subscribeFds.push_back(event);
 			client.setOperationFd(cgiFd, "hello=there&abc=def"); // TODO send request body
 			Operation op = {Operation::CGI, cgiFd};
 			this->operations.insert(std::make_pair(op, clientPtr));
@@ -536,6 +533,15 @@ namespace conn
 	{
 		while (!EventLoop::shouldExit)
 		{
+			if (!this->subscribeFds.empty())
+			{
+				// complete pending subscriptions
+				this->events.insert(
+					this->events.end(),
+					this->subscribeFds.begin(),
+					this->subscribeFds.end());
+				this->subscribeFds.clear();
+			}
 			// waiting for ready event from epoll
 			 // -1 without timeout
 			int numReadyEvents = poll(this->events.data(), events.size(), -1);
@@ -561,10 +567,12 @@ namespace conn
 				if (removeIt != this->removeFds.end())
 				{
 					std::cout << "removing  " << monitoredIt->fd << std::endl;
+					::close(monitoredIt->fd);
 					monitoredIt = this->events.erase(monitoredIt);
 					this->removeFds.erase(removeIt);
 					continue;
 				}
+
 				if (monitoredIt->revents & (POLLHUP | POLLERR | POLLOUT | POLLIN))
 				{// some event of this fd
 					handleFdEvent(monitoredIt);
