@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/04 05:18:39 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/08 10:27:21 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ namespace conn
 		MapClient clients;
 		MapOperations operations;
 		SetRemoveFd removeFds;
+		ListEvents subscribeFds;
+
 		http::Dispatcher dispatcher;
 
 		void connectServerToClient(http::Server *server);
