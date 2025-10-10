@@ -6,21 +6,11 @@
 ;    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/10/06 19:13:04 by maurodri          #+#    #+#              ;
-;    Updated: 2025/10/07 00:39:50 by maurodri         ###   ########.fr        ;
+;    Updated: 2025/10/10 02:51:06 by maurodri         ###   ########.fr        ;
 ;                                                                              ;
 ;******************************************************************************;
 
-; local variable buffer = new buffer
-(setq-local buffer (get-buffer-create "*42webclient*")) 
 
-; scoped variable connection = new tcp connection
-(setq-local connection (open-network-stream 
-       "42webclient"
-       buffer
-       "localhost"
-       8080
-       :type 'plain))
-			
 (defun httpGet (conn path)
   "Function  that makes a get request on path using conn"
   (process-send-string
@@ -42,6 +32,16 @@ Content-Length: %d\r\n\
    conn
    (format "DELETE %s HTTP/1.1\r\nHost: localhost\r\n\r\n" path)))
 
+
+; local variable connection = new tcp connection
+(setq-local connection (open-network-stream
+       "42webclient"
+       (get-buffer-create "*42webclient*")
+       "localhost"
+       8080
+       :type 'plain))
+
+
 (httpGet connection "/")
 (httpPost connection "/todo.cgi" "hello there")
 (httpGet connection "/todo.cgi")
@@ -55,5 +55,31 @@ Content-Length: %d\r\n\
 (httpGet connection "/42/../42")
 (httpGet connection "/42/index.html")
 (httpGet connection "/exit")
-(delete-process connection) ; close tcp connection
+;(delete-process connection) ; close tcp connection
 
+
+
+
+; local variable connection2 = new tcp connection
+(setq-local connection2 (open-network-stream
+       "42webclient"
+       (get-buffer-create "*42webclient*")
+       "localhost"
+       8080
+       :type 'plain))
+
+
+(httpGet connection2 "/")
+(httpPost connection2 "/todo.cgi" "hello there")
+(httpGet connection2 "/todo.cgi")
+(httpGet connection2 "/todo.cgi?hello=there&def=xhy")
+(httpDelete connection2 "/hello.txt")
+(httpGet connection2 "/hello.txt")
+(httpPost connection2 "/hello.txt" "content of hello there")
+(httpGet connection2 "/42")
+(httpGet connection2 "/42/")
+(httpGet connection2 "/42/..")
+(httpGet connection2 "/42/../42")
+(httpGet connection2 "/42/index.html")
+(httpGet connection2 "/exit")
+;(delete-process connection2) ; close tcp connection

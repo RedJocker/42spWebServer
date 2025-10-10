@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/13 22:20:05 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/10 02:37:54 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -49,7 +49,6 @@ BufferedReader::~BufferedReader()
 
 }
 
-// returns allocated char* and reset read state
 bool BufferedReader::hasBufferedContent() const
 {
 	return this->buffered.size() > 0;
@@ -98,7 +97,6 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 		this->fd,
 		this->readBuffer,
 		std::min(toRead, static_cast<size_t>(BUFFER_SIZE)));
-
 	if (currentRead < 0)
 	{
 		return std::make_pair(
@@ -225,4 +223,20 @@ std::pair<ReadState, char *> BufferedReader::readAll(void)
 			readBuffer + currentRead);
 
 	return std::make_pair(READING, reinterpret_cast<char *>(0));
+}
+
+void BufferedReader::saveBuffer(void)
+{
+	this->saved.insert(this->saved.end(),
+		this->buffered.begin(),
+		this->buffered.end());
+}
+
+void BufferedReader::restoreSavedBuffer(void)
+{
+	this->buffered.clear();
+	this->buffered.insert(this->buffered.end(),
+		this->saved.begin(),
+		this->saved.end());
+	this->saved.clear();
 }

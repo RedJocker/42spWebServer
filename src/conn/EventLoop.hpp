@@ -6,24 +6,18 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/08 10:27:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/10 03:00:57 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EVENTLOOP_HPP
 # define EVENTLOOP_HPP
 
-#include <map>
-#include "TcpServer.hpp"
-#include "TcpClient.hpp"
 #include "Dispatcher.hpp"
 #include "Client.hpp"
-#include <poll.h>
 #include "Monitor.hpp"
-#include <iostream>
 
-# define MAX_EVENTS 6
-
+#include <poll.h>
 
 
 namespace conn
@@ -67,6 +61,7 @@ namespace conn
 
 		bool loop(void);
 
+		// Monitor required overrides
 		bool subscribeHttpServer(http::Server *server);
 		bool subscribeHttpClient(int fd, http::Server *server);
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
