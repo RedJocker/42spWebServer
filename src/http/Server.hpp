@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/07 17:38:02 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/13 13:39:59 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ namespace http
 		std::string getDocroot() const;
 
 		void addCgiRoute(const std::string &route);
-		void onFileRead(http::Client &client, const std::string fileContent);
+		void onFileRead(http::Client &client, const std::string &fileContent, const std::string &filePath);
 		void onFileWritten(http::Client &client);
 		void onCgiResponse(http::Client &client, const std::string cgiResponse);
 		void onServerError(http::Client &client);

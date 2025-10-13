@@ -6,13 +6,14 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/07 19:00:04 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/13 13:39:51 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "Monitor.hpp"
 #include "pathUtils.hpp"
+#include "devUtil.hpp"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -183,11 +184,11 @@ namespace http
 		monitor.subscribeCgi(cgiFd, client.getFd());
 	}
 
-	void Server::onFileRead(http::Client &client, std::string fileContent)
+	void Server::onFileRead(http::Client &client, const std::string &fileContent, const std::string &filePath)
 	{
-
+		std::string mimeType = utils::guessMimeType(filePath);
 		client.getResponse()
-			.addHeader("Content-Type", "text/html") // TODO infer file type from extension
+			.addHeader("Content-Type", mimeType)
 			.setOk()
 			.setBody(fileContent);
 		client.setMessageToSend(client.getResponse().toString());
@@ -248,12 +249,12 @@ namespace http
 	}
 	void Server::handleGetFile(http::Client &client, conn::Monitor &monitor)
 	{
-
 		std::cout << "Server::handleGetFile " << std::endl;
 		const std::string &path = client.getRequest().getPath();
 		std::string docroot = this->getDocroot();
 		Response &response = client.getResponse();
 		std::string filePath;
+
 		if (!utils::normalizeUrlPath(docroot, path, filePath))
 		{
 			response.setNotFound();
@@ -269,7 +270,7 @@ namespace http
 			return ;
 		}
 		std::cout << "clientFd = " << client.getFd() << std::endl;
-		monitor.subscribeFileRead(fd, client.getFd());
+		monitor.subscribeFileRead(fd, client.getFd(), &filePath);
 	}
 
 	void Server::handleGetDirectory(
