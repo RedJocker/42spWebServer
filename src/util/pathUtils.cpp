@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/23 20:01:36 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/13 11:24:36 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,11 @@ namespace utils {
 			outFullPath = root + "/";
 		} else {
 			outFullPath = root + sanitized;
+		}
+
+		// Prevent docroot escape
+		if (outFullPath.compare(0, root.size(), root) != 0) {
+			return false;
 		}
 
 		return true;
