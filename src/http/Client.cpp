@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/06 20:02:32 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/10 02:37:01 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ namespace http {
 
 	Client::Client(): conn::TcpClient(0) {}
 
-	Client::Client(int clientFd, Server *server): conn::TcpClient(clientFd), server(server) {}
+	Client::Client(int clientFd, Server *server)
+		: conn::TcpClient(clientFd), server(server) {}
 
 	Client::Client(const Client &other): conn::TcpClient(other) {
 		//TODO
@@ -59,8 +60,9 @@ namespace http {
 
 	void Client::clear()
 	{
-		this->clearReadOperation();
+		this->reader.saveBuffer();
 		this->request.clear();
 		this->response.clear();
+		this->clearReadOperation(); // restores buffer
 	}
 }

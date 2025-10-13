@@ -6,21 +6,21 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/08 10:39:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/10 03:01:54 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventLoop.hpp"
 #include "BufferedWriter.hpp"
 #include "Monitor.hpp"
+#include "devUtil.hpp"
+
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
 #include <cerrno>
 
-#include "Headers.hpp"
-#include "devUtil.hpp"
 namespace conn
 {
 
@@ -328,6 +328,8 @@ namespace conn
 	void EventLoop::handleClientRequest(
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
+		if (client->getOperationFd() >= 0)
+			return ; // client is already being served
 		http::Request &req = client->readHttpRequest();
 
 		switch (req.state()) {
@@ -404,8 +406,6 @@ namespace conn
 			if (requestClose)
 				client->getResponse().addHeader("Connection", "close");
 
-			// Clear client request/response for next request
-			client->clear();
 		} else if (flushResult.first == BufferedWriter::ERROR) {
 			// Handle write errors
 			throw std::domain_error("write ERROR");
@@ -414,7 +414,17 @@ namespace conn
 
 		// Unsubscribe the client if connection must close
 		if (requestClose)
+		{
 			unsubscribeHttpClient(eventIt);
+			return;
+		}
+		client->clear();
+		if (client->hasBufferedContent())
+		{ // BufferedReader has read content of more than one request
+			std::cout << "buffered_in: " << client->getFd() << std::endl;
+			this->handleClientRequest(client, eventIt);
+			return;
+		}
 	}
 
 	void EventLoop::handleFdEvent(ListEvents::iterator &monitoredIt)
@@ -526,6 +536,7 @@ namespace conn
 		clients.clear();
 		operations.clear();
 		removeFds.clear();
+		subscribeFds.clear();
 		EventLoop::shouldExit = true;
 	}
 
@@ -566,7 +577,7 @@ namespace conn
 					this->removeFds.find(monitoredIt->fd);
 				if (removeIt != this->removeFds.end())
 				{
-					std::cout << "removing  " << monitoredIt->fd << std::endl;
+					std::cout << "removing:  " << monitoredIt->fd << std::endl;
 					::close(monitoredIt->fd);
 					monitoredIt = this->events.erase(monitoredIt);
 					this->removeFds.erase(removeIt);

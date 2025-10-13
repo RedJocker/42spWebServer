@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/16 01:06:04 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/08 07:47:57 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -116,6 +116,7 @@ namespace conn
 
 	void TcpClient::setOperationFd(int operationFd)
 	{
+		this->reader.saveBuffer();
 		this->operationFd = operationFd;
 	}
 
@@ -131,6 +132,7 @@ namespace conn
 	{
 		this->reader.setFd(clientFd);
 		this->operationFd = -1;
+		this->reader.restoreSavedBuffer();
 	}
 
 	void TcpClient::clearWriteOperation()

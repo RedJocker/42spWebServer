@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:23 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/11 03:09:11 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/08 10:39:46 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -28,6 +28,7 @@ class BufferedReader
 	int fd;
 	size_t readBefore;
 	std::vector<char> buffered;
+	std::vector<char> saved;
 	char readBuffer[BUFFER_SIZE];
 
 	char *consumeBufferedContent();
@@ -46,8 +47,11 @@ public:
 	std::pair<ReadState, char *> readlineCrlf(void);
 	std::pair<ReadState, char *> readAll(void);
 
+
 	void setFd(int fd);
 	bool hasBufferedContent() const;
+	void saveBuffer(void);
+	void restoreSavedBuffer(void);
 };
 
 typedef BufferedReader::ReadState ReadState;
