@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/07 17:44:43 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/08 03:54:59 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -541,12 +541,13 @@ namespace conn
 			int numReadyEvents = poll(this->events.data(), events.size(), -1);
 			if (numReadyEvents < 0)
 			{
-				std::cout << "poll error: " << strerror(errno) << std::endl;
+				std::cout << "No events on pool due to: "
+						  << strerror(errno) << std::endl;
 				continue;
 			}
 			else if (numReadyEvents == 0)
 			{
-				std::cout << "poll timeout: " << std::endl;
+				std::cout << "Timeout on poll: " << std::endl;
 				continue;
 			}
 
@@ -572,6 +573,7 @@ namespace conn
 				++monitoredIt;
 			}
 		}
+		std::cout << "Server shuting down" << std::endl;
 		this->shutdown();
 		return true;
 	}

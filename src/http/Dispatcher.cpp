@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/04 05:17:43 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/08 03:56:12 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ namespace http {
 	}
 
 	Dispatcher::~Dispatcher() {}
-	
+
 	http::Server &Dispatcher::resolveServer(http::Client &client) {
 		http::Server *srv = client.getServer();
 		if (!srv)
@@ -65,15 +65,6 @@ namespace http {
 			handleTrace(client);
 			return ;
 	    }
-
-		//TODO: handle sigint signal setting shouldExit to true
-		// and remove this if statement 
-		if(method == "GET" && client.getRequest().getPath() == "/exit")
-		{
-			conn::EventLoop::shouldExit = true;
-			return ;
-		}
-		// 
 
 
 	    http::Server *server = client.getServer();
