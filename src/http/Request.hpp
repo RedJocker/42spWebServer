@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/06 20:21:11 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/13 11:34:57 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ namespace http
 			READING_REQUEST_LINE,
 			READING_HEADERS,
 			READING_BODY,
+			READING_CHUNKED_BODY,
 			READ_ERROR,
 			READ_BAD_REQUEST,
 			READ_COMPLETE,
@@ -66,6 +67,7 @@ namespace http
 		ReadState readRequestLine(BufferedReader &reader);
 		ReadState readHeaderLine(BufferedReader &reader);
 		ReadState readBody(BufferedReader &reader);
+		ReadState readChunkedBody(BufferedReader &reader);
 
 	};
 }

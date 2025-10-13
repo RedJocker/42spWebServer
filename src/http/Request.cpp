@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/07 19:28:46 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/13 11:44:45 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,8 +115,11 @@ namespace http
 			if (line.empty()) { // End of Headers
 				std::string contentLength =
 					_headers.getHeader("Content-Length");
+				std::string transferEncoding = _headers.getHeader("Transfer-Encoding");
 				if (!contentLength.empty())
-					_state = READING_BODY; // Body to read
+					_state = READING_BODY;
+				else if (transferEncoding == "chunked")
+					_state = READING_CHUNKED_BODY;
 				else
 					_state = READ_COMPLETE; // No body to read
 			}
@@ -176,16 +179,44 @@ namespace http
 			return _state;
 		}
 	}
-	
+
+	Request::ReadState Request::readChunkedBody(BufferedReader &reader) {
+		while (true) {
+			// Read chunk size line
+			std::pair<BufferedReader::ReadState, char*> sizeLine = reader.readlineCrlf();
+			if (sizeLine.first != BufferedReader::DONE)
+				return _state;
+			std::string sizeStr(sizeLine.second);
+			delete[] sizeLine.second;
+
+			// Hex to int
+			size_t chunkSize = std::strtoul(sizeStr.c_str(), NULL, 16);
+			if (chunkSize == 0) {
+				_state = READ_COMPLETE;
+				break; // end of chunks
+			}
+
+			// Read chunk data + \r\n
+			std::pair<BufferedReader::ReadState, char*> chunkData = reader.read(chunkSize + 2);
+			if (chunkData.first != BufferedReader::DONE)
+				return _state;
+
+			_body.parse(chunkData.second, chunkSize); // Ignores \r\n
+			delete[] chunkData.second;
+		}
+		return _state;
+	}
 
 	Request::ReadState Request::readHttpRequest(BufferedReader &reader) {
 		switch (_state) {
 		case READING_REQUEST_LINE:
 			return readRequestLine(reader);
-		case READING_HEADERS: 
+		case READING_HEADERS:
 			return readHeaderLine(reader);
 		case READING_BODY:
 			return readBody(reader);
+		case READING_CHUNKED_BODY:
+			return readChunkedBody(reader);
 		case READ_BAD_REQUEST:
 		case READ_EOF:
 		case READ_ERROR:
