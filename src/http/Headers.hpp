@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:20 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/10 08:46:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/07 18:26:54 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,11 @@
 
 namespace http {
 	class Headers {
+		struct CaseInsensitive
+		{
+			bool operator()(const std::string &s1, const std::string &s2) const;
+		};
+
 		public:
 			Headers(void);
 			Headers(const Headers &other);
@@ -29,12 +34,12 @@ namespace http {
 			std::string getHeader(const std::string &key) const;
 			void clear(void);
 
-			std::map<std::string, std::string> getAll(void) const;
+			std::map<std::string, std::string, CaseInsensitive> getAll(void) const;
 
 			bool addHeader(const std::string &key, const std::string &value);
 			std::string str(void) const;
 		private:
-			std::map<std::string, std::string> _headers;
+			std::map<std::string, std::string, CaseInsensitive> _headers;
 	};
 }
 

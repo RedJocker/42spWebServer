@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/02 01:20:35 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/07 17:38:02 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,7 @@ namespace http
 		Server &operator=(const Server &other);
 		virtual ~Server(void);
 
-		std::string getHostname() const
-;
+		std::string getHostname() const;
 		std::string getDocroot() const;
 
 		void addCgiRoute(const std::string &route);
