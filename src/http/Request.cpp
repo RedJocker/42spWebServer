@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 11:44:45 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/13 15:19:29 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
+#include <string>
 
 namespace http
 {
@@ -253,44 +254,50 @@ namespace http
 		return requestStream.str();
 	}
 
-	char **Request::envp() const
+	char **Request::envp(const RequestPath &reqPath) const
 	{
 		std::vector<std::string> envp;
-		this->envpInit(envp);
+		envpInit(envp, reqPath);
 
-		size_t envp_len = envp.size() + 1;
-		char **envp_on_heap = new char*[envp_len];
-
-		for (size_t i = 0; i < envp_len - 1; ++i)
-		{
-			size_t strSize = envp.at(i).size() + 1;
-			char *str = new char[strSize];
-			::strncpy(str, envp.at(i).c_str(), strSize);
-			str[strSize - 1] = '\0';
-			envp_on_heap[i] = str;
+		char **envp_on_heap = new char*[envp.size() + 1];
+		for (size_t i = 0; i < envp.size(); ++i) {
+			size_t len = envp[i].size() + 1;
+			envp_on_heap[i] = new char[len];
+			std::strncpy(envp_on_heap[i], envp[i].c_str(), len);
+			envp_on_heap[i][len - 1] = '\0';
 		}
-		envp_on_heap[envp_len - 1] = reinterpret_cast<char *>(0);
+
+		envp_on_heap[envp.size()] = 0;
 		return envp_on_heap;
 	}
 
-	void Request::envpInit(std::vector<std::string> &envp) const
+	void Request::envpInit(std::vector<std::string> &envp, const RequestPath &reqPath) const
 	{
 	    // TODO fill envp with variables for cgi process
 	    // taken from request data
 
+		// Cleans existing envp
+		envp.clear();
+
 	    //// headers required for all cgi request
-			envp.push_back("REQUEST_METHOD=" + this->_method); // take from request method
-			envp.push_back("REDIRECT_STATUS=0"); // always 0?
-	    	envp.push_back("SCRIPT_FILENAME=./www/todo.cgi"); // build from request path and docroot
+		envp.push_back("REQUEST_METHOD=" + this->_method); // take from request method
+		envp.push_back("REDIRECT_STATUS=0"); // always 0?
+	    envp.push_back("SCRIPT_FILENAME=" + reqPath.getFullPath());
 	    ////
 
 	    /// headers required for cgi request with body (body is passed by parent on stdin)
-	    	envp.push_back("CONTENT_TYPE=application/x-www-form-urlencoded"); // take from request header
-			envp.push_back("CONTENT_LENGTH=19"); // take from request header
+		std::string contentLength = _headers.getHeader("Content-Length");
+		if (!contentLength.empty()) {
+			envp.push_back("CONTENT_LENGTH=" + contentLength);
+			std::string contentType = _headers.getHeader("Content-Type");
+			if (contentType.empty())
+				contentType = "application/x-www-form-urlencoded";
+			envp.push_back("CONTENT_TYPE=" + contentType);
+		}
 		////
 
 		//// headers required for passing query string
-			envp.push_back("QUERY_STRING=hello=there&yyy=xxx"); //  build from request path
+		envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
 		////
 	}
 }

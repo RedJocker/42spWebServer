@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 14:57:26 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/13 15:17:45 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ namespace http
 			std::cout << "child" << std::endl;
 
 			// Init CGI env
-			char **envp = client.getRequest().envp();
+			char **envp = client.getRequest().envp(reqPath);
 
 			// PHP-CGI
 			const char *args[3];
