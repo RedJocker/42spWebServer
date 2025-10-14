@@ -180,11 +180,11 @@
       - [X] checking if is exactly index.php before other static files
       - [X] responding something
         - [X] maybe 418 I'm a teapot just to know it is our response
-  - [ ] Handle relative url path
-    - [ ] it should be possible to use relative path on url
-    - [ ] create subdirectories on www to test relative path works
-    - [ ] it should not be possible to go outside docroot
-      - [ ] `GET /../Makefile HTTP/1.1` should return 404 not found
+  - [X] Handle relative url path
+    - [X] it should be possible to use relative path on url
+    - [X] create subdirectories on www to test relative path works
+    - [X] it should not be possible to go outside docroot
+      - [X] `GET /../Makefile HTTP/1.1` should return 404 not found
       - [ ] test on terminal, browsers make some url cleaning on request
   - [X] Handle header Connection: close
   - [X] create a http::Server that is a conn::TcpServer
@@ -195,9 +195,9 @@
     - [X] port
     - [X] routing
     - [X] Dispatcher will forward request handling to http:Server if it is one of valid methods
-  - [ ] Handle header Transfer-Encoding: chunked
-    - [ ] a slightly different protocol for reading body
-      - [ ] size1\r\ncontent1\r\nsize2\r\ncontent2\r\n0\r\n
+  - [X] Handle header Transfer-Encoding: chunked
+    - [X] a slightly different protocol for reading body
+      - [X] size1\r\ncontent1\r\nsize2\r\ncontent2\r\n0\r\n
 
 - Connection Handling
   - [X] create folder for connection module
@@ -252,5 +252,5 @@
 	  - [x] read a file as if it was a cgi-response with cgi-response content
 	  - [x] send response based on file read
 	  - [x] read a cgi-response from ipc to a process without processing any request input
-	  
+
         - write full response

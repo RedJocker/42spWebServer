@@ -6,11 +6,12 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/07 17:55:29 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/13 13:25:00 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
+#include "devUtil.hpp"
 #include <sstream>
 #include <unistd.h>
 

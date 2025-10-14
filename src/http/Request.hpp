@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/06 20:21:11 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/13 15:18:35 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "Headers.hpp"
 #include "Body.hpp"
 #include "TcpClient.hpp"
+#include "RequestPath.hpp"
 
 namespace http
 {
@@ -28,6 +29,7 @@ namespace http
 			READING_REQUEST_LINE,
 			READING_HEADERS,
 			READING_BODY,
+			READING_CHUNKED_BODY,
 			READ_ERROR,
 			READ_BAD_REQUEST,
 			READ_COMPLETE,
@@ -50,7 +52,7 @@ namespace http
 		std::string getBody(void) const;
 
 		std::string toString(void) const;
-		char **envp() const;
+		char **envp(const RequestPath &reqPath) const;
 	private:
 		std::string _method;
 		std::string _path;
@@ -61,11 +63,12 @@ namespace http
 
 		ReadState _state;
 
-		void envpInit(std::vector<std::string> &envp) const;
+		void envpInit(std::vector<std::string> &envp, const RequestPath &reqPath) const;
 		bool parseRequestLine(const std::string &line);
 		ReadState readRequestLine(BufferedReader &reader);
 		ReadState readHeaderLine(BufferedReader &reader);
 		ReadState readBody(BufferedReader &reader);
+		ReadState readChunkedBody(BufferedReader &reader);
 
 	};
 }
