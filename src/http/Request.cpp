@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 15:19:29 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/15 11:26:18 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,6 +284,12 @@ namespace http
 		envp.push_back("REDIRECT_STATUS=0"); // always 0?
 	    envp.push_back("SCRIPT_FILENAME=" + reqPath.getFullPath());
 	    ////
+
+		//// SERVER_PROTOCOL
+		if (!this->_protocol.empty())
+			envp.push_back(std::string("SERVER_PROTOCOL=") + this->_protocol);
+		else
+			envp.push_back(std::string("SERVER_PROTOCOL=HTTP/1.1"));
 
 	    /// headers required for cgi request with body (body is passed by parent on stdin)
 		std::string contentLength = _headers.getHeader("Content-Length");

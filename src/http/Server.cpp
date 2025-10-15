@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 15:17:45 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/15 11:45:45 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,73 +110,97 @@ namespace http
 	{
 		std::cout << "handleCgiRequest: " <<  client.getFd() << std::endl;
 
+		// Create RequestPath with docroot + URL
 		RequestPath reqPath(this->getDocroot(), client.getRequest().getPath());
 
+		// Invalid path or docroot escape
 		if (reqPath.getFullPath().empty()) {
 			client.getResponse().setNotFound();
 			client.setMessageToSend(client.getResponse().toString());
 			return;
 		}
 
+		// Envp based on RequestPath
+		char **envp = client.getRequest().envp(reqPath);
+		if (!envp) {
+			client.getResponse().setInternalServerError();
+			client.setMessageToSend(client.getResponse().toString());
+			return;
+		}
+
 		int sockets[2];
-		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0)
-		{
-			std::cerr << "errno " << errno << ": "
-					  << strerror(errno) << std::endl;
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0) {
+			std::cerr << "errno " << errno << ": " << strerror(errno) << std::endl;
+			// Free envp before exit
+			for (size_t i = 0; envp[i] != 0; ++i) {
+				delete[] envp[i];
+			}
+			delete[] envp;
+
 			throw std::runtime_error("socketpair error");
 		}
 
-		switch (fork())
-		{
-		case 0:
-		{ //child
-			std::cout << "child" << std::endl;
+		pid_t pid = fork();
+		if (pid < 0) {
+			std::cerr << "fork failed: " << strerror(errno) << std::endl;
+			for (size_t i = 0; envp[i] != 0; ++i) {
+				delete[] envp[i];
+			}
+			delete[] envp;
+			close (sockets[0]);
+			close (sockets[1]);
+			client.getResponse().setInternalServerError();
+			client.setMessageToSend(client.getResponse().toString());
+			return;
+		}
 
-			// Init CGI env
-			char **envp = client.getRequest().envp(reqPath);
+		if (pid == 0) {
+			// Child
+			// Close parent
+			close (sockets[1]);
 
-			// PHP-CGI
+			dup2(sockets[0], 0);
+			dup2(sockets[0], 1);
+
+			monitor.shutdown();
+
 			const char *args[3];
 			args[0] = "/usr/bin/php-cgi";
 			args[1] = reqPath.getFullPath().c_str();
 			args[2] = 0;
 
-			close(sockets[1]);
-			dup2(sockets[0], 0); // stdin
-			dup2(sockets[0], 1); // stdout
-			monitor.shutdown(); // shutdown EventLoop
-
 			execve(args[0], const_cast<char **>(args), envp);
 
-			// If execve fails, exit child
-			std::cerr << "Failed to exec php-cgi: "
-					  << strerror(errno) << std::endl;
-
-			std::cerr << "Retrying in a different location " <<std::endl;
+			// If fail, try another path
+			std::cerr << "Failed to exec php-cgi: " << strerror(errno) << std::endl;
 			args[0] = "/opt/homebrew/bin/php-cgi";
 			execve(args[0], const_cast<char **>(args), envp);
 
-			std::cerr << "Failed to exec on retry: "
-					  << strerror(errno) << std::endl;
-
+			// Both exec fail
+			std::cerr << "Failed to exec on retry: " << strerror(errno) << std::endl;
 			for (size_t i = 0; envp[i] != 0; ++i) {
-				delete envp[i];
+				delete[] envp[i];
 			}
 			delete[] envp;
 
 			close(sockets[0]);
 			::exit(11);
-		}
-		default: { break; }
-		}
-		//parent
-		std::cout << "parent" << std::endl;
-		close(sockets[0]); // close child fd
+		} else {
+			// Parent
+			// No use of envp
+			for (size_t i = 0; envp[i] != 0; ++i) {
+				delete[] envp[i];
+			}
+			delete[] envp;
 
-		// Write request body to CGI
-		int cgiFd = sockets[1];
+			// Close child
+			close(sockets[0]);
 
-		monitor.subscribeCgi(cgiFd, client.getFd());
+			// cgiFd for read/write
+			int cgiFd = sockets[1];
+			monitor.subscribeCgi(cgiFd, client.getFd());
+			return;
+		}
 	}
 
 	void Server::onFileRead(http::Client &client, const std::string &fileContent, const std::string &filePath)
