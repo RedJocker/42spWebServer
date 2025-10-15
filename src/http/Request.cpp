@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/15 11:26:18 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/15 13:09:44 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,37 +273,32 @@ namespace http
 
 	void Request::envpInit(std::vector<std::string> &envp, const RequestPath &reqPath) const
 	{
-	    // TODO fill envp with variables for cgi process
-	    // taken from request data
-
 		// Cleans existing envp
 		envp.clear();
 
-	    //// headers required for all cgi request
-		envp.push_back("REQUEST_METHOD=" + this->_method); // take from request method
-		envp.push_back("REDIRECT_STATUS=0"); // always 0?
-	    envp.push_back("SCRIPT_FILENAME=" + reqPath.getFullPath());
-	    ////
+	    // Standard CGI variables
+		envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
+		envp.push_back("SERVER_SOFTWARE=webserv/1.0");
+		envp.push_back("REQUEST_METHOD=" + _method);
+		envp.push_back("SERVER_PROTOCOL=" + (_protocol.empty() ? "HTTP/1.1" : _protocol));
+		envp.push_back("REDIRECT_STATUS=0");
+		envp.push_back("SCRIPT_FILENAME=" + reqPath.getFullPath());
 
-		//// SERVER_PROTOCOL
-		if (!this->_protocol.empty())
-			envp.push_back(std::string("SERVER_PROTOCOL=") + this->_protocol);
-		else
-			envp.push_back(std::string("SERVER_PROTOCOL=HTTP/1.1"));
+		// Query string
+		envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
 
-	    /// headers required for cgi request with body (body is passed by parent on stdin)
+		// Optional variables
+		envp.push_back("PATH_INFO=" + reqPath.getNormalizedPath());
+		envp.push_back("PATH_TRANSLATED=" + reqPath.getFullPath());
+
+		// Body-related headers
 		std::string contentLength = _headers.getHeader("Content-Length");
 		if (!contentLength.empty()) {
 			envp.push_back("CONTENT_LENGTH=" + contentLength);
 			std::string contentType = _headers.getHeader("Content-Type");
 			if (contentType.empty())
 				contentType = "application/x-www-form-urlencoded";
-			envp.push_back("CONTENT_TYPE=" + contentType);
+			envp.push_back("CONTENT-TYPE=" + contentType);
 		}
-		////
-
-		//// headers required for passing query string
-		envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
-		////
 	}
 }
