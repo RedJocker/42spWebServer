@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/15 11:45:45 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/15 12:04:31 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -394,11 +394,20 @@ namespace http
 		// Redirect if not '/'
 		if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
 			Response &response = client.getResponse();
+
 			std::string location = reqPath.getNormalizedPath() + "/";
+			std::string body = "<html><body><h1>308 Permanent Redirect</h1>"
+								"<p>Resource moved permanently to <a href=\"" + location + "\">"
+								+ location + "</a>.</p></body></html>";
+
 			response.clear();
 			response.setStatusCode(308);
 			response.setStatusInfo("Permanent Redirect");
 			response.addHeader("Location", location);
+			response.addHeader("Content-Type", "text/html");
+			response.addHeader("Content-Length", utils::toString(body.size()));
+			response.setBody(body);
+			
 			client.setMessageToSend(response.toString());
 			return;
 		}

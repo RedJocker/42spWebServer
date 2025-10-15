@@ -6,13 +6,14 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 11:24:36 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/15 12:10:16 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pathUtils.hpp"
 #include <vector>
 #include <cctype>
+#include <sstream>
 
 namespace utils {
 	int hexDigitValue(char c) {
@@ -45,6 +46,12 @@ namespace utils {
 			}
 		}
 		return out;
+	}
+
+	std::string toString(size_t n) {
+		std::ostringstream oss;
+		oss << n;
+		return oss.str();
 	}
 
 	bool normalizeUrlPath(const std::string &docroot, const std::string &urlPath, std::string &outFullPath) {
