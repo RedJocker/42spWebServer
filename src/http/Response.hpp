@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/16 19:13:36 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/15 14:21:35 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define RESPONSE_HPP
 
 #include <string>
+#include <unistd.h>
 #include "Headers.hpp"
 #include "Body.hpp"
 
@@ -50,7 +51,7 @@ namespace http {
 
 			std::string toString(void) const;
 
-			Response &setFileBody(int fd);
+			void setFileBody(int fd);
 			bool isStreaming(void) const;
 			int getFileFd(void) const;
 			size_t getBytesSent(void) const;
@@ -64,6 +65,10 @@ namespace http {
 
 			Headers _headers;
 			Body _body;
+
+			int _fileFd;
+			size_t _bytesSent;
+			bool _isStreaming;
 	};
 }
 

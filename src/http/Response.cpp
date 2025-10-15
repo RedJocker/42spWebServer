@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 13:25:00 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/15 14:20:46 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,34 @@
 
 namespace http {
 	Response::Response(void)
-	: _protocol("HTTP/1.1"), _statusCode(200), _statusInfo("OK"), _headers(), _body()
+	: _protocol("HTTP/1.1"),
+	_statusCode(200),
+	_statusInfo("OK"),
+	_headers(),
+	_body(),
+	_fileFd(-1),
+	_bytesSent(0),
+	_isStreaming(false)
 	{}
 	Response::Response(const std::string &protocol, int statusCode, const std::string &statusInfo)
-		: _protocol(protocol), _statusCode(statusCode), _statusInfo(statusInfo), _headers(), _body()
+	: _protocol(protocol),
+	_statusCode(statusCode),
+	_statusInfo(statusInfo),
+	_headers(),
+	_body(),
+	_fileFd(-1),
+	_bytesSent(0),
+	_isStreaming(false)
 	{}
 	Response::Response(const Response &other)
-	{
-		*this = other;
-	}
+	: _statusCode(other._statusCode),
+	_statusInfo(other._statusInfo),
+	_headers(other._headers),
+	_body(other._body),
+	_fileFd(-1),
+	_bytesSent(0),
+	_isStreaming(false)
+	{}
 	Response &Response::operator=(const Response &other)
 	{
 		if (this != &other) {
@@ -34,12 +53,17 @@ namespace http {
 			_statusInfo = other._statusInfo;
 			_headers = other._headers;
 			_body = other._body;
+
+			closeFile();
+			_fileFd = -1;
+			_bytesSent = 0;
+			_isStreaming = false;
 		}
 		return *this;
 	}
 	Response::~Response(void)
 	{
-
+		closeFile();
 	}
 
 	Headers &Response::headers(void)
@@ -84,6 +108,7 @@ namespace http {
 
 	Response &Response::setBody(const Body &body) {
 		_body = body;
+		_isStreaming = false;
 		return *this;
 	}
 
@@ -153,7 +178,9 @@ namespace http {
 		responseStream << _headers.str();
 
 		responseStream << "\r\n";
-		responseStream << _body.str();
+		if (!_isStreaming) {
+			responseStream << _body.str();
+		}
 		return responseStream.str();
 	}
 
@@ -164,5 +191,38 @@ namespace http {
 		_statusInfo = "";
 		_headers.clear();
 		_body.clear();
+		closeFile();
+	}
+
+	void Response::setFileBody(int fd) {
+		closeFile();
+		_fileFd = fd;
+		_bytesSent = 0;
+		_isStreaming = true;
+	}
+
+	bool Response::isStreaming() const {
+		return _isStreaming;
+	}
+
+	int Response::getFileFd() const {
+		return _fileFd;
+	}
+
+	size_t Response::getBytesSent() const {
+		return _bytesSent;
+	}
+
+	void Response::addBytesSent(size_t n) {
+		_bytesSent += n;
+	}
+
+	void Response::closeFile() {
+		if (_fileFd >= 0) {
+			::close(_fileFd);
+			_fileFd = -1;
+		}
+		_isStreaming = false;
+		_bytesSent = 0;
 	}
 }
