@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 13:39:59 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/10/15 18:14:17 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ namespace http
 {
     class Server : public conn::TcpServer
 	{
+
 		std::string hostname;
 		std::string docroot;
 		std::vector<std::string> cgiRoutes;
@@ -40,6 +41,8 @@ namespace http
 		void handleCgiRequest(http::Client &client, conn::Monitor &monitor);
 
 	public:
+		const static std::string DEFAULT_DOCROOT;
+
 		Server(const std::string &hostname,
 			   const std::string &docroot,
 			   unsigned short port);
@@ -47,11 +50,11 @@ namespace http
 		Server &operator=(const Server &other);
 		virtual ~Server(void);
 
-		std::string getHostname() const;
-		std::string getDocroot() const;
+		const std::string &getHostname() const;
+		const std::string &getDocroot() const;
 
 		void addCgiRoute(const std::string &route);
-		void onFileRead(http::Client &client, const std::string &fileContent, const std::string &filePath);
+		void onFileRead(http::Client &client, const std::string &fileContent);
 		void onFileWritten(http::Client &client);
 		void onCgiResponse(http::Client &client, const std::string cgiResponse);
 		void onServerError(http::Client &client);

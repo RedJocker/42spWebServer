@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/08 07:47:57 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 18:39:13 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,14 +18,14 @@
 namespace conn
 {
 
-	TcpClient::TcpClient(): clientFd(0), operationFd(-1),  reader(0), writer(0)
+	TcpClient::TcpClient(): clientFd(0), operationFd(-22),  reader(0), writer(0)
 	{
 		throw std::domain_error(
 			"default constructor is not allowed, use constructor with clientFd parameter");
 	}
 
 	TcpClient::TcpClient(int clientFd)
-		: clientFd(clientFd), operationFd(-1), reader(clientFd), writer(clientFd)
+		: clientFd(clientFd), operationFd(-22), reader(clientFd), writer(clientFd)
 	{
 
 	}
@@ -49,7 +49,7 @@ namespace conn
 
 	TcpClient::~TcpClient()
 	{
-		close(this->clientFd);
+
 	}
 
 	std::pair<ReadState, char *> TcpClient::read(size_t length)
@@ -131,13 +131,13 @@ namespace conn
 	void TcpClient::clearReadOperation()
 	{
 		this->reader.setFd(clientFd);
-		this->operationFd = -1;
+		this->operationFd = -22;
 		this->reader.restoreSavedBuffer();
 	}
 
 	void TcpClient::clearWriteOperation()
 	{
 		this->writer.setFd(clientFd);
-		this->operationFd = -1;
+		this->operationFd = -22;
 	}
 }

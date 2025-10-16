@@ -6,13 +6,12 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/08 03:53:48 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/15 18:44:49 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventLoop.hpp"
 #include <iostream>
-#include "devUtil.hpp"
 #include <signal.h>
 
 
@@ -31,7 +30,7 @@ int main(void)
 	conn::EventLoop eventLoop;
 
 	http::Server server("localhost", "./www", 8080);
-	server.addCgiRoute("todo.cgi");
+	server.addCgiRoute("/todo.cgi");
 	std::pair<int, std::string> maybeServerFd = server.createAndListen();
 	if (maybeServerFd.first < 0)
 	{

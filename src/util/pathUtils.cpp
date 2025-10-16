@@ -6,14 +6,14 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/15 12:10:16 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/16 19:32:39 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pathUtils.hpp"
-#include <vector>
 #include <cctype>
 #include <sstream>
+
 
 namespace utils {
 	int hexDigitValue(char c) {
@@ -48,85 +48,47 @@ namespace utils {
 		return out;
 	}
 
+
 	std::string toString(size_t n) {
 		std::ostringstream oss;
 		oss << n;
 		return oss.str();
 	}
 
-	bool normalizeUrlPath(const std::string &docroot, const std::string &urlPath, std::string &outFullPath) {
-		// Strip query string
-		std::string path = urlPath;
-		std::string::size_type qpos = path.find('?');
-		if (qpos != std::string::npos)
-			path = path.substr(0, qpos);
-		if (path.empty())
-			path = "/";
+	std::string guessMimeType(const std::string &filePath) {
+		// Find last dot
 
-		// Decode percent-encoded characters
-		path = urlDecode(path);
 
-		// Collapse multiple slashes
-		std::string collapsed;
-		collapsed.reserve(path.size());
-		for (std::string::size_type i = 0; i < path.size(); ++i) {
-			char c = path[i];
-			if (c == '/') {
-				if (collapsed.empty() || collapsed[collapsed.size() - 1] != '/')
-					collapsed.push_back('/');
-			} else {
-				collapsed.push_back(c);
-			}
+		std::string::size_type dotPos = filePath.rfind('.');
+
+		// may receive extension only
+		std::string ext = dotPos == std::string::npos ?
+			filePath
+			: filePath.substr(dotPos + 1);
+
+		// To lower
+		for (std::string::size_type i = 0; i < ext.size(); ++i) {
+			if (ext[i] >= 'A' && ext[i] <= 'Z')
+				ext[i] += 'a' - 'A';
 		}
 
-		// Split into segments and resolve . and ..
-		std::vector<std::string> segments;
-		for (std::string::size_type i = 0; i < collapsed.size(); ) {
-			if (collapsed[i] == '/') {
-				++i;
-				continue;
-			}
-			std::string::size_type j = i;
-			while (j < collapsed.size() && collapsed[j] != '/')
-				++j;
-			std::string seg = collapsed.substr(i, j - i);
-			i = j;
 
-			if (seg.empty() || seg == ".") {
-				continue;
-			} else if (seg == "..") {
-				if (segments.empty())
-					continue;
-				segments.pop_back();
-			} else {
-				segments.push_back(seg);
-			}
-		}
+		// Map extensions to MIME types
+		if (ext == "html" || ext == "htm") return "text/html";
+		if (ext == "css") return "text/css";
+		if (ext == "js") return "application/javascript";
+		if (ext == "json") return "application/json";
+		if (ext == "txt") return "text/plain";
+		if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
+		if (ext == "png") return "image/png";
+		if (ext == "gif") return "image/gif";
+		if (ext == "svg") return "image/svg+xml";
+		if (ext == "ico") return "image/x-icon";
+		if (ext == "pdf") return "application/pdf";
+		if (ext == "xml") return "application/xml";
+		if (ext == "zip") return "application/zip";
 
-		// Reconstruct sanitized path (leading '/')
-		std::string sanitized = "/";
-		for (std::vector<std::string>::size_type k = 0; k < segments.size(); ++k) {
-			if (k != 0)
-				sanitized += "/";
-			sanitized += segments[k];
-		}
-
-		// Combine with docroot
-		std::string root = docroot;
-		if (!root.empty() && root[root.size() - 1] == '/')
-			root.erase(root.size() - 1);
-
-		if (sanitized == "/") {
-			outFullPath = root + "/";
-		} else {
-			outFullPath = root + sanitized;
-		}
-
-		// Prevent docroot escape
-		if (outFullPath.compare(0, root.size(), root) != 0) {
-			return false;
-		}
-
-		return true;
+		return "application/octet-stream"; // fallback
 	}
 }
+

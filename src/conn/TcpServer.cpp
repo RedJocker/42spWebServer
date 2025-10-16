@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:36:49 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/23 19:14:12 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/15 21:06:45 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -51,7 +51,6 @@ namespace conn
 					  << " and fd "
 					  << this->serverFd
 					  << std::endl;
-			close(this->serverFd);
 		}
 	}
 
