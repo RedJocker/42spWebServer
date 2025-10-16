@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/09/23 11:38:06 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/15 17:50:28 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,7 @@
 
 namespace utils {
 	std::string urlDecode(const std::string &url);
-
-	bool normalizeUrlPath(const std::string &docroot, const std::string &urlPath, std::string &outFullPath);
+	std::string guessMimeType(const std::string &filePath);
 }
 
 #endif

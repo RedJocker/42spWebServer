@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 15:18:35 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/10/15 17:42:43 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,25 +45,29 @@ namespace http
 		ReadState state(void) const { return _state; }
 		void clear(void);
 
-		std::string getMethod(void) const;
-		std::string getPath(void) const;
-		std::string getProtocol(void) const;
+		const std::string &getMethod(void) const;
+		const std::string &getPathRaw(void) const;
+		const std::string &getProtocol(void) const;
+
+		RequestPath &getPath(void);
 		std::string getHeader(const std::string &key) const;
 		std::string getBody(void) const;
 
 		std::string toString(void) const;
-		char **envp(const RequestPath &reqPath) const;
+		char **envp(void) const;
+
 	private:
 		std::string _method;
-		std::string _path;
+		std::string _pathRaw;
 		std::string _protocol;
 
+		RequestPath _path;
 		Headers _headers;
 		Body _body;
 
 		ReadState _state;
 
-		void envpInit(std::vector<std::string> &envp, const RequestPath &reqPath) const;
+		void envpInit(std::vector<std::string> &envp) const;
 		bool parseRequestLine(const std::string &line);
 		ReadState readRequestLine(BufferedReader &reader);
 		ReadState readHeaderLine(BufferedReader &reader);

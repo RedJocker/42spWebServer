@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/15 11:45:45 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/10/16 16:58:27 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,23 @@
 
 namespace http
 {
+	const std::string Server::DEFAULT_DOCROOT = "./www";
 	Server::Server(const std::string &hostname,
 				   const std::string &docroot,
 				   unsigned short port)
-		: conn::TcpServer(port), hostname(hostname), docroot(docroot) {}
+		: conn::TcpServer(port), hostname(hostname), docroot(docroot)
+	{
+		this->docroot = docroot;
+		while (!this->docroot.empty()
+			   && this->docroot[this->docroot.size() - 1] == '/')
+		{
+			// keeping docroot without ending /
+			// must ensure path has leading / on RequestPath
+			this->docroot.erase(this->docroot.end() - 1);
+		}
+		this->docroot = this->docroot.empty() ?
+			DEFAULT_DOCROOT : this->docroot;
+	}
 
 	Server::Server(const Server &other) : conn::TcpServer(other.port)
 	{
@@ -51,12 +64,12 @@ namespace http
 
 	Server::~Server(void) {}
 
-	std::string Server::getHostname() const
+	const std::string &Server::getHostname() const
 	{
 		return this->hostname;
 	}
 
-	std::string Server::getDocroot() const
+	const std::string &Server::getDocroot() const
 	{
 		return this->docroot;
 	}
@@ -81,15 +94,8 @@ namespace http
 
 	bool Server::isCgiRequest(http::Client &client, conn::Monitor &monitor)
 	{
-		(void)monitor;
-
-		// Resolve server for this client docroot CGI route
-		const std::string &path = client.getRequest().getPath();
-
-		// Normalize requested path
-		std::string filePath;
-		if (!utils::normalizeUrlPath(this->getDocroot(), path, filePath))
-			return false;
+		(void) monitor;
+		RequestPath &reqPath = client.getRequest().getPath();
 
 		// Check if this path matches any of the server's configured CGI routes
 		const std::vector<std::string> &cgiRoutes = this->getCgiRoutes();
@@ -97,115 +103,121 @@ namespace http
 			 it != cgiRoutes.end();
 			 ++it)
 		{
-			std::string expectedPath = this->getDocroot() + "/" + *it;
+			// TODO make possible to match on fileExtension ex "/42/*.cgi"
+			std::string expectedPath = this->getDocroot() + *it;
 
-			if (filePath == expectedPath)
-				return true; // Path matches a configured CGI route
+			if (reqPath.getFilePath() == expectedPath)
+				return true;
 		}
 
-		return false; // No match found
+		return false;
 	}
 
 	void Server::handleCgiRequest(http::Client &client, conn::Monitor &monitor)
 	{
 		std::cout << "handleCgiRequest: " <<  client.getFd() << std::endl;
 
-		// Create RequestPath with docroot + URL
-		RequestPath reqPath(this->getDocroot(), client.getRequest().getPath());
+		RequestPath &reqPath = client.getRequest().getPath();
 
-		// Invalid path or docroot escape
-		if (reqPath.getFullPath().empty()) {
+		if (!reqPath.isFile())
+		{
 			client.getResponse().setNotFound();
-			client.setMessageToSend(client.getResponse().toString());
-			return;
-		}
-
-		// Envp based on RequestPath
-		char **envp = client.getRequest().envp(reqPath);
-		if (!envp) {
-			client.getResponse().setInternalServerError();
 			client.setMessageToSend(client.getResponse().toString());
 			return;
 		}
 
 		int sockets[2];
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0) {
-			std::cerr << "errno " << errno << ": " << strerror(errno) << std::endl;
-			// Free envp before exit
-			for (size_t i = 0; envp[i] != 0; ++i) {
-				delete[] envp[i];
-			}
-			delete[] envp;
-
-			throw std::runtime_error("socketpair error");
+			std::cerr << "failed to open socket: " << strerror(errno) << std::endl;
+			this->onServerError();
+			return;
 		}
 
 		pid_t pid = fork();
 		if (pid < 0) {
 			std::cerr << "fork failed: " << strerror(errno) << std::endl;
-			for (size_t i = 0; envp[i] != 0; ++i) {
-				delete[] envp[i];
-			}
 			delete[] envp;
 			close (sockets[0]);
 			close (sockets[1]);
-			client.getResponse().setInternalServerError();
-			client.setMessageToSend(client.getResponse().toString());
+			this->onServerError();
 			return;
 		}
 
 		if (pid == 0) {
-			// Child
-			// Close parent
-			close (sockets[1]);
-
-			dup2(sockets[0], 0);
-			dup2(sockets[0], 1);
-
-			monitor.shutdown();
+			std::cout << "child" << std::endl;
+			
+			
+			
+			//prevent dangling pointer from getFilePath.c_str() after shutdown 
+			std::string filePathCopy = reqPath.getFilePath();
+			// PHP-CGI
 
 			const char *args[3];
 			args[0] = "/usr/bin/php-cgi";
-			args[1] = reqPath.getFullPath().c_str();
+			args[1] = filePathCopy.c_str();
 			args[2] = 0;
+
+			close(sockets[1]);
+			dup2(sockets[0], 0); // stdin
+			dup2(sockets[0], 1); // stdout
+			close(sockets[0]);
+			// all child outputs to stdout now go to socket
+			// and will be interpreted as cgi response
+			
+			char **envp = client.getRequest().envp();
+			if (!envp)
+			{
+				// TODO read status response from cgi
+				std::cout << "Status: 500 Internal Server Error" << std::endl;
+				// TODO check output format is right
+				::exit(11);
+			}
+			
+			// shutdown EventLoop, carreful with dangling pointers and closed fds
+			monitor.shutdown(); 
+			// nothing coming from EventLoop is valid anymore
 
 			execve(args[0], const_cast<char **>(args), envp);
 
-			// If fail, try another path
-			std::cerr << "Failed to exec php-cgi: " << strerror(errno) << std::endl;
+			// TODO handle script errors like infinity loop, runtime error, etc
+			// we will need to create some request timeout system
+
+			// If execve fails, exit child
+			std::cerr << "Failed to exec php-cgi: "
+					  << strerror(errno) << std::endl;
+
+			std::cerr << "Retrying in a different location " <<std::endl;
 			args[0] = "/opt/homebrew/bin/php-cgi";
 			execve(args[0], const_cast<char **>(args), envp);
 
 			// Both exec fail
-			std::cerr << "Failed to exec on retry: " << strerror(errno) << std::endl;
+			std::cerr << "Failed to exec on retry: "
+					  << strerror(errno) << std::endl;
+			
 			for (size_t i = 0; envp[i] != 0; ++i) {
 				delete[] envp[i];
 			}
 			delete[] envp;
 
-			close(sockets[0]);
+			// TODO read status response from cgi
+			std::cout << "Status: 500 Internal Server Error" << std::endl;
+			// TODO check output format is right
+
 			::exit(11);
-		} else {
-			// Parent
-			// No use of envp
-			for (size_t i = 0; envp[i] != 0; ++i) {
-				delete[] envp[i];
-			}
-			delete[] envp;
-
-			// Close child
-			close(sockets[0]);
-
-			// cgiFd for read/write
-			int cgiFd = sockets[1];
-			monitor.subscribeCgi(cgiFd, client.getFd());
-			return;
 		}
+		// parent
+		close(sockets[0]);
+		std::cout << "parent" << std::endl;
+		int cgiFd = sockets[1];
+		monitor.subscribeCgi(cgiFd, client.getFd());
 	}
 
-	void Server::onFileRead(http::Client &client, const std::string &fileContent, const std::string &filePath)
+	void Server::onFileRead(http::Client &client, const std::string &fileContent)
 	{
-		std::string mimeType = utils::guessMimeType(filePath);
+		RequestPath &reqPath = client.getRequest().getPath();
+
+
+		std::string mimeType = utils::guessMimeType(reqPath.getExtension());
 		client.getResponse()
 			.addHeader("Content-Type", mimeType)
 			.setOk()
@@ -234,6 +246,10 @@ namespace http
 		size_t separatorIndex = cgiResponse.find("\r\n\r\n");
 		if (separatorIndex == std::string::npos)
 		{
+			// TODO cgi response should always have headers and maybe contain null body
+			// rewrite to interpret missing separator as headers only;
+			// https://www.rfc-editor.org/rfc/rfc3875#section-6
+
 			client.getResponse().setOk().setBody(cgiResponse);
 			client.setMessageToSend(client.getResponse().toString());
 		}
@@ -260,6 +276,9 @@ namespace http
 					break;
 				index = index_next + 2;
 			}
+
+			// TODO check status header from cgi, send it as status and remove header
+			// https://www.rfc-editor.org/rfc/rfc3875#section-6.3.3
 			client.getResponse()
 				.setOk()
 				.setBody(cgiResponse.substr(separatorIndex + 4));
@@ -270,32 +289,30 @@ namespace http
 	{
 		std::cout << "Server::handleGetFile " << std::endl;
 
-		RequestPath reqPath(this->getDocroot(), client.getRequest().getPath());
+		RequestPath &reqPath = client.getRequest().getPath();
 
-		int fd = open(reqPath.getFullPath().c_str(), O_RDONLY);
+		int fd = open(reqPath.getFilePath().c_str(), O_RDONLY);
 		if (fd < 0) {
+			// TODO
+			// we need to check reason failed to open
+			// and give a response based on the reason
 			client.getResponse().setNotFound();
 			client.setMessageToSend(client.getResponse().toString());
 			return;
 		}
 		std::cout << "clientFd = " << client.getFd() << std::endl;
-		monitor.subscribeFileRead(fd, client.getFd(), NULL);
+		monitor.subscribeFileRead(fd, client.getFd());
 	}
 
 	void Server::handleGetDirectory(
 		http::Client &client, conn::Monitor &monitor)
 	{
 		(void) monitor;
-		const std::string &path = client.getRequest().getPath();
+
+		const RequestPath &reqPath = client.getRequest().getPath();
 		Response &response = client.getResponse();
-		std::string docroot = this->getDocroot();
-		std::string dirPath;
-		if (!utils::normalizeUrlPath(docroot, path, dirPath))
-		{
-			response.setNotFound();
-			client.setMessageToSend(response.toString());
-			return ;
-		}
+
+		const std::string &dirPath = reqPath.getFilePath();
 
 		DIR *dir = opendir(dirPath.c_str());
 		if (!dir)
@@ -335,20 +352,18 @@ namespace http
 
 	void Server::handlePost(http::Client &client, conn::Monitor &monitor)
 	{
-		const std::string &path = client.getRequest().getPath();
-		std::string docroot = this->getDocroot();
+
+		const RequestPath &reqPath = client.getRequest().getPath();
+
+		const std::string &filePath = reqPath.getFilePath();
 		Response &response = client.getResponse();
-		std::string filePath;
-		if (!utils::normalizeUrlPath(docroot, path, filePath))
-		{
-			response.setNotFound();
-			client.setMessageToSend(response.toString());
-			return ;
-		}
 
 		int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd < 0)
 		{
+			// TODO
+			// we need to check reason failed to open
+			// and give a response based on the reason
 			std::cerr << "Failed to open file: " << filePath << std::endl;
 			response.setInternalServerError();
 			client.setMessageToSend(response.toString());
@@ -361,17 +376,14 @@ namespace http
 
 	void Server::handleDelete(http::Client &client, conn::Monitor &monitor)
 	{
+		// TODO
+		// what to do if file is directory? delete folder ? error ?
+
 		(void) monitor;
-		const std::string &path = client.getRequest().getPath();
+
+		const std::string &filePath =
+			client.getRequest().getPath().getFilePath();
 		Response &response = client.getResponse();
-		std::string docroot = this->getDocroot();
-		std::string filePath;
-		if (!utils::normalizeUrlPath(docroot, path, filePath))
-		{
-			response.setNotFound();
-			client.setMessageToSend(response.toString());
-			return ;
-		}
 
 		int result = unlink(filePath.c_str());
 		if (result == 0)
@@ -380,6 +392,10 @@ namespace http
 			response.setStatusCode(204);
 			response.setStatusInfo("No Content");
 		} else {
+			// TODO
+			// we need to check reason failed to unlink
+			// and give a response based on the reason
+			// it may be not found, permission issue, maybe something else
 			response.setNotFound();
 		}
 
@@ -389,16 +405,17 @@ namespace http
 
 	void Server::serve(Client &client, conn::Monitor &monitor)
 	{
-		RequestPath reqPath(this->getDocroot(), client.getRequest().getPath());
+		RequestPath &reqPath = client.getRequest().getPath();
 
-		// Redirect if not '/'
+		// Redirect if not '/' for directory listing
 		if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
 			Response &response = client.getResponse();
-			std::string location = reqPath.getNormalizedPath() + "/";
+			std::string location = reqPath.getPath() + "/";
 			response.clear();
 			response.setStatusCode(308);
 			response.setStatusInfo("Permanent Redirect");
 			response.addHeader("Location", location);
+			response.addHeader("Content-Length", "0");
 			client.setMessageToSend(response.toString());
 			return;
 		}
@@ -412,15 +429,8 @@ namespace http
 		const std::string &method = client.getRequest().getMethod();
 		Response &response = client.getResponse();
 
-		if (method == "GET")
+		if (method == "GET" && (reqPath.isFile() || reqPath.isDirectory()))
 		{
-			struct stat pathStat;
-			if (stat(reqPath.getFullPath().c_str(), &pathStat) != 0) {
-				response.setNotFound();
-				client.setMessageToSend(response.toString());
-				return;
-			}
-
 			if (reqPath.isDirectory())
 				handleGetDirectory(client, monitor);
 			else
@@ -435,7 +445,7 @@ namespace http
 			return ;
 		}
 
-		if (method == "DELETE")
+		if (method == "DELETE" && (reqPath.isFile() || reqPath.isDirectory()))
 		{
 			handleDelete(client, monitor);
 			return ;
