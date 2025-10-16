@@ -6,12 +6,13 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/15 18:42:52 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 19:32:39 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pathUtils.hpp"
 #include <cctype>
+#include <sstream>
 
 
 namespace utils {
@@ -47,8 +48,16 @@ namespace utils {
 		return out;
 	}
 
+
+	std::string toString(size_t n) {
+		std::ostringstream oss;
+		oss << n;
+		return oss.str();
+	}
+
 	std::string guessMimeType(const std::string &filePath) {
 		// Find last dot
+
 
 		std::string::size_type dotPos = filePath.rfind('.');
 
@@ -63,7 +72,7 @@ namespace utils {
 				ext[i] += 'a' - 'A';
 		}
 
-		
+
 		// Map extensions to MIME types
 		if (ext == "html" || ext == "htm") return "text/html";
 		if (ext == "css") return "text/css";

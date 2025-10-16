@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/15 21:08:10 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 18:39:13 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,14 +18,14 @@
 namespace conn
 {
 
-	TcpClient::TcpClient(): clientFd(0), operationFd(-1),  reader(0), writer(0)
+	TcpClient::TcpClient(): clientFd(0), operationFd(-22),  reader(0), writer(0)
 	{
 		throw std::domain_error(
 			"default constructor is not allowed, use constructor with clientFd parameter");
 	}
 
 	TcpClient::TcpClient(int clientFd)
-		: clientFd(clientFd), operationFd(-1), reader(clientFd), writer(clientFd)
+		: clientFd(clientFd), operationFd(-22), reader(clientFd), writer(clientFd)
 	{
 
 	}

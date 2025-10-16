@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 16:58:27 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/16 18:49:52 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,17 +129,16 @@ namespace http
 		int sockets[2];
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0) {
 			std::cerr << "failed to open socket: " << strerror(errno) << std::endl;
-			this->onServerError();
+			this->onServerError(client);
 			return;
 		}
 
 		pid_t pid = fork();
 		if (pid < 0) {
 			std::cerr << "fork failed: " << strerror(errno) << std::endl;
-			delete[] envp;
 			close (sockets[0]);
 			close (sockets[1]);
-			this->onServerError();
+			this->onServerError(client);
 			return;
 		}
 

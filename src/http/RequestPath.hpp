@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:54:53 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/15 17:55:11 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 18:47:16 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class RequestPath
 	private:
 		std::string originalPath;   // from request
 		std::string originalPathNormalized; // original normalized
-		std::string path;    // normalized just path part, must have / on end
+		std::string path;    // normalized just path part, must have / on start
 		std::string queryString;   // normalized just query part
 
 		std::string filePath; // docroot + path
