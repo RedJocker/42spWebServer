@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/15 12:06:52 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 19:54:51 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,19 @@ namespace http {
 	Client::Client(int clientFd, Server *server)
 		: conn::TcpClient(clientFd), server(server) {}
 
-	Client::Client(const Client &other): conn::TcpClient(other) {
-		//TODO
+	Client::Client(const Client &other): conn::TcpClient(other),
+		server(other.server),
+		request(other.request),
+		response(other.response) {
 	}
 
 	Client &Client::operator=(const Client &other) {
-		if (this == &other)
-			return *this;
-		//TODO
-
+		if (this == &other) {
+			conn::TcpClient::operator=(other);
+			server = other.server;
+			request = other.request;
+			response = other.response;
+		}
 		return *this;
 	}
 
@@ -55,7 +59,7 @@ namespace http {
 	Server *Client::getServer() const {
 		return this->server;
 	}
-	
+
 	void Client::setServer(Server *srv) {
 		this->server = srv;
 	}
