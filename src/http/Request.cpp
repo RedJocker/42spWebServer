@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 16:37:46 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/16 20:37:59 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -289,18 +289,19 @@ namespace http
 		envp.clear();
 
 	    //// headers required for all cgi request
-		envp.push_back("REQUEST_METHOD=" + this->_method); // take from request method
-		envp.push_back("REDIRECT_STATUS=0"); // always 0?
-	    envp.push_back("SCRIPT_FILENAME=" + reqPath.getFilePath());
-	    ////
+		envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
+		envp.push_back("SERVER_SOFTWARE=webserv/1.0");
+		envp.push_back("REQUEST_METHOD=" + _method);
+		envp.push_back("SERVER_PROTOCOL=" + (_protocol.empty() ? "HTTP/1.1" : _protocol));
+		envp.push_back("REDIRECT_STATUS=0");
+		envp.push_back("SCRIPT_FILENAME=" + reqPath.getFilePath());
 
-
-		//// SERVER_PROTOCOL
-		if (!this->_protocol.empty())
-			envp.push_back(std::string("SERVER_PROTOCOL=") + this->_protocol);
-		else
-			envp.push_back(std::string("SERVER_PROTOCOL=HTTP/1.1"));
-
+		// Optional variables
+		// Maybe TODO PATH_INFO is a path after the matching script name without url-encoding
+		// https://stackoverflow.com/a/2261971/13352218
+		//envp.push_back("PATH_INFO=" + reqPath.getNormalizedPath());
+		// PATH_TRANSLATED is a transformation of PATH_INFO
+		//envp.push_back("PATH_TRANSLATED=" + reqPath.getPath());
 
 	    /// headers required for cgi request with body (body is passed by parent on stdin) only POST should send body
 		if (this->_method == "POST")
