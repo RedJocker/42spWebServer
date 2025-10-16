@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/16 16:02:49 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/16 16:59:00 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,7 +319,7 @@ namespace conn
 			client.getResponse().setInternalServerError();
 			client.setMessageToSend(client.getResponse().toString());
 			return ;
-		} 
+		}
 
 		std::string cgiResponseString(readResult.second);
 		delete[] readResult.second;

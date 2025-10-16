@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/15 19:18:37 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 16:37:46 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,9 +261,17 @@ namespace http
 		envpInit(envp);
 
 		char **envp_on_heap = new char*[envp.size() + 1];
+		if (!envp_on_heap)
+			return reinterpret_cast<char **>(0);
 		for (size_t i = 0; i < envp.size(); ++i) {
 			size_t len = envp[i].size() + 1;
 			envp_on_heap[i] = new char[len];
+			if (!envp_on_heap[i])
+			{
+				for (size_t j = 0; j < i; ++j)
+					delete[] envp_on_heap[j];
+				return reinterpret_cast<char **>(0);
+			}
 			std::strncpy(envp_on_heap[i], envp[i].c_str(), len);
 			envp_on_heap[i][len - 1] = '\0';
 		}
@@ -286,6 +294,14 @@ namespace http
 	    envp.push_back("SCRIPT_FILENAME=" + reqPath.getFilePath());
 	    ////
 
+
+		//// SERVER_PROTOCOL
+		if (!this->_protocol.empty())
+			envp.push_back(std::string("SERVER_PROTOCOL=") + this->_protocol);
+		else
+			envp.push_back(std::string("SERVER_PROTOCOL=HTTP/1.1"));
+
+
 	    /// headers required for cgi request with body (body is passed by parent on stdin) only POST should send body
 		if (this->_method == "POST")
 		{
@@ -300,6 +316,7 @@ namespace http
 					contentType = "application/x-www-form-urlencoded";
 				envp.push_back("CONTENT_TYPE=" + contentType);
 			}
+
 		}
 		////
 

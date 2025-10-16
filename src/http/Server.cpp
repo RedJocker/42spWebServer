@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 15:57:05 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/16 16:58:27 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,24 +127,31 @@ namespace http
 		}
 
 		int sockets[2];
-		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0)
-		{
-			std::cerr << "errno " << errno << ": "
-					  << strerror(errno) << std::endl;
-			throw std::runtime_error("socketpair error");
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0) {
+			std::cerr << "failed to open socket: " << strerror(errno) << std::endl;
+			this->onServerError();
+			return;
 		}
 
-		switch (fork())
-		{
-		case 0:
-		{ //child
-			std::cout << "child" << std::endl;
+		pid_t pid = fork();
+		if (pid < 0) {
+			std::cerr << "fork failed: " << strerror(errno) << std::endl;
+			delete[] envp;
+			close (sockets[0]);
+			close (sockets[1]);
+			this->onServerError();
+			return;
+		}
 
-			//Init CGI env
-			char **envp = client.getRequest().envp();
+		if (pid == 0) {
+			std::cout << "child" << std::endl;
+			
+			
+			
 			//prevent dangling pointer from getFilePath.c_str() after shutdown 
 			std::string filePathCopy = reqPath.getFilePath();
 			// PHP-CGI
+
 			const char *args[3];
 			args[0] = "/usr/bin/php-cgi";
 			args[1] = filePathCopy.c_str();
@@ -154,13 +161,26 @@ namespace http
 			dup2(sockets[0], 0); // stdin
 			dup2(sockets[0], 1); // stdout
 			close(sockets[0]);
-			monitor.shutdown(); // shutdown EventLoop
+			// all child outputs to stdout now go to socket
+			// and will be interpreted as cgi response
+			
+			char **envp = client.getRequest().envp();
+			if (!envp)
+			{
+				// TODO read status response from cgi
+				std::cout << "Status: 500 Internal Server Error" << std::endl;
+				// TODO check output format is right
+				::exit(11);
+			}
+			
+			// shutdown EventLoop, carreful with dangling pointers and closed fds
+			monitor.shutdown(); 
+			// nothing coming from EventLoop is valid anymore
 
 			execve(args[0], const_cast<char **>(args), envp);
 
 			// TODO handle script errors like infinity loop, runtime error, etc
 			// we will need to create some request timeout system
-
 
 			// If execve fails, exit child
 			std::cerr << "Failed to exec php-cgi: "
@@ -170,22 +190,24 @@ namespace http
 			args[0] = "/opt/homebrew/bin/php-cgi";
 			execve(args[0], const_cast<char **>(args), envp);
 
+			// Both exec fail
 			std::cerr << "Failed to exec on retry: "
 					  << strerror(errno) << std::endl;
-
+			
 			for (size_t i = 0; envp[i] != 0; ++i) {
-				delete envp[i];
+				delete[] envp[i];
 			}
 			delete[] envp;
 
+			// TODO read status response from cgi
+			std::cout << "Status: 500 Internal Server Error" << std::endl;
+			// TODO check output format is right
+
 			::exit(11);
 		}
-		default: { break; }
-		}
-		//parent
+		// parent
+		close(sockets[0]);
 		std::cout << "parent" << std::endl;
-		close(sockets[0]); // close child fd
-
 		int cgiFd = sockets[1];
 		monitor.subscribeCgi(cgiFd, client.getFd());
 	}
@@ -224,6 +246,10 @@ namespace http
 		size_t separatorIndex = cgiResponse.find("\r\n\r\n");
 		if (separatorIndex == std::string::npos)
 		{
+			// TODO cgi response should always have headers and maybe contain null body
+			// rewrite to interpret missing separator as headers only;
+			// https://www.rfc-editor.org/rfc/rfc3875#section-6
+
 			client.getResponse().setOk().setBody(cgiResponse);
 			client.setMessageToSend(client.getResponse().toString());
 		}
@@ -250,6 +276,9 @@ namespace http
 					break;
 				index = index_next + 2;
 			}
+
+			// TODO check status header from cgi, send it as status and remove header
+			// https://www.rfc-editor.org/rfc/rfc3875#section-6.3.3
 			client.getResponse()
 				.setOk()
 				.setBody(cgiResponse.substr(separatorIndex + 4));
@@ -259,7 +288,6 @@ namespace http
 	void Server::handleGetFile(http::Client &client, conn::Monitor &monitor)
 	{
 		std::cout << "Server::handleGetFile " << std::endl;
-
 
 		RequestPath &reqPath = client.getRequest().getPath();
 
