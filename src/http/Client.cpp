@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/10 02:37:01 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/15 12:06:52 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,8 @@ namespace http {
 
 	Request &Client::readHttpRequest() {
 		this->request.readHttpRequest(this->reader);
+		this->request.getPath()
+			.initRequestPath(this->request.getPathRaw(), this->server->getDocroot());
 		return this->request;
 	}
 

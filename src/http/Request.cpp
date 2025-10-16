@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 15:19:29 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/10/15 19:18:37 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ namespace http
 {
 	Request::Request(void)
 		: _method()
-		, _path()
+		, _pathRaw()
 		, _protocol()
 		, _headers()
 		, _body()
@@ -36,7 +36,7 @@ namespace http
 	Request &Request::operator=(const Request &other) {
 		if (this != &other) {
 			this->_method = other._method;
-			this->_path = other._path;
+			this->_pathRaw = other._pathRaw;
 			this->_protocol = other._protocol;
 			this->_headers = other._headers;
 			this->_body = other._body;
@@ -49,7 +49,7 @@ namespace http
 
 	bool Request::parseRequestLine(const std::string &line) {
 		std::istringstream lineStream(line);
-		if (!(lineStream >> _method >> _path >> _protocol))
+		if (!(lineStream >> _method >> _pathRaw >> _protocol))
 			return false;
 		return true;
 	}
@@ -228,9 +228,10 @@ namespace http
 		}
 	}
 
-	std::string Request::getMethod() const { return _method; }
-	std::string Request::getPath() const { return _path; }
-	std::string Request::getProtocol() const { return _protocol; }
+	const std::string &Request::getMethod() const { return _method; }
+	const std::string &Request::getPathRaw() const { return _pathRaw; }
+	const std::string &Request::getProtocol() const { return _protocol; }
+	RequestPath &Request::getPath() { return _path; }
 	std::string Request::getHeader(const std::string &key) const {
 		return _headers.getHeader(key);
 	}
@@ -238,7 +239,7 @@ namespace http
 	void Request::clear()
 	{
 		_method = "";
-		_path = "";
+		_pathRaw = "";
 		_protocol = "";
 		_state = READING_REQUEST_LINE;
 		_headers.clear();
@@ -248,16 +249,16 @@ namespace http
 	std::string Request::toString() const
 	{
 		std::ostringstream requestStream;
-		requestStream << _method << " " << _path << " " << _protocol << "\r\n";
+		requestStream << _method << " " << _pathRaw << " " << _protocol << "\r\n";
 		requestStream << _headers.str();
 		requestStream << _body.str();
 		return requestStream.str();
 	}
 
-	char **Request::envp(const RequestPath &reqPath) const
+	char **Request::envp(void) const
 	{
 		std::vector<std::string> envp;
-		envpInit(envp, reqPath);
+		envpInit(envp);
 
 		char **envp_on_heap = new char*[envp.size() + 1];
 		for (size_t i = 0; i < envp.size(); ++i) {
@@ -271,33 +272,42 @@ namespace http
 		return envp_on_heap;
 	}
 
-	void Request::envpInit(std::vector<std::string> &envp, const RequestPath &reqPath) const
+	void Request::envpInit(std::vector<std::string> &envp) const
 	{
+		const RequestPath &reqPath = _path;
 	    // TODO fill envp with variables for cgi process
 	    // taken from request data
 
-		// Cleans existing envp
 		envp.clear();
 
 	    //// headers required for all cgi request
 		envp.push_back("REQUEST_METHOD=" + this->_method); // take from request method
 		envp.push_back("REDIRECT_STATUS=0"); // always 0?
-	    envp.push_back("SCRIPT_FILENAME=" + reqPath.getFullPath());
+	    envp.push_back("SCRIPT_FILENAME=" + reqPath.getFilePath());
 	    ////
 
-	    /// headers required for cgi request with body (body is passed by parent on stdin)
-		std::string contentLength = _headers.getHeader("Content-Length");
-		if (!contentLength.empty()) {
-			envp.push_back("CONTENT_LENGTH=" + contentLength);
-			std::string contentType = _headers.getHeader("Content-Type");
-			if (contentType.empty())
-				contentType = "application/x-www-form-urlencoded";
-			envp.push_back("CONTENT_TYPE=" + contentType);
+	    /// headers required for cgi request with body (body is passed by parent on stdin) only POST should send body
+		if (this->_method == "POST")
+		{
+			std::stringstream contentLengthStream;
+			contentLengthStream << _body.size();
+			std::string contentLength = contentLengthStream.str();
+			if (!contentLength.empty()) {
+				envp.push_back("CONTENT_LENGTH=" + contentLength);
+				std::string contentType =
+					_headers.getHeader("Content-Type");
+				if (contentType.empty())
+					contentType = "application/x-www-form-urlencoded";
+				envp.push_back("CONTENT_TYPE=" + contentType);
+			}
 		}
 		////
 
 		//// headers required for passing query string
-		envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
+		if (!reqPath.getQueryString().empty())
+		{
+			envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
+		}
 		////
 	}
 }
