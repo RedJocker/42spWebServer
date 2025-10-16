@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/08 07:47:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/15 21:08:10 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -49,7 +49,7 @@ namespace conn
 
 	TcpClient::~TcpClient()
 	{
-		close(this->clientFd);
+
 	}
 
 	std::pair<ReadState, char *> TcpClient::read(size_t length)
@@ -131,13 +131,13 @@ namespace conn
 	void TcpClient::clearReadOperation()
 	{
 		this->reader.setFd(clientFd);
-		this->operationFd = -1;
+		this->operationFd = -22;
 		this->reader.restoreSavedBuffer();
 	}
 
 	void TcpClient::clearWriteOperation()
 	{
 		this->writer.setFd(clientFd);
-		this->operationFd = -1;
+		this->operationFd = -22;
 	}
 }

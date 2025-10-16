@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:54:53 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/13 14:23:38 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/10/15 17:55:11 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,28 +15,39 @@
 
 #include <string>
 #include <sys/stat.h>
-#include "pathUtils.hpp"
 
-class RequestPath {
+class RequestPath
+{
 	public:
-		RequestPath(const std::string &docroot, const std::string &url);
+		RequestPath();
 
-		std::string getOriginalPath() const;
-		std::string getQueryString() const;
-		std::string getNormalizedPath() const;
-		std::string getFullPath() const;
+		const std::string &getOriginalPath() const;
+		const std::string &getQueryString() const;
+		const std::string &getOriginalPathNormalized() const;
+		const std::string &getPath() const;
+		const std::string &getFilePath() const;
+		const std::string &getExtension() const;
+		std::string resourceMimeType() const;
 		bool isDirectory() const;
+		bool isFile() const;
 		bool needsTrailingSlashRedirect() const;
+		void initRequestPath(const std::string &rawPath, const std::string &docroot);
 
 	private:
-		std::string originalPath;
-		std::string queryString;
-		std::string normalizedPath;
-		std::string fullPath;
+		std::string originalPath;   // from request
+		std::string originalPathNormalized; // original normalized
+		std::string path;    // normalized just path part, must have / on end
+		std::string queryString;   // normalized just query part
+
+		std::string filePath; // docroot + path
+		std::string extension; // just extension of normalized
+		std::string docroot; //  server docroot, does not have / on end
 		bool directory;
 		bool redirectNeeded;
-
-		void analyzePath(const std::string &docroot);
+		bool _isFile;
+		void analyzePath();
+		void splitQueryFromPath();
+		void normalize();
 };
 
 #endif

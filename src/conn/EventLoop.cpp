@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/10 03:01:54 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 16:59:00 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,15 @@ namespace conn
 			event.events = POLLIN | POLLOUT; // subscribe for reads and writes
 			event.fd = cgiFd;
 			this->subscribeFds.push_back(event);
-			client.setOperationFd(cgiFd, "hello=there&abc=def"); // TODO send request body
+			std::string body = client.getRequest().getBody();
+			if (client.getRequest().getMethod() == "POST" && !body.empty())
+			{ // only write on posts with body
+				client.setOperationFd(cgiFd, client.getRequest().getBody());
+			}
+			else
+			{ // skip to reading
+				client.setOperationFd(cgiFd);
+			}
 			Operation op = {Operation::CGI, cgiFd};
 			this->operations.insert(std::make_pair(op, clientPtr));
 		}
@@ -278,6 +286,7 @@ namespace conn
 
 		if (flushResult.first == BufferedWriter::ERROR)
 		{
+			std::cerr << "error cgi writing: " << strerror(errno) << std::endl;
 			TODO("handle error writing to cgi process");
 			http::Server *server = client.getServer();
 			if (server)
@@ -286,6 +295,7 @@ namespace conn
 		std::cout << "parent done writing to cgi:" << std::endl;
 		client.clearWriteOperation();
 		client.setOperationFd(cgiFd);
+
 		return;
 	}
 
@@ -303,12 +313,11 @@ namespace conn
 		std::cout << "parent done reading" << std::endl;
 		if (readResult.first != BufferedReader::NO_CONTENT)
 		{
-			std::cout << "error exit" << std::endl;
-			// TODO error on cgi reading
-			TODO("error on cgi reading");
+			std::cerr << "error cgi reading: " << strerror(errno) << std::endl;
+			this->unsubscribeOperation(cgiFd);
+			client.clearReadOperation();
 			client.getResponse().setInternalServerError();
 			client.setMessageToSend(client.getResponse().toString());
-			close(cgiFd);
 			return ;
 		}
 
@@ -317,7 +326,7 @@ namespace conn
 
 		std::cout << "CGI Response: "<< cgiResponseString << std::endl;
 
-		this->unsubscribeOperation(eventIt->fd);
+		this->unsubscribeOperation(cgiFd);
 		client.clearReadOperation();
 
 		http::Server *server = client.getServer();
@@ -398,6 +407,9 @@ namespace conn
 
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
 
+		if (flushResult.first == BufferedWriter::WRITING)
+			return ; // still has content to write
+
 		// Check if client requested connection close
 		bool requestClose = client->getRequest().getHeader("Connection") == "close";
 
@@ -429,7 +441,7 @@ namespace conn
 
 	void EventLoop::handleFdEvent(ListEvents::iterator &monitoredIt)
 	{
-		// std::cout << "monitoredFd  " << monitoredIt->fd << std::endl;
+		//std::cout << "monitoredFd  " << monitoredIt->fd << std::endl;
 		if (monitoredIt->revents & (POLLHUP | POLLERR))
 		{ // close
 			std::cout << "close: " << monitoredIt->fd << std::endl;
