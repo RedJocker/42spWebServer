@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/15 21:07:48 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/16 16:02:49 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -406,6 +406,9 @@ namespace conn
 			throw std::domain_error("called handleClientWriteResponse without content to write");
 
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
+
+		if (flushResult.first == BufferedWriter::WRITING)
+			return ; // still has content to write
 
 		// Check if client requested connection close
 		bool requestClose = client->getRequest().getHeader("Connection") == "close";

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/15 20:20:38 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/16 15:57:05 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -387,6 +387,7 @@ namespace http
 			response.setStatusCode(308);
 			response.setStatusInfo("Permanent Redirect");
 			response.addHeader("Location", location);
+			response.addHeader("Content-Length", "0");
 			client.setMessageToSend(response.toString());
 			return;
 		}

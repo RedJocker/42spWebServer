@@ -6,7 +6,7 @@
 ;    By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/10/06 19:13:04 by maurodri          #+#    #+#              ;
-;    Updated: 2025/10/15 21:11:26 by maurodri         ###   ########.fr        ;
+;    Updated: 2025/10/16 16:00:35 by maurodri         ###   ########.fr        ;
 ;                                                                              ;
 ;******************************************************************************;
 
@@ -72,7 +72,7 @@ Content-Length: %d\r\n\
 
 
 (httpGet connection2 "/")
-(httpGet connection "/text.html")
+(httpGet connection2 "/text.html")
 (httpPost connection2 "/todo.cgi" "hello there")
 (httpGet connection2 "/todo.cgi")
 (httpGet connection2 "/todo.cgi?hello=there&def=xhy")
