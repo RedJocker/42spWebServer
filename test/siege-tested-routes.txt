@@ -1,0 +1,8 @@
+http://localhost:8080
+http://localhost:8080/
+http://localhost:8080/42
+http://localhost:8080/42/
+http://localhost:8080/42/index.html
+http://localhost:8080/text.html
+http://localhost:8080/todo.cgi
+
