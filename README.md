@@ -29,7 +29,107 @@
   - [epool intro](https://www.suchprogramming.com/epoll-in-3-easy-steps/)
   - [epool master](https://thelinuxcode.com/epoll-7-c-function/)
 
+
+
+
 # Tasks
+
+## To fix
+
+- when listing directory of address '/'
+  - expected to see h1 with content 'Index of /'
+  - actual was  'Index of //'
+  - issue is probably on Server.cpp:314 on call to RequestPath.getFilePath
+    returning state set by RequestPath.initRequestPath
+
+## Sprint 1
+
+- Http
+  - file upload
+    - [ ] give support for 'Content-Type: multiplart/form-data; boundary ---some-bounderyadfkjla'
+      - another request body format
+      - has a delimiter defined as part of header that delimits body in parts
+      - each body part may contain more headers
+      - filename will be part of a in body header
+      - browsers send this when using a form with '<input type=file>'
+        - try sending a request with this format with current webserver implementation to see
+          the body of request on webserver log
+      - if this is part of a cgi request
+        - cgi should receive body already joined, without delimiters
+        - content size sent to cgi must be content size of already joined body
+    - [ ] download files to a folder specified by configuration
+      - may start with a hardcoded folder as temporary implementation
+  - Configurable server
+    - [ ] Configurable port
+      - configuration may choose a port for server
+    - [ ] Configurable max size of body request
+      - configuration may choose a limit for body size
+      - research what is the apropriate response for this case
+    - [ ] Configurable docroot
+      - configuration may choose a root server folder that maps to server file system
+    - [ ] Configurable routing system
+      - part of server configuration (including virtual servers)
+      - [ ] configurable allowed methods for a specific route
+        - a certain route at '/some-route' can define only GET to be allowed, or only GET and POST, etc
+      - [ ] file extension based route matching
+        - a route may be defined based on file extensions like '/some-route/*.php'
+          - actual syntax can be defined by implementation, but wildcards was a minishell item
+      - [ ] configuration for directory files
+        - may have a configurable default file (ex: index.html, index.php, any.xxx)
+        - may list directory content
+        - may be forbiden access
+        - can only have one of these behaviour at a time
+          - must define behaviour if configuration file has more than one active
+            - priority based is likely better option something like 'forbiden > index > listing'
+      - [ ] configuration for default responses
+        - body content of error responses like 404 or 500 may be customized
+        - configuration should point to a file that will be used on response
+        - these files may be loaded to memory before starting server so it may be pre-cached
+          during response handling
+      - [ ] configurable redirection
+        - a route may be configured to redirect requests to another route
+      - [ ] configurable file upload
+        - may allow or dissalow file upload (depends on POST method being allowed)
+        - may configure a folder to upload files into
+      - implementation sugestion
+        - create a interface Route that has at least
+          - a bool matches(RequestPath path, method) const
+          - a void serve(Client client, Monitor monitor) const
+        - create implementations for RouteCgi and RouteStaticFile
+        - route based configuration should be responsability of Route classes
+  - [ ] Virtual Servers
+    - configuration may define serveral servers for same port, that is same tcp connection
+    - each virtual server should have the same capacities as a normal server
+    - on client connection it will not be possible to determine which virtual server this connection
+      is related to
+      - only after reading header 'Host: somedomainname' it will be possible to determine
+        which virtual server should handle the request being parsed
+    - [ ] reasearch how to implement in a way that does not require too much rewriting
+      - maybe we can have all http::Server to contain a list of virtual servers with at least
+        one default virtual server and have the current 'server responsabilities' delegated
+        to virtual servers and server would only be responsible to determine the virtual server
+        that is responsible to handle client request
+
+- CGI
+  - [ ] change cgi process current directory to folder of requested resource
+    - use chdir on child process, after fork, before execve
+    - cgi process should be able to use relative path to acess other files
+      - relative to folder of cgi resource, "folder where script is located" 
+  - [ ] read status response from cgi
+    - cgi may respond with status code through cgi response headers
+    - header should be read by server, removed from headers and sent as status code
+  - [ ] deal with cgi unresponsiveness
+    - some timeout system is required for cgi specifically, but also for all fd operations in general
+  - [ ] deal with cgi crashes
+
+- Tests
+  - make end-to-end tests to test that implementation behaviour is following requirements 
+    - testing on 'high level', no implementation details, blackbox testing
+    - set up stage enviroment so that changing dev enviroment (like ./www folder)
+      does not change test results
+  - make stress tests
+
+## Sprint 0
 
 - [X] init repository
 
@@ -185,7 +285,7 @@
     - [X] create subdirectories on www to test relative path works
     - [X] it should not be possible to go outside docroot
       - [X] `GET /../Makefile HTTP/1.1` should return 404 not found
-      - [ ] test on terminal, browsers make some url cleaning on request
+      - [X] test on terminal, browsers make some url cleaning on request
   - [X] Handle header Connection: close
   - [X] create a http::Server that is a conn::TcpServer
     - [X] this class will be responsible for server specific behaviour
@@ -225,32 +325,32 @@
          - epoll does not allow monitoring regular files
     - [X] handle file reading on EventLoop
     - [X] handle file writing on EventLoop
-    - handle cgi ipc on EventLoop
+    - [x] handle cgi ipc on EventLoop
 
 - CGI
-  - create folder for cgi module
-  - spawn a php-cgi process
+  - [x] create folder for cgi module
+  - [x] spawn a php-cgi process
   - [X] research how to better deal with IPC
-  - research how to better deal with spawned process
+  - [x] research how to better deal with spawned process
     - one process only dealing with all requests concurrently
-    - one process for each request
-  - use socketpair for ipc
+    - [x] one process for each request (for simplicity reasons)
+  - [x] use socketpair for ipc
     - pair of connected sockets
       - each socket is bidirectional
       - child-cgi
         - [x] redirect child stdin and stdout to one side of socketpair
         - [x]close other side of socketpair
-		- [ ] create envp with cgi variables
-			- [x] send hardcoded values
-			- send valued based on request
-		- [x] call execve
-		- handle error if failed execve and exit
+                - [x] create envp with cgi variables
+                        - [x] send hardcoded values
+                        - [x] send valued based on request
+                - [x] call execve
+                - handle error if failed execve and exit
       - server
-        - subscribe read/write to cgi on EventLoop
-        - write request body to cgi
+        - [x] subscribe read/write to cgi on EventLoop
+        - [x] write request body to cgi
         - [x] read cgi-response
-	  - [x] read a file as if it was a cgi-response with cgi-response content
-	  - [x] send response based on file read
-	  - [x] read a cgi-response from ipc to a process without processing any request input
+          - [x] read a file as if it was a cgi-response with cgi-response content
+          - [x] send response based on file read
+          - [x] read a cgi-response from ipc to a process without processing any request input
 
-        - write full response
+        - [x] write full response
