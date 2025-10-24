@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/15 18:44:49 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/24 19:06:05 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ int main(void)
 
 	http::Server server("localhost", "./www", 8080);
 	server.addCgiRoute("/todo.cgi");
+	server.addCgiRoute("/42/todo.cgi");
 	std::pair<int, std::string> maybeServerFd = server.createAndListen();
 	if (maybeServerFd.first < 0)
 	{

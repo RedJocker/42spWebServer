@@ -111,8 +111,14 @@
         that is responsible to handle client request
 
 - CGI
-  - [ ] change cgi process current directory to folder of requested resource
+  - [-] change cgi process current directory to folder of requested resource
     - use chdir on child process, after fork, before execve
+      - [x] aparently php-cgi can set current directory based
+        on envp SCRIPT_FILENAME
+      - [ ] will need to check this again when supporting multiple cgis
+      - changing chdir also has impact on relative filenames passed to cgi
+        would need to do something like split filename in folder + file
+        set chdir to folder and pass only filename as script
     - cgi process should be able to use relative path to acess other files
       - relative to folder of cgi resource, "folder where script is located" 
   - [ ] read status response from cgi
