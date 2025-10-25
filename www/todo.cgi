@@ -1,5 +1,7 @@
 <?php
 
+http_response_code(418);
+
 echo(getcwd());
 echo("---<br><pre>");
 var_export($_SERVER);
