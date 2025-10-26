@@ -1,6 +1,7 @@
 <?php
 
-echo(getcwd());
+
+echo(getcwd()) // missing semicolon to trigger runtime error, should result on 500 status code
 echo("---<br><pre>");
 var_export($_SERVER);
 echo("</pre><br>---");

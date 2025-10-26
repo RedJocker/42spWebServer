@@ -92,10 +92,12 @@
         - may allow or dissalow file upload (depends on POST method being allowed)
         - may configure a folder to upload files into
       - implementation sugestion
-        - create a interface Route that has at least
-          - a bool matches(RequestPath path, method) const
-          - a void serve(Client client, Monitor monitor) const
+        - create a (interface||abstract class) Route that has at least
+          - a virtual bool matches(RequestPath path, method) const
+          - a virtual void serve(Client client, Monitor monitor) const
         - create implementations for RouteCgi and RouteStaticFile
+		  - use existing code to implement serve and matches for these
+		    specific implementations
         - route based configuration should be responsability of Route classes
   - [ ] Virtual Servers
     - configuration may define serveral servers for same port, that is same tcp connection
@@ -126,8 +128,9 @@
     - header should be read by server, removed from headers and sent as status code
   - [ ] deal with cgi unresponsiveness
     - some timeout system is required for cgi specifically, but also for all fd operations in general
-  - [ ] deal with cgi crashes
-
+  - [X] deal with cgi crashes
+	- php-cgi handles runtime errors and return Status: 500 through socket pair
+	  so reading status from cgi response contemplates this item
 - Tests
   - make end-to-end tests to test that implementation behaviour is following requirements 
     - testing on 'high level', no implementation details, blackbox testing
