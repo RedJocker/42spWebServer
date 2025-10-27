@@ -14,7 +14,7 @@
   - [reference RFC](https://www.rfc-editor.org/rfc/rfc2616)
   - [http overview mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview)
   - [crlf](https://stackoverflow.com/questions/1552749/difference-between-cr-lf-lf-and-cr-line-break-types)
-
+  - [status codes]([https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/)
 - cgi
   - [reference RFC](https://www.rfc-editor.org/rfc/rfc3875)
   - [some examples in different languages](https://gist.github.com/stokito/a9a2732ffc7982978a16e40e8d063c8f)
@@ -128,6 +128,8 @@
     - header should be read by server, removed from headers and sent as status code
   - [ ] deal with cgi unresponsiveness
     - some timeout system is required for cgi specifically, but also for all fd operations in general
+	- return status 504 Gateway Timeout
+	  - [504 reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/504#status)
   - [X] deal with cgi crashes
 	- php-cgi handles runtime errors and return Status: 500 through socket pair
 	  so reading status from cgi response contemplates this item
