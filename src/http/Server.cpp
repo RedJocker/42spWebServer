@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/24 22:48:33 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/27 12:14:52 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,9 +198,7 @@ namespace http
 			}
 			delete[] envp;
 
-			// TODO read status response from cgi
 			std::cout << "Status: 500 Internal Server Error" << std::endl;
-			// TODO check output format is right
 
 			::exit(11);
 		}

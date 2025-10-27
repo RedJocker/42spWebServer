@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/25 00:03:19 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/27 12:21:18 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,23 +54,23 @@ namespace http {
 	bool Response::setStatusCodeStr(const std::string &statusStr)
 	{
 		std::stringstream lineStream(statusStr);
-		std::string statusCode;
+		std::string statusCodeStr;
 		std::string statusInfo;
 
-		lineStream >> statusCode;
+		lineStream >> statusCodeStr;
 		std::getline(lineStream, statusInfo);
 
-		if (statusCode.size() != 3)
+		if (statusCodeStr.size() != 3)
 			return false;
-		int status = 0;
+		int statusCode = 0;
 		for (size_t i = 0; i < 3; ++i)
 		{
-			if (statusStr.at(i) < '0' || statusStr.at(i) > '9')
+			if (statusCodeStr.at(i) < '0' || statusCodeStr.at(i) > '9')
 				return false;
-			status *= 10;
-			status += (statusStr.at(i) - '0');
+			statusCode *= 10;
+			statusCode += (statusStr.at(i) - '0');
 		}
-		this->_statusCode = status;
+		this->_statusCode = statusCode;
 		if (statusInfo != "")
 			this->_statusInfo = statusInfo;
 		else
