@@ -164,17 +164,17 @@ function countCharsPerSecond() {
             correct: 0,
             wrong: 0,
         };
-        for (i = historyChars.length - 1; i >= historyChars.length - 5; --i) {
+        for (i = historyChars.length - 1; i >= historyChars.length - 30; --i) {
             averageThirtySec.total += historyChars[i].total;
             averageThirtySec.correct += historyChars[i].correct;
             averageThirtySec.wrong += historyChars[i].wrong;
         }
-        averageThirtySec.total /= 5;
-        averageThirtySec.correct /= 5;
-        averageThirtySec.wrong /= 5;
-        typedLastThirtySecond.innerHTML = averageThirtySec.total;
-        correctLastThirtySecond.innerHTML = averageThirtySec.correct;
-        wrongLastThirtySecond.innerHTML = averageThirtySec.wrong;
+        averageThirtySec.total /= 30;
+        averageThirtySec.correct /= 30;
+        averageThirtySec.wrong /= 30;
+        typedLastThirtySecond.innerHTML = averageThirtySec.total.toFixed(2);
+        correctLastThirtySecond.innerHTML = averageThirtySec.correct.toFixed(2);
+        wrongLastThirtySecond.innerHTML = averageThirtySec.wrong.toFixed(2);
 
     }
     lastCharsTyped = {...charsTyped};
