@@ -121,7 +121,7 @@
         set chdir to folder and pass only filename as script
     - cgi process should be able to use relative path to acess other files
       - relative to folder of cgi resource, "folder where script is located" 
-  - [ ] read status response from cgi
+  - [x] read status response from cgi
     - cgi may respond with status code through cgi response headers
     - header should be read by server, removed from headers and sent as status code
   - [ ] deal with cgi unresponsiveness

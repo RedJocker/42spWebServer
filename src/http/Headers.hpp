@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:20 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/07 18:26:54 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/24 22:46:22 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ namespace http {
 			std::map<std::string, std::string, CaseInsensitive> getAll(void) const;
 
 			bool addHeader(const std::string &key, const std::string &value);
+			void eraseHeader(const std::string &key);
 			std::string str(void) const;
 		private:
 			std::map<std::string, std::string, CaseInsensitive> _headers;

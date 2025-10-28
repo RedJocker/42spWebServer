@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 20:14:08 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/24 22:48:33 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,8 +278,16 @@ namespace http
 
 			// TODO check status header from cgi, send it as status and remove header
 			// https://www.rfc-editor.org/rfc/rfc3875#section-6.3.3
-			client.getResponse()
-				.setOk()
+			Response &response = client.getResponse();
+			std::string status = response.getHeader("Status");
+			bool statusSet = false;
+			if (status != "")
+				statusSet = response.setStatusCodeStr(status);
+			if (!statusSet)
+				response.setOk();
+			else
+				response.headers().eraseHeader("Status");
+			response
 				.setBody(cgiResponse.substr(separatorIndex + 4));
 			client.setMessageToSend(client.getResponse().toString());
 		}
