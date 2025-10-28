@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/27 12:21:18 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/28 17:18:42 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ namespace http {
 		if (statusInfo != "")
 			this->_statusInfo = statusInfo;
 		else
-			this->_statusInfo = this->statusInfoInfer(status);
+			this->_statusInfo = this->statusInfoInfer(statusCode);
 		return true;
 	}
 
