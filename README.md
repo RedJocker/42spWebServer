@@ -126,13 +126,20 @@
   - [x] read status response from cgi
     - cgi may respond with status code through cgi response headers
     - header should be read by server, removed from headers and sent as status code
-  - [ ] deal with cgi unresponsiveness
+  - [x] deal with cgi unresponsiveness
     - some timeout system is required for cgi specifically, but also for all fd operations in general
 	- return status 504 Gateway Timeout
 	  - [504 reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/504#status)
   - [X] deal with cgi crashes
 	- php-cgi handles runtime errors and return Status: 500 through socket pair
 	  so reading status from cgi response contemplates this item
+
+- Connection
+  - [ ] timeout system for clients
+    - client may be unresponsive after a keep-alive response
+    - client may be too slow sending the whole request
+    - send response with 408 Request Timeout
+
 - Tests
   - make end-to-end tests to test that implementation behaviour is following requirements 
     - testing on 'high level', no implementation details, blackbox testing
