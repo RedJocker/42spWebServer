@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/15 18:14:17 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 00:09:36 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,9 @@
 
 # include "TcpServer.hpp"
 # include <string>
-# include <vector>
+# include <set>
 # include "Client.hpp"
-
-namespace conn
-{
-	class Monitor;
-}
+# include "Route.hpp"
 
 namespace http
 {
@@ -30,7 +26,7 @@ namespace http
 
 		std::string hostname;
 		std::string docroot;
-		std::vector<std::string> cgiRoutes;
+		std::set<Route*> routes;
 
 		void handleGetFile(http::Client &client, conn::Monitor &monitor);
 
@@ -53,13 +49,12 @@ namespace http
 		const std::string &getHostname() const;
 		const std::string &getDocroot() const;
 
-		void addCgiRoute(const std::string &route);
+		void addRoute(Route *route);
 		void onFileRead(http::Client &client, const std::string &fileContent);
 		void onFileWritten(http::Client &client);
 		void onCgiResponse(http::Client &client, const std::string cgiResponse);
 		void onServerError(http::Client &client);
 		void serve(Client &client, conn::Monitor &monitor);
-		const std::vector<std::string> &getCgiRoutes() const;
 
 	};
 }

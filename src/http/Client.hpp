@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:34:03 by maurodri          #+#    #+#             */
-/*   Updated: 2025/09/25 16:56:36 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/10/30 00:03:35 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,12 @@
 namespace http
 {
 	class Server;
+	class Route;
 
 	class Client : public conn::TcpClient
 	{
 		Server *server;
+		Route *route;
 		Request request;
 		Response response;
 
@@ -40,8 +42,10 @@ namespace http
 		Request &getRequest();
 		Response &getResponse();
 
-		Server *getServer() const;
+		Server *getServer(void) const;
 		void setServer(Server *server);
+		Route *getRoute(void) const;
+		void setRoute(Route *server);
 
 		void clear(void);
 	};

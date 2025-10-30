@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/28 23:50:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/29 23:53:00 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -344,9 +344,9 @@ namespace conn
 		this->unsubscribeOperation(cgiFd);
 		client.clearReadOperation();
 
-		http::Server *server = client.getServer();
-		if (server)
-			server->onCgiResponse(client, cgiResponseString);
+		http::Route *route = client.getRoute();
+		if (route)
+			route->respond(client, cgiResponseString);
 	}
 
 	void EventLoop::handleClientRequest(
