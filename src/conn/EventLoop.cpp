@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/16 16:59:00 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/28 23:50:57 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,19 @@
 #include "Monitor.hpp"
 #include "devUtil.hpp"
 
+#include <limits>
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
 #include <cerrno>
+#include <signal.h>
 
 namespace conn
 {
 
 	bool EventLoop::shouldExit = false;
+	time_t EventLoop::timeoutLimit = 5;
 
 	EventLoop::EventLoop()
 	{
@@ -89,8 +92,17 @@ namespace conn
 	{
 		std::cout << "unsubscribeOperation " <<  operationFd << std::endl;
 		this->unsubscribeFd(operationFd);
-		Operation op = {Operation::ANY, operationFd};
-		this->operations.erase(this->operations.find(op));
+		Operation op = Operation::declare(Operation::ANY, operationFd, EventLoop::timeoutLimit);
+		MapOperations::iterator opIt = this->operations.find(op);
+		if (opIt != this->operations.end())
+		{
+			http::Client *client = opIt->second;
+			if (client)
+			{
+				client->clearCgiPid();
+			}
+		}
+		this->operations.erase(op);
 	}
 
 	void EventLoop::unsubscribeHttpClient(
@@ -151,7 +163,8 @@ namespace conn
 			event.fd = fileFd;
 			this->subscribeFds.push_back(event);
 			client->setOperationFd(fileFd);
-			Operation op = {Operation::FILE_READ, fileFd};
+			Operation op =
+				Operation::declare(Operation::FILE_READ, fileFd, EventLoop::timeoutLimit);
 			this->operations.insert(std::make_pair(op, client));
 		}
 	}
@@ -168,7 +181,8 @@ namespace conn
 			event.fd = fileFd;
 			this->subscribeFds.push_back(event);
 			client->setOperationFd(fileFd, content);
-			Operation op = {Operation::FILE_WRITE, fileFd};
+			Operation op =
+				Operation::declare(Operation::FILE_WRITE, fileFd, EventLoop::timeoutLimit);
 			this->operations.insert(std::make_pair(op, client));
 		}
 	}
@@ -194,7 +208,8 @@ namespace conn
 			{ // skip to reading
 				client.setOperationFd(cgiFd);
 			}
-			Operation op = {Operation::CGI, cgiFd};
+			Operation op =
+				Operation::declare(Operation::CGI, cgiFd, EventLoop::timeoutLimit);
 			this->operations.insert(std::make_pair(op, clientPtr));
 		}
 	}
@@ -424,12 +439,14 @@ namespace conn
 			client->clear();
 		}
 
+		bool responseClose = client->getResponse().getHeader("Connection") == "close";
 		// Unsubscribe the client if connection must close
-		if (requestClose)
+		if (requestClose || responseClose)
 		{
 			unsubscribeHttpClient(eventIt);
 			return;
 		}
+
 		client->clear();
 		if (client->hasBufferedContent())
 		{ // BufferedReader has read content of more than one request
@@ -456,7 +473,8 @@ namespace conn
 		if (monitoredIt->revents & POLLOUT)
 		{ // fd is available for write
 			// std::cout << "out "  << monitoredIt->fd << std::endl;
-			Operation op = {Operation::ANY, monitoredIt->fd};
+			Operation op =
+				Operation::declare(Operation::ANY, monitoredIt->fd, EventLoop::timeoutLimit);
 			MapOperations::iterator operationIt = this->operations.find(op);
 			if (operationIt != this->operations.end()
 				&& operationIt->first.type == Operation::FILE_WRITE)
@@ -504,7 +522,8 @@ namespace conn
 				this->handleClientRequest(client, monitoredIt);
 				return;
 			}
-			Operation op = {Operation::ANY, monitoredIt->fd};
+			Operation op =
+				Operation::declare(Operation::ANY, monitoredIt->fd, EventLoop::timeoutLimit);
 			MapOperations::iterator operationIt =
 				this->operations.find(op);
 			if (operationIt != this->operations.end()
@@ -552,10 +571,54 @@ namespace conn
 		EventLoop::shouldExit = true;
 	}
 
+	time_t EventLoop::markExpiredOperations(void)
+	{
+
+		time_t minTimeout = EventLoop::timeoutLimit;
+		for (MapOperations::iterator op = this->operations.begin();
+			 op != this->operations.end();)
+		{
+			time_t expirationTime = op->first.timeToExpire();
+			//std::cout << "expirationTime" << expirationTime << std::endl;
+			if (expirationTime < 0)
+			{
+				std::cout << "expiredOp fd:" << op->first.fd << std::endl;
+				http::Client *client = op->second;
+				if (client)
+				{
+					client->clearReadOperation();
+					client->getResponse()
+						.setGatewayTimeout();
+					client->setMessageToSend(client->getResponse().toString());
+					pid_t cgiPid = client->getCgiPid();
+					if (cgiPid <= 0)
+					{
+						throw std::domain_error("unexpected pid while"
+									"removing timeout cgi operation");
+					}
+					kill(cgiPid, SIGKILL);
+					client->clearCgiPid();
+				}
+				// avoid call to unsubscribeOperation to avoid iterator invalidation
+				this->unsubscribeFd(op->first.fd);
+				this->operations.erase(op++);
+			}
+			else
+			{
+				minTimeout = expirationTime < minTimeout ? expirationTime : minTimeout;
+				++op;
+			}
+		}
+		return minTimeout;
+}
+
 	bool EventLoop::loop()
 	{
 		while (!EventLoop::shouldExit)
 		{
+			time_t minTimeout = this->markExpiredOperations();
+			//std::cout << "minTimeout: " << minTimeout << std::endl;
+
 			if (!this->subscribeFds.empty())
 			{
 				// complete pending subscriptions
@@ -566,8 +629,10 @@ namespace conn
 				this->subscribeFds.clear();
 			}
 			// waiting for ready event from epoll
-			 // -1 without timeout
-			int numReadyEvents = poll(this->events.data(), events.size(), -1);
+			// -1 without timeout
+			// TODO make timeout system for clients
+			int timeoutTime = static_cast<int>(minTimeout) * 1000;
+			int numReadyEvents = poll(this->events.data(), events.size(), timeoutTime);
 			if (numReadyEvents < 0)
 			{
 				std::cout << "No events on pool due to: "

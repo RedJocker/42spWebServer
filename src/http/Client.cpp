@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/16 19:54:51 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/28 23:36:19 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ namespace http {
 		this->reader.saveBuffer();
 		this->request.clear();
 		this->response.clear();
+		this->clearCgiPid();
 		this->clearReadOperation(); // restores buffer
 	}
 }

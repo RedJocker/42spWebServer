@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/28 17:18:42 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/29 00:01:20 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,10 @@ namespace http {
 
 	std::string Response::getHeader(const std::string &key) const {
 		return _headers.getHeader(key);
+	}
+
+	int Response::getStatusCode(void) const {
+		return this->_statusCode;
 	}
 
 	bool Response::setStatusCodeStr(const std::string &statusStr)
@@ -147,11 +151,23 @@ namespace http {
 
 	Response &Response::setInternalServerError()
 	{
-	    (*this)
-	        .setStatusCode(500)
-	        .setStatusInfo("Internal Server Error")
-	        .addHeader("Content-Length", "0")
-	        .addHeader("Connection", "Close");
+		this->clear();
+		(*this)
+			.setStatusCode(500)
+			.setStatusInfo("Internal Server Error")
+			.addHeader("Content-Length", "0")
+			.addHeader("Connection", "close");
+		return *this;
+	}
+
+	Response &Response::setGatewayTimeout()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(504)
+			.setStatusInfo("Gateway Timeout")
+			.addHeader("Content-Length", "0")
+			.addHeader("Connection", "close");
 		return *this;
 	}
 

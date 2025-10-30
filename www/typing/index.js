@@ -24,7 +24,6 @@ function appendWord(word)
 
     chars.forEach( (ch, i) => {
         let span = document.createElement("span");
-        console.log(span);
 
         if (ch === " " || ch === "\n" || ch === "\t") {
             span.innerHTML = "&nbsp;";
@@ -58,11 +57,20 @@ appendWord(word);
 
 document.addEventListener("keydown", (event) => {
     if (idSetInterval < 0) {
-        idSetInterval = setInterval(countCharsPerSecond, 1000);
+        idSetInterval = setInterval(updateStats, 1000);
     }
-    if (event.key === " " || event.key === "/"){
+    let textInput = document.getElementById("textInput");
+    if (event.key === " " || event.key === "/" || event.key === "'"){
         event.preventDefault();
+        if (document.activeElement === textInput) {
+            textInput.value += event.key
+        }
     }
+
+    if (document.activeElement === textInput) {
+            return
+    }
+
     //console.log(event);
     if (event.key.length > 1) {
         if (event.key === "Backspace"|| event.key === "Delete"){
@@ -116,68 +124,52 @@ function normalizeCh(ch) {
     }
 }
 
-function countCharsPerSecond() {
-    let typedLastSecond = document.getElementById('typedLastSecond');
-    let correctLastSecond = document.getElementById('correctLastSecond');
-    let wrongLastSecond = document.getElementById('wrongLastSecond');
-
-    charsPerSecond = {
+function updateStatsHistory(){
+    let charsPerSecond = {
         total: charsTyped.total - lastCharsTyped.total,
         correct: charsTyped.correct - lastCharsTyped.correct,
         wrong: charsTyped.wrong - lastCharsTyped.wrong,
     };
-    typedLastSecond.innerHTML = charsPerSecond.total;
-    correctLastSecond.innerHTML = charsPerSecond.correct;
-    wrongLastSecond.innerHTML = charsPerSecond.wrong;
-
     historyChars.push(charsPerSecond);
-    if (historyChars.length >= 5) {
-        let typedLastFiveSecond = document.getElementById('typedLastFiveSecond');
-        let correctLastFiveSecond = document.getElementById('correctLastFiveSecond');
-        let wrongLastFiveSecond = document.getElementById('wrongLastFiveSecond');
-
-        let averageFiveSec = {
-            total: 0,
-            correct: 0,
-            wrong: 0,
-        };
-        for (i = historyChars.length - 1; i >= historyChars.length - 5; --i) {
-            averageFiveSec.total += historyChars[i].total;
-            averageFiveSec.correct += historyChars[i].correct;
-            averageFiveSec.wrong += historyChars[i].wrong;
-        }
-        averageFiveSec.total /= 5;
-        averageFiveSec.correct /= 5;
-        averageFiveSec.wrong /= 5;
-        typedLastFiveSecond.innerHTML = averageFiveSec.total;
-        correctLastFiveSecond.innerHTML = averageFiveSec.correct;
-        wrongLastFiveSecond.innerHTML = averageFiveSec.wrong;
-
-    }
-    if (historyChars.length >= 30) {
-        let typedLastThirtySecond = document.getElementById('typedLastThirtySecond');
-        let correctLastThirtySecond = document.getElementById('correctLastThirtySecond');
-        let wrongLastThirtySecond = document.getElementById('wrongLastThirtySecond');
-
-        let averageThirtySec = {
-            total: 0,
-            correct: 0,
-            wrong: 0,
-        };
-        for (i = historyChars.length - 1; i >= historyChars.length - 30; --i) {
-            averageThirtySec.total += historyChars[i].total;
-            averageThirtySec.correct += historyChars[i].correct;
-            averageThirtySec.wrong += historyChars[i].wrong;
-        }
-        averageThirtySec.total /= 30;
-        averageThirtySec.correct /= 30;
-        averageThirtySec.wrong /= 30;
-        typedLastThirtySecond.innerHTML = averageThirtySec.total.toFixed(2);
-        correctLastThirtySecond.innerHTML = averageThirtySec.correct.toFixed(2);
-        wrongLastThirtySecond.innerHTML = averageThirtySec.wrong.toFixed(2);
-
-    }
     lastCharsTyped = {...charsTyped};
+}
+
+function updateStatsGroup(groupSize) {
+    let typedView = document.getElementById('typedLast' + groupSize);
+    let correctView = document.getElementById('correctLast' + groupSize);
+    let wrongView = document.getElementById('wrongLast' + groupSize);
+
+    let average = {
+        total: 0,
+        correct: 0,
+        wrong: 0,
+    };
+    if (groupSize <= historyChars.length) {
+        for (i = historyChars.length - 1;
+             i >= historyChars.length - groupSize;
+             --i){
+            average.total += historyChars[i].total;
+            average.correct += historyChars[i].correct;
+            average.wrong += historyChars[i].wrong;
+        }
+        average.total /= groupSize;
+        average.correct /= groupSize;
+        average.wrong /= groupSize;
+    }
+    typedView.innerHTML = average.total.toFixed(2);
+    correctView.innerHTML = average.correct.toFixed(2);
+    wrongView.innerHTML = average.wrong.toFixed(2);
+}
+
+function updateStatsDisplay() {
+    updateStatsGroup(1);
+    updateStatsGroup(5);
+    updateStatsGroup(30);
+}
+
+function updateStats() {
+    updateStatsHistory();
+    updateStatsDisplay();
 }
 
 function setTextPractice() {
@@ -208,32 +200,14 @@ function initStats() {
 
     historyChars = [];
 
-    let typedLastSecond = document.getElementById('typedLastSecond');
-    let correctLastSecond = document.getElementById('correctLastSecond');
-    let wrongLastSecond = document.getElementById('wrongLastSecond');
-    typedLastSecond.innerHTML = 0;
-    correctLastSecond.innerHTML = 0;
-    wrongLastSecond.innerHTML =  0;
-
-    let typedLastFiveSecond = document.getElementById('typedLastFiveSecond');
-    let correctLastFiveSecond = document.getElementById('correctLastFiveSecond');
-    let wrongLastFiveSecond = document.getElementById('wrongLastFiveSecond');
-    typedLastFiveSecond.innerHTML = 0;
-    correctLastFiveSecond.innerHTML = 0;
-    wrongLastFiveSecond.innerHTML = 0;
-
-    let typedLastThirtySecond = document.getElementById('typedLastThirtySecond');
-    let correctLastThirtySecond = document.getElementById('correctLastThirtySecond');
-    let wrongLastThirtySecond = document.getElementById('wrongLastThirtySecond');
-    typedLastThirtySecond.innerHTML = 0;
-    correctLastThirtySecond.innerHTML = 0;
-    wrongLastThirtySecond.innerHTML = 0;
+    updateStatsDisplay()
 }
+
 
 let idSetInterval = -1;
 window.addEventListener("focus", () => {
     if (idSetInterval < 0)
-        idSetInterval = setInterval(countCharsPerSecond, 1000);
+        idSetInterval = setInterval(updateStats, 1000);
 });
 
 window.addEventListener("blur", () => {
