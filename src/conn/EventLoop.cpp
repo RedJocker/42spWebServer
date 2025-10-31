@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/31 15:09:18 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/10/31 00:29:11 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -587,7 +587,8 @@ namespace conn
 			{
 				std::cout << "expiredOp fd:" << op->first.fd << std::endl;
 				http::Client *client = op->second;
-				if (client && op->first.type == Operation::CGI)
+				if (client && op->first.type == Operation::CGI
+					&& client->getWriterState() == BufferedWriter::DONE)
 				{
 					client->clearReadOperation();
 					client->getResponse()
