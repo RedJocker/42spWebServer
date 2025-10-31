@@ -22,7 +22,7 @@ function appendWord(word)
     wordsTag.innerHTML = "";
     chars = word.split("");
 
-    chars.forEach( (ch, i) => {
+    chars.forEach((ch, i) => {
         let span = document.createElement("span");
 
         if (ch === " " || ch === "\n" || ch === "\t") {
@@ -63,12 +63,12 @@ document.addEventListener("keydown", (event) => {
     if (event.key === " " || event.key === "/" || event.key === "'"){
         event.preventDefault();
         if (document.activeElement === textInput) {
-            textInput.value += event.key
+            textInput.value += event.key;
         }
     }
 
     if (document.activeElement === textInput) {
-            return
+        return;
     }
 
     //console.log(event);
@@ -145,7 +145,7 @@ function updateStatsGroup(groupSize) {
         wrong: 0,
     };
     if (groupSize <= historyChars.length) {
-        for (i = historyChars.length - 1;
+        for (let i = historyChars.length - 1;
              i >= historyChars.length - groupSize;
              --i){
             average.total += historyChars[i].total;
@@ -200,7 +200,7 @@ function initStats() {
 
     historyChars = [];
 
-    updateStatsDisplay()
+    updateStatsDisplay();
 }
 
 

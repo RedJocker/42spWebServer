@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/30 22:25:34 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/31 15:09:18 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -587,7 +587,7 @@ namespace conn
 			{
 				std::cout << "expiredOp fd:" << op->first.fd << std::endl;
 				http::Client *client = op->second;
-				if (client)
+				if (client && op->first.type == Operation::CGI)
 				{
 					client->clearReadOperation();
 					client->getResponse()
@@ -608,7 +608,8 @@ namespace conn
 			}
 			else
 			{
-				minTimeout = expirationTime < minTimeout ? expirationTime : minTimeout;
+				minTimeout = expirationTime < minTimeout ?
+					expirationTime : minTimeout;
 				++op;
 			}
 		}
@@ -635,7 +636,8 @@ namespace conn
 			// -1 without timeout
 			// TODO make timeout system for clients
 			int timeoutTime = static_cast<int>(minTimeout) * 1000;
-			int numReadyEvents = poll(this->events.data(), events.size(), timeoutTime);
+			int numReadyEvents =
+				poll(this->events.data(), events.size(), timeoutTime);
 			if (numReadyEvents < 0)
 			{
 				std::cout << "No events on pool due to: "

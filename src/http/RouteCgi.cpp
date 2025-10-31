@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/30 22:23:06 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/31 15:03:01 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -41,7 +41,7 @@ namespace http {
 		//TODO
 	}
 
-	RouteCgi::RouteCgi(const RouteCgi &other)
+	RouteCgi::RouteCgi(const RouteCgi &other) : Route(other)
 	{
 		(void) other;
 		//TODO
@@ -125,7 +125,7 @@ namespace http {
 				::exit(11);
 			}
 
-			// shutdown EventLoop, carreful with dangling pointers and closed fds
+			// shutdown EventLoop, careful with dangling pointers and closed fds
 			monitor.shutdown();
 			// nothing coming from EventLoop is valid anymore
 

@@ -1,12 +1,12 @@
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
-//   RouteStaticFile.cpp                                       :+:      :+:    :+:   //
+//   RouteStaticFile.cpp                                :+:      :+:    :+:   //
 //                                                    +:+ +:+         +:+     //
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/30 22:28:37 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/31 14:58:34 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -41,7 +41,8 @@ namespace http {
 		//TODO
 	}
 
-	RouteStaticFile::RouteStaticFile(const RouteStaticFile &other)
+	RouteStaticFile::RouteStaticFile(
+		const RouteStaticFile &other) : Route(other)
 	{
 		(void) other;
 		//TODO
