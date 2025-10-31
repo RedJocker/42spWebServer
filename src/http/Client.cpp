@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/29 23:56:04 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 21:25:29 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,10 +58,6 @@ namespace http {
 
 	Server *Client::getServer(void) const {
 		return this->server;
-	}
-
-	void Client::setServer(Server *srv) {
-		this->server = srv;
 	}
 
 	Route *Client::getRoute(void) const {

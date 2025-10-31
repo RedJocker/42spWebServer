@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/29 23:53:00 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 22:25:34 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,18 +237,19 @@ namespace conn
 		{
 			std::cout << "file writing done" << eventIt->fd << std::endl;
 			client.clearWriteOperation();
-			http::Server *server = client.getServer();
-			if (server)
-				server->onFileWritten(client);
+			http::Route *route = client.getRoute();
+			Operation op = Operation::declare(Operation::FILE_WRITE, -22, 0);
+			if (route)
+				route->respond(client, op);
 		} else
 		{
 			std::cout << "file writing error "
 					  << writeResult.second
 					  << " "
 					  << eventIt->fd << std::endl;
-			http::Server *server = client.getServer();
-			if (server)
-				server->onServerError(client);
+			http::Route *route = client.getRoute();
+			if (route)
+				route->onServerError(client);
 		}
 
 		this->unsubscribeOperation(eventIt->fd);
@@ -269,11 +270,12 @@ namespace conn
 		std::cout << "handleFileReads after reading" << std::endl;
 		if (readResult.first == BufferedReader::NO_CONTENT)
 		{
-			std::string responseStr = std::string(readResult.second);
+			Operation op = Operation::declare(Operation::FILE_READ, -22, 0);
+			op.content = std::string(readResult.second);
 			delete[] readResult.second;
-			http::Server *server = client->getServer();
-			if (server)
-				server->onFileRead(*client, responseStr);
+			http::Route *route = client->getRoute();
+			if (route)
+				route->respond(*client, op);
 
 		} else
 		{
@@ -303,9 +305,9 @@ namespace conn
 		{
 			std::cerr << "error cgi writing: " << strerror(errno) << std::endl;
 			TODO("handle error writing to cgi process");
-			http::Server *server = client.getServer();
-			if (server)
-				server->onServerError(client);
+			http::Route *route = client.getRoute();
+			if (route)
+				route->onServerError(client);
 		}
 		std::cout << "parent done writing to cgi:" << std::endl;
 		client.clearWriteOperation();
@@ -336,17 +338,18 @@ namespace conn
 			return ;
 		}
 
-		std::string cgiResponseString(readResult.second);
+		Operation op = Operation::declare(Operation::CGI, -22, 0);
+		op.content = std::string(readResult.second);
 		delete[] readResult.second;
 
-		std::cout << "CGI Response: "<< cgiResponseString << std::endl;
+		std::cout << "CGI Response: "<< op.content << std::endl;
 
 		this->unsubscribeOperation(cgiFd);
 		client.clearReadOperation();
 
 		http::Route *route = client.getRoute();
 		if (route)
-			route->respond(client, cgiResponseString);
+			route->respond(client, op);
 	}
 
 	void EventLoop::handleClientRequest(

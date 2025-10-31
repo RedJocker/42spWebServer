@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/30 00:09:36 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 21:28:15 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,6 @@ namespace http
 		std::string docroot;
 		std::set<Route*> routes;
 
-		void handleGetFile(http::Client &client, conn::Monitor &monitor);
-
-		void handleGetDirectory(http::Client &client, conn::Monitor &monitor);
-		void handlePost(http::Client &client, conn::Monitor &monitor);
-		void handleDelete(http::Client &client, conn::Monitor &monitor);
-		bool isCgiRequest(http::Client &client, conn::Monitor &monitor);
-		void handleCgiRequest(http::Client &client, conn::Monitor &monitor);
-
 	public:
 		const static std::string DEFAULT_DOCROOT;
 
@@ -50,12 +42,7 @@ namespace http
 		const std::string &getDocroot() const;
 
 		void addRoute(Route *route);
-		void onFileRead(http::Client &client, const std::string &fileContent);
-		void onFileWritten(http::Client &client);
-		void onCgiResponse(http::Client &client, const std::string cgiResponse);
-		void onServerError(http::Client &client);
 		void serve(Client &client, conn::Monitor &monitor);
-
 	};
 }
 

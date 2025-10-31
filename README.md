@@ -91,16 +91,15 @@
       - [ ] configurable file upload
         - may allow or dissalow file upload (depends on POST method being allowed)
         - may configure a folder to upload files into
-      - implementation sugestion
-        - create a (interface||abstract class) Route that has at least
-          - a virtual bool matches(RequestPath path, method) const
-          - a virtual void serve(Client client, Monitor monitor) const
-        - create implementations for RouteCgi and RouteStaticFile
+      - [x] create a (interface||abstract class) Route that has at least
+        - a virtual bool matches(RequestPath path, method) const
+        - a virtual void serve(Client client, Monitor monitor) const
+        -[x] create implementations for RouteCgi and RouteStaticFile
           - use existing code to implement serve and matches for these
             specific implementations
           - [x] create Route
           - [x] implement RouteCgi
-          - [ ] implement RouteStaticFile
+          - [x] implement RouteStaticFile
         - route based configuration should be responsability of Route classes
   - [ ] Virtual Servers
     - configuration may define serveral servers for same port, that is same tcp connection

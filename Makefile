@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/10/29 23:01:35 by maurodri         ###   ########.fr        #
+#    Updated: 2025/10/30 21:35:41 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,6 +38,7 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					RequestPath.cpp \
 					Route.cpp \
 					RouteCgi.cpp \
+					RouteStaticFile.cpp \
 					Dispatcher.cpp)
 MODULE_FILES := $(CONN_FILES) \
 	$(UTIL_FILES) \

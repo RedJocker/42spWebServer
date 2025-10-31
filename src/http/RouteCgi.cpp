@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/30 00:22:34 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 22:23:06 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -86,8 +86,7 @@ namespace http {
 		int sockets[2];
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0) {
 			std::cerr << "failed to open socket: " << strerror(errno) << std::endl;
-			TODO("respond server error");
-			//this->onServerError(client);
+			this->onServerError(client);
 			return;
 		}
 
@@ -96,8 +95,7 @@ namespace http {
 			std::cerr << "fork failed: " << strerror(errno) << std::endl;
 			close (sockets[0]);
 			close (sockets[1]);
-			TODO("respond server error");
-			//this->onServerError(client);
+			this->onServerError(client);
 			return;
 		}
 
@@ -123,9 +121,7 @@ namespace http {
 			char **envp = client.getRequest().envp();
 			if (!envp)
 			{
-				// TODO read status response from cgi
 				std::cout << "Status: 500 Internal Server Error" << std::endl;
-				// TODO check output format is right
 				::exit(11);
 			}
 
@@ -134,9 +130,6 @@ namespace http {
 			// nothing coming from EventLoop is valid anymore
 
 			execve(args[0], const_cast<char **>(args), envp);
-
-			// TODO handle script errors like infinity loop, runtime error, etc
-			// we will need to create some request timeout system
 
 			// If execve fails, exit child
 			std::cerr << "Failed to exec php-cgi: "
@@ -167,8 +160,9 @@ namespace http {
 		monitor.subscribeCgi(cgiFd, client.getFd());
 	}
 
-	void RouteCgi::respond(http::Client &client,  const std::string &operationContent) const
+	void RouteCgi::respond(http::Client &client,  const Operation &operation) const
 	{
+		const std::string &operationContent = operation.content;
 		// Parse headers and body from operationContent
 		size_t separatorIndex = operationContent.find("\r\n\r\n");
 		if (separatorIndex == std::string::npos)

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/30 00:09:56 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 21:50:05 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -36,5 +36,12 @@ namespace http {
 	Route::~Route()
 	{
 		//TODO
+	}
+
+	void Route::onServerError(http::Client &client) const
+	{
+		client.getResponse()
+			.setInternalServerError();
+		client.setMessageToSend(client.getResponse().toString());
 	}
 }
