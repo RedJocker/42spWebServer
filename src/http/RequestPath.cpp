@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:58:32 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 18:44:03 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/30 21:44:31 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,10 @@ const std::string &RequestPath::getFilePath() const {
 
 const std::string &RequestPath::getExtension() const {
 	return extension;
+}
+
+const std::string &RequestPath::getDocroot() const {
+	return docroot;
 }
 
 

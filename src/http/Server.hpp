@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/15 18:14:17 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/31 15:27:03 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,30 +15,22 @@
 
 # include "TcpServer.hpp"
 # include <string>
-# include <vector>
+# include <set>
 # include "Client.hpp"
-
-namespace conn
-{
-	class Monitor;
-}
+# include "Route.hpp"
 
 namespace http
 {
     class Server : public conn::TcpServer
 	{
+		struct OrderRoutes
+		{
+			bool operator()(const Route *s1, const Route *s2) const;
+		};
 
 		std::string hostname;
 		std::string docroot;
-		std::vector<std::string> cgiRoutes;
-
-		void handleGetFile(http::Client &client, conn::Monitor &monitor);
-
-		void handleGetDirectory(http::Client &client, conn::Monitor &monitor);
-		void handlePost(http::Client &client, conn::Monitor &monitor);
-		void handleDelete(http::Client &client, conn::Monitor &monitor);
-		bool isCgiRequest(http::Client &client, conn::Monitor &monitor);
-		void handleCgiRequest(http::Client &client, conn::Monitor &monitor);
+		std::set<Route*, OrderRoutes> routes;
 
 	public:
 		const static std::string DEFAULT_DOCROOT;
@@ -53,14 +45,8 @@ namespace http
 		const std::string &getHostname() const;
 		const std::string &getDocroot() const;
 
-		void addCgiRoute(const std::string &route);
-		void onFileRead(http::Client &client, const std::string &fileContent);
-		void onFileWritten(http::Client &client);
-		void onCgiResponse(http::Client &client, const std::string cgiResponse);
-		void onServerError(http::Client &client);
+		void addRoute(Route *route);
 		void serve(Client &client, conn::Monitor &monitor);
-		const std::vector<std::string> &getCgiRoutes() const;
-
 	};
 }
 

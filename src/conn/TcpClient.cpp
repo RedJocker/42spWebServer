@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-/*   Updated: 2025/10/16 18:39:13 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/28 23:43:24 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,7 +18,9 @@
 namespace conn
 {
 
-	TcpClient::TcpClient(): clientFd(0), operationFd(-22),  reader(0), writer(0)
+TcpClient::TcpClient()
+	: clientFd(0), operationFd(-22), cgiPid(-22),
+	  reader(0), writer(0)
 	{
 		throw std::domain_error(
 			"default constructor is not allowed, use constructor with clientFd parameter");
@@ -120,12 +122,23 @@ namespace conn
 		this->operationFd = operationFd;
 	}
 
+	pid_t TcpClient::getCgiPid(void) const
+	{
+		return this->cgiPid;
+	}
+
+
 	void TcpClient::setOperationFd(int operationFd, std::string writeContent)
 	{
 		if (this->operationFd != operationFd) {
 			this->operationFd = operationFd;
 			this->writer.setMessage(operationFd, writeContent);
 		}
+	}
+
+	void TcpClient::setCgiPid(pid_t cgiPid)
+	{
+		this->cgiPid = cgiPid;
 	}
 
 	void TcpClient::clearReadOperation()
@@ -139,5 +152,10 @@ namespace conn
 	{
 		this->writer.setFd(clientFd);
 		this->operationFd = -22;
+	}
+
+	void TcpClient::clearCgiPid()
+	{
+		this->setCgiPid(-22);
 	}
 }

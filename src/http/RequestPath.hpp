@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:54:53 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 18:47:16 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/30 21:43:50 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ class RequestPath
 		const std::string &getPath() const;
 		const std::string &getFilePath() const;
 		const std::string &getExtension() const;
+		const std::string &getDocroot() const;
+
 		std::string resourceMimeType() const;
 		bool isDirectory() const;
 		bool isFile() const;

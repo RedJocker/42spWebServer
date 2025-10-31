@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/10 03:00:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/28 23:41:58 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include "Monitor.hpp"
 
 #include <poll.h>
-
+#include <ctime>
 
 namespace conn
 {
@@ -49,10 +49,12 @@ namespace conn
 			http::Client &client,  ListEvents::iterator &eventIt);
 
 		void handleFdEvent(ListEvents::iterator &monitoredIt);
-	    void unsubscribeFd(int fd);
+		void unsubscribeFd(int fd);
 		void unsubscribeOperation(int operationFd);
+		time_t markExpiredOperations(void);
 	public:
 		static bool shouldExit;
+		static time_t timeoutLimit;
 
 		EventLoop();
 		EventLoop(const EventLoop &other);

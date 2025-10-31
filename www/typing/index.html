@@ -39,7 +39,10 @@
 
       }
       span {
+	  box-sizing: border-box;
 	  color: white;
+	  border-top: 1px dashed rgb(10 10 10);
+	  border-left:1px dashed rgb(10 10 10);
       }
       span.current {
 	  background-color: rgb(110 110 110);
@@ -47,9 +50,13 @@
       }
       span.good {
 	  color: green;
+	  border-top: 1px dashed green;
+	  border-left:1px dashed green;
       }
       span.bad {
 	  color: red;
+	  border-top: 1px dashed red;
+	  border-left:1px dashed red;
       }
     </style>
   </head>
@@ -62,20 +69,20 @@
 	  <p>Correct: </p>
 	  <p>Wrong: </p>
 	</div>
-	<div id="statsLastSecond">
-	  <p>1 second: <span id="typedLastSecond" >0</span> chs</p>
-	  <p>1 second: <span id="correctLastSecond" >0</span> chs</p>
-	  <p>1 second: <span id="wrongLastSecond" >0</span> chs</p>
+	<div id="statsLast1">
+	  <p>1 second: <span id="typedLast1" >0</span> chs</p>
+	  <p>1 second: <span id="correctLast1" >0</span> chs</p>
+	  <p>1 second: <span id="wrongLast1" >0</span> chs</p>
 	</div>
-	<div id="statsLastFiveSecond">
-	  <p>5 seconds: <span id="typedLastFiveSecond" >0</span> chs/s</p>
-	  <p>5 second: <span id="correctLastFiveSecond" >0</span> chs/s</p>
-	  <p>5 second: <span id="wrongLastFiveSecond" >0</span> chs/s</p>
+	<div id="statsLast5">
+	  <p>5 seconds: <span id="typedLast5" >0</span> chs/s</p>
+	  <p>5 second: <span id="correctLast5" >0</span> chs/s</p>
+	  <p>5 second: <span id="wrongLast5" >0</span> chs/s</p>
 	</div>
-	<div id="statsLastThirtySecond">
-	  <p>30 seconds: <span id="typedLastThirtySecond" >0</span> chs/s</p>
-	  <p>30 second: <span id="correctLastThirtySecond" >0</span> chs/s</p>
-	  <p>30 second: <span id="wrongLastThirtySecond" >0</span> chs/s</p>
+	<div id="statsLast30">
+	  <p>30 seconds: <span id="typedLast30" >0</span> chs/s</p>
+	  <p>30 second: <span id="correctLast30" >0</span> chs/s</p>
+	  <p>30 second: <span id="wrongLast30" >0</span> chs/s</p>
 	</div>
       </div>
     </div>

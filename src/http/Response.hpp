@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/24 22:48:19 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/29 00:00:28 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ namespace http {
 			virtual ~Response(void);
 
 			std::string getHeader(const std::string &key) const;
+			int getStatusCode(void) const;
 			Headers &headers();
 
 			bool setStatusCodeStr(const std::string &statusStr);
@@ -48,6 +49,7 @@ namespace http {
 			Response &setImTeapot();
 			Response &setBadRequest();
 			Response &setInternalServerError();
+			Response &setGatewayTimeout();
 
 			void clear(void);
 

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/08 03:56:12 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 21:26:48 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,13 +48,6 @@ namespace http {
 	}
 
 	Dispatcher::~Dispatcher() {}
-
-	http::Server &Dispatcher::resolveServer(http::Client &client) {
-		http::Server *srv = client.getServer();
-		if (!srv)
-			throw std::runtime_error("Client has no associated server");
-		return *srv;
-	}
 
 	void Dispatcher::dispatch(http::Client &client, conn::Monitor &monitor)
 	{
