@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/30 22:17:14 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/31 15:55:37 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,36 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include "RouteCgi.hpp"
+#include "RouteStaticFile.hpp"
 
 namespace http
 {
+	bool Server::OrderRoutes::operator()(
+		http::Route const *routeA, http::Route const *routeB) const {
+		// true if routeA has precedence over routeB
+		if (routeA == routeB)
+			return false;
+		if (!routeA)
+			return false;
+		if (!routeB)
+			return true;
+		RouteCgi const *routeAAsCgi = dynamic_cast<RouteCgi const*>(routeA);
+		RouteCgi const *routeBAsCgi = dynamic_cast<RouteCgi const*>(routeB);
+		if (routeAAsCgi && routeBAsCgi)
+			// giving precedence to route that was declared last
+			return routeAAsCgi->getId() > routeBAsCgi->getId();
+		RouteStaticFile const *routeAAsStatic = dynamic_cast<RouteStaticFile const*>(routeA);
+		RouteStaticFile const *routeBAsStatic = dynamic_cast<RouteStaticFile const*>(routeB);
+		if (routeAAsStatic && routeBAsStatic)
+			// giving precedence to route that was declared last
+			return routeAAsStatic->getId() > routeBAsStatic->getId();
+		// we know they are not null and not same type give precedence to cgi
+		if (routeAAsCgi)
+			return true;
+		return false;
+	}
+
 	const std::string Server::DEFAULT_DOCROOT = "./www";
 	Server::Server(const std::string &hostname,
 				   const std::string &docroot,
@@ -107,9 +134,6 @@ namespace http
 			Route &route = *(*routeIt);
 			if (route.matches(reqPath, method))
 			{
-				// Maybe TODO: if order of resolution maters
-				// then need to pass some comparator to std::set<Route*>
-				// and resolve order in comparator or something else
 				client.setRoute(&route);
 				route.serve(client, monitor);
 				return ;

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/30 21:28:15 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/31 15:27:03 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,14 @@ namespace http
 {
     class Server : public conn::TcpServer
 	{
+		struct OrderRoutes
+		{
+			bool operator()(const Route *s1, const Route *s2) const;
+		};
 
 		std::string hostname;
 		std::string docroot;
-		std::set<Route*> routes;
+		std::set<Route*, OrderRoutes> routes;
 
 	public:
 		const static std::string DEFAULT_DOCROOT;

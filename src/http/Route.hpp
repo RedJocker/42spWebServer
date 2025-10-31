@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/30 21:57:59 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/10/31 15:40:45 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,6 +27,9 @@ namespace http
 
 	class Route
 	{
+		static int idGenerator;
+		int id;
+
 	public:
 		Route(void);
 		Route(const Route &other);
@@ -37,6 +40,7 @@ namespace http
 		virtual void respond(http::Client &client, const Operation &operation) const = 0;
 
 		void onServerError(http::Client &client) const;
+		int getId(void) const;
 	};
 }
 
