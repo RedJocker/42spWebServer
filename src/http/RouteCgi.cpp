@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/04 13:58:24 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/04 19:57:58 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,8 +15,11 @@
 #include "Monitor.hpp"
 #include "pathUtils.hpp"
 #include "RequestPath.hpp"
-#include <sys/socket.h>
+#include <cerrno>
+#include <cstring>
+#include <cstdlib>
 #include <iostream>
+#include <sys/socket.h>
 
 namespace http {
 
