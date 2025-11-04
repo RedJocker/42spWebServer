@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:54:53 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/30 21:43:50 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/04 13:59:43 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #define REQUESTPATH_HPP
 
 #include <string>
-#include <sys/stat.h>
 
 class RequestPath
 {
@@ -33,7 +32,10 @@ class RequestPath
 		bool isDirectory() const;
 		bool isFile() const;
 		bool needsTrailingSlashRedirect() const;
-		void initRequestPath(const std::string &rawPath, const std::string &docroot);
+		void initRequestPath(
+			const std::string &rawPath, const std::string &docroot);
+		bool matchesPathSpecification(
+			const std::string &pathSpecification) const;
 
 	private:
 		std::string originalPath;   // from request

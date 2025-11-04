@@ -6,25 +6,11 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/31 15:55:37 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/04 14:03:44 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "Monitor.hpp"
-#include "pathUtils.hpp"
-#include "devUtil.hpp"
-#include "RequestPath.hpp"
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <iostream>
-#include <sstream>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
 
@@ -139,5 +125,10 @@ namespace http
 				return ;
 			}
 		}
+
+		Response &response = client.getResponse();
+		response.clear();
+		response.setNotFound();
+		client.setMessageToSend(response.toString());
 	}
 }

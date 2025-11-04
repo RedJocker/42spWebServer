@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/10/31 14:58:34 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/04 13:58:10 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,20 +14,13 @@
 #include "Server.hpp"
 #include "Monitor.hpp"
 #include "pathUtils.hpp"
-#include "devUtil.hpp"
 #include "RequestPath.hpp"
-#include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/socket.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <iostream>
+#include <dirent.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <sstream>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-
-
 
 namespace http {
 
@@ -36,7 +29,8 @@ namespace http {
 		//TODO
 	}
 
-	RouteStaticFile::RouteStaticFile(std::string path) : path(path)
+	RouteStaticFile::RouteStaticFile(std::string pathSpecification)
+		: Route(pathSpecification)
 	{
 		//TODO
 	}
@@ -59,16 +53,6 @@ namespace http {
 	RouteStaticFile::~RouteStaticFile()
 	{
 		//TODO
-	}
-
-
-	bool RouteStaticFile::matches(const RequestPath &path, const std::string &method) const
-	{
-		// TODO make configurable method checking
-		(void) method;
-		(void) path;
-		// TODO make possible to match contents of directory , ex: "/42/*"
-		return true;
 	}
 
 	void RouteStaticFile::handleGetFile(http::Client &client, conn::Monitor &monitor) const

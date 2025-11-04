@@ -6,13 +6,15 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:58:32 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/30 21:44:31 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/04 14:44:37 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RequestPath.hpp"
 #include "pathUtils.hpp"
 #include <vector>
+#include <iostream>
+#include <sys/stat.h>
 
 RequestPath::RequestPath()
 {
@@ -58,6 +60,76 @@ bool RequestPath::needsTrailingSlashRedirect() const {
 
 bool RequestPath::isFile() const {
 	return _isFile;
+}
+
+bool RequestPath::matchesPathSpecification(
+	const std::string &pathSpecification) const
+{
+	// TODO validade pathSpecification while parsing config
+	// TODO make unit test for this method
+	// "/**.ext" should only be used at end of spec, that is, any "/" or "*" after "/**" is invalid
+	// "/**.ext" matches any file with ".ext" either at current folder or any subfolder
+	// "/**" should only be used at end of spec, mathing all files on folder and subfolders
+	// "**" that is not preceded by "/" or is not at end of spec is invalid
+	// "*" on end of spec matches only at same level, that is, if path has no extra "/"
+	// "*" on other position with match until first occurrence of next spec char on path
+
+	const std::string &spec = pathSpecification;
+	const size_t spec_len = spec.size();
+	const size_t path_len = this->path.size();
+	size_t spec_i = 0;
+	size_t path_i = 0;
+
+	std::cout << spec << " -> " << this->path << std::endl;
+	while (true)
+	{
+		//std::cout << spec_i << ":" << path_i << std::endl;
+		if (spec_i == spec_len)
+			return path_i == path_len;
+		if (path_i == path_len)
+			return spec_i == spec_len - 1 && spec.at(spec_i) == '*';
+		if (spec_i == spec_len - 3
+			&& spec.substr(spec_i) == "/**")
+			return this->path.at(path_i) == '/';
+		if (spec.substr(spec_i, 3) == "/**")
+		{
+			if (this->path.at(path_i) != '/')
+				return false;
+			// there is at least one '/' at path_i, npos return not possible
+			size_t path_last_slash =
+				utils::findLastFromEnd('/', this->path, path_i);
+			
+			std::string path_end = this->path.substr(path_last_slash + 1);
+			std::string spec_suffix = spec.substr(spec_i + 3);
+
+			return utils::endsWith(path_end, spec_suffix);
+		}
+
+		if (spec.at(spec_i) != '*')
+		{
+			if (spec.at(spec_i) != this->path.at(path_i))
+				return false;
+			else
+			{
+				++spec_i;
+				++path_i;
+				continue;
+			}
+		}
+		if (spec.at(spec_i) == '*' && spec_i == spec_len - 1)
+		{
+			return this->path.find('/', path_i) == std::string::npos;
+		}
+		// at this point spec[spec_i] == '*' and not at end
+		++spec_i;
+		char nextSpecChar = spec.at(spec_i);
+		path_i = this->path.find(nextSpecChar, path_i);
+		if (path_i == std::string::npos)
+			return false;
+		// at this point spec[spec_i] == path[path_i]
+		++spec_i;
+		++path_i;
+	}
 }
 
 void RequestPath::initRequestPath(

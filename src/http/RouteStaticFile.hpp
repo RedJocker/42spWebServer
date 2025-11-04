@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:17 by maurodri          #+#    #+#             //
-/*   Updated: 2025/10/31 15:17:34 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/04 02:08:13 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,7 +22,6 @@ namespace http {
 
 	class RouteStaticFile : public Route
 	{
-		std::string path;
 		RouteStaticFile();
 
 		void handleGetFile(http::Client &client, conn::Monitor &monitor) const;
@@ -39,7 +38,6 @@ namespace http {
 		RouteStaticFile(const RouteStaticFile &other);
 		RouteStaticFile &operator=(const RouteStaticFile &other);
 		virtual ~RouteStaticFile();
-		virtual bool matches(const RequestPath &path, const std::string &method) const;
 		virtual void serve(http::Client &client,  conn::Monitor &monitor) const;
 		virtual void respond(http::Client &client, const Operation &operation) const;
 	};

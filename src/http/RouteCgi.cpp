@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/10/31 15:03:01 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/04 13:58:24 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,29 +14,19 @@
 #include "Server.hpp"
 #include "Monitor.hpp"
 #include "pathUtils.hpp"
-#include "devUtil.hpp"
 #include "RequestPath.hpp"
-#include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/socket.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <iostream>
-#include <sstream>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-
-
 
 namespace http {
 
-	RouteCgi::RouteCgi()
+	RouteCgi::RouteCgi() : Route()
 	{
 		//TODO
 	}
 
-	RouteCgi::RouteCgi(std::string path) : path(path)
+	RouteCgi::RouteCgi(const std::string &pathSpecification)
+		: Route(pathSpecification)
 	{
 		//TODO
 	}
@@ -58,16 +48,6 @@ namespace http {
 	RouteCgi::~RouteCgi()
 	{
 		//TODO
-	}
-
-
-	bool RouteCgi::matches(const RequestPath &path, const std::string &method) const
-	{
-		// TODO make configurable method checking
-		(void) method;
-
-		// TODO make possible to match on fileExtension ex "/42/*.cgi"
-		return path.getPath() == this->path;
 	}
 
 	void RouteCgi::serve(http::Client &client, conn::Monitor &monitor) const

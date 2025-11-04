@@ -69,11 +69,14 @@
       - configuration may choose a root server folder that maps to server file system
     - [ ] Configurable routing system
       - part of server configuration (including virtual servers)
-      - [ ] configurable allowed methods for a specific route
+      - [X] configurable allowed methods for a specific route
         - a certain route at '/some-route' can define only GET to be allowed, or only GET and POST, etc
-      - [ ] file extension based route matching
-        - a route may be defined based on file extensions like '/some-route/*.php'
-          - actual syntax can be defined by implementation, but wildcards was a minishell item
+      - [X] file extension based route matching
+        - using /path/\*\*.ext to match files that end in .ext at /path folder or subfolders
+         - using /path/\*\* to match any files at path folder or subfolder
+         - using /path/*.ext to match files that end in .ext at /path folder only
+         - using /path/* to match any file at /path folder only
+         - using /path/specific.html to match only /path/specific.html
       - [ ] configuration for directory files
         - may have a configurable default file (ex: index.html, index.php, any.xxx)
         - may list directory content
@@ -94,7 +97,7 @@
       - [x] create a (interface||abstract class) Route that has at least
         - a virtual bool matches(RequestPath path, method) const
         - a virtual void serve(Client client, Monitor monitor) const
-        -[x] create implementations for RouteCgi and RouteStaticFile
+        - [x] create implementations for RouteCgi and RouteStaticFile
           - use existing code to implement serve and matches for these
             specific implementations
           - [x] create Route
