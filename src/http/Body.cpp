@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:36 by vcarrara          #+#    #+#             */
-//   Updated: 2025/09/03 20:33:24 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/04 13:55:46 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,10 @@ namespace http {
 	void Body::setContent(std::string content)
 	{
 		this->_content = content;
+	}
+
+	void Body::append(const char* data, size_t len) {
+		_content.append(data, len);
 	}
 
 	// Return content as string

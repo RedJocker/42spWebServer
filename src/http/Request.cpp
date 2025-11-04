@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 13:28:27 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/11/04 13:56:59 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <fstream>
 
 namespace http
 {
@@ -170,139 +171,51 @@ namespace http
 	Request::ReadState Request::readBody(BufferedReader &reader)
 	{
 		std::pair<BufferedReader::ReadState, char*> result;
-
 		std::string contentLength = _headers.getHeader("Content-Length");
 		std::string contentType = _headers.getHeader("Content-Type");
 		size_t expectedLength = 0;
-		if (!contentLength.empty()) {
+
+		if (!contentLength.empty())
 			expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
-		}
 
-		bool isMultipart = !_multipartBoundary.empty();
-
-		if (isMultipart) {
-			result = reader.readAll();
-			switch (result.first) {
-			case BufferedReader::READING:
-				return _state;
-
-			case BufferedReader::ERROR: {
-				std::cout << "error:" << result.second << std::endl;
-				_state = READ_ERROR;
-				return _state;
-			}
-
-			case BufferedReader::NO_CONTENT: {
-				_state = READ_EOF;
-				delete[] result.second;
-				return _state;
-			}
-
-			case BufferedReader::DONE: {
-				if (result.second)
-				{
-					_tmpBodyBuffer.append(result.second);
-					delete[] result.second;
-				}
-
-				std::string &buf = _tmpBodyBuffer;
-				std::string boundary = _multipartBoundary;
-				std::string endBoundary = _multipartBoundary + "--";
-
-				while (true)
-				{
-					size_t boundaryPos = buf.find(boundary);
-					if (boundaryPos == std::string::npos)
-						break;
-
-					size_t nextPos = boundaryPos + boundary.size();
-					bool isFinal = false;
-					if (nextPos + 1 < buf.size() &&
-						buf[nextPos] == '-' && buf[nextPos + 1] == '-')
-					{
-						isFinal = true;
-					}
-
-					size_t partEnd = boundaryPos;
-					if (partEnd > 0)
-					{
-						std::string part = buf.substr(0, partEnd);
-						size_t headerEnd = part.find("\r\n\r\n");
-						if (headerEnd != std::string::npos)
-						{
-							std::string headerSection = part.substr(0, headerEnd);
-							std::string bodySection = part.substr(headerEnd + 4);
-
-							size_t dispPos = headerSection.find("Content-Disposition:");
-							if (dispPos != std::string::npos)
-							{
-								size_t fnPos = headerSection.find("filename=", dispPos);
-								if (fnPos != std::string::npos)
-								{
-									fnPos += 9;
-									std::string filename;
-									while (fnPos < headerSection.size() &&
-										(headerSection[fnPos] == ' ' ||
-											headerSection[fnPos] == '"'))
-										++fnPos;
-									while (fnPos < headerSection.size() &&
-										headerSection[fnPos] != '"' &&
-										headerSection[fnPos] != '\r' &&
-										headerSection[fnPos] != '\n')
-										filename += headerSection[fnPos++];
-									if (!filename.empty())
-										_uploadedFiles.push_back(filename);
-								}
-							}
-							_multipartBodyAccum += bodySection;
-						}
-					}
-					if (isFinal)
-					{
-						_body.setContent(_multipartBodyAccum);
-						_tmpBodyBuffer.clear();
-						_multipartBodyAccum.clear();
-						_state = READ_COMPLETE;
-						return _state;
-					}
-					buf.erase(0, nextPos);
-				}
-				return READING_BODY;
-			}
-
-			default:
-				return _state;
-			}
-		}
-
-		// Non-multipart
 		result = reader.read(expectedLength);
 		switch (result.first) {
-			case BufferedReader::READING:
-				return _state;
-			case BufferedReader::ERROR: {
-				std::cout << "error:" << result.second << std::endl;
-				_state = READ_ERROR;
-				return _state;
-			}
-			case BufferedReader::NO_CONTENT: {
-				_state = READ_EOF;
-				return _state;
-			}
-			case BufferedReader::DONE: {
-				if (!_body.parse(result.second, expectedLength)) {
-					delete[] result.second;
-					return _state;
-				}
-				delete[] result.second;
+		case BufferedReader::READING:
+			return _state;
+		case BufferedReader::ERROR:
+			_state = READ_ERROR;
+			return _state;
+		case BufferedReader::NO_CONTENT:
+			_state = READ_EOF;
+			return _state;
+		case BufferedReader::DONE:
+		{
+			std::string chunk(result.second, expectedLength);
+			delete[] result.second;
 
-				if (_body.size() >= expectedLength) {
+			if (contentType.find("multipart/form-data") != std::string::npos)
+			{
+				_multipartBodyAccum.append(chunk);
+				if (_multipartBodyAccum.size() >= expectedLength)
+				{
+					if (!parseMultipartBody()) {
+						_state = READ_BAD_REQUEST;
+						return _state;
+					}
 					_state = READ_COMPLETE;
 				}
-				return _state;
 			}
-			default:
-				return _state;
+			else
+			{
+				if (!_body.parse(chunk.c_str(), expectedLength))
+					return _state;
+				if (_body.size() >= expectedLength)
+					_state = READ_COMPLETE;
+			}
+			return _state;
+		}
+		default:
+			return _state;
 		}
 	}
 
@@ -413,6 +326,64 @@ namespace http
 	const std::string &Request::getMultipartBoundary(void) const
 	{
 		return _multipartBoundary;
+	}
+
+	void Request::extractMultipartBoundary(void)
+	{
+		std::string contentType = _headers.getHeader("Content-Type");
+		std::string key = "boundary=";
+		std::string::size_type pos = contentType.find(key);
+		if (pos != std::string::npos)
+			_multipartBoundary = "--" + contentType.substr(pos + key.size());
+	}
+
+	bool Request::parseMultipartBody(void)
+	{
+		if (_multipartBoundary.empty())
+		return false;
+
+		std::string endBoundary = _multipartBoundary + "--";
+		std::string::size_type pos = 0;
+		std::string::size_type next = 0;
+
+		while ((next = _multipartBodyAccum.find(_multipartBoundary, pos)) != std::string::npos) {
+			std::string part = _multipartBodyAccum.substr(pos, next - pos);
+			pos = next + _multipartBoundary.size();
+
+			if (part.empty())
+				continue;
+
+			std::string::size_type headerEnd = part.find("\r\n\r\n");
+			if (headerEnd == std::string::npos)
+				continue;
+
+			std::string headerBlock = part.substr(0, headerEnd);
+			std::string body = part.substr(headerEnd + 4);
+
+			// Extract filename
+			std::string::size_type fnPos = headerBlock.find("filename=\"");
+			if (fnPos != std::string::npos) {
+				fnPos += 10;
+				std::string::size_type fnEnd = headerBlock.find("\"", fnPos);
+				std::string filename = headerBlock.substr(fnPos, fnEnd - fnPos);
+
+				std::string filepath = "/tmp/" + filename;
+				std::ofstream ofs(filepath.c_str(), std::ios::binary);
+				if (ofs.is_open()) {
+					ofs.write(body.data(), body.size());
+					ofs.close();
+					_uploadedFiles.push_back(filepath);
+				}
+			}
+			else {
+				_body.append(body.c_str(), body.size());
+			}
+	}
+
+	// Trim trailing boundary
+	if (_multipartBodyAccum.find(endBoundary) != std::string::npos)
+		return true;
+	return false;
 	}
 
 	void Request::envpInit(std::vector<std::string> &envp) const
