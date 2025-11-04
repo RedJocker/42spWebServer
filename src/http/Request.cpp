@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 13:56:59 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/11/04 14:06:36 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -389,12 +389,7 @@ namespace http
 	void Request::envpInit(std::vector<std::string> &envp) const
 	{
 		const RequestPath &reqPath = _path;
-	    // TODO fill envp with variables for cgi process
-	    // taken from request data
-
 		envp.clear();
-
-	    //// headers required for all cgi request
 		envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
 		envp.push_back("SERVER_SOFTWARE=webserv/1.0");
 		envp.push_back("REQUEST_METHOD=" + _method);
@@ -402,36 +397,25 @@ namespace http
 		envp.push_back("REDIRECT_STATUS=0");
 		envp.push_back("SCRIPT_FILENAME=" + reqPath.getFilePath());
 
-		// Optional variables
-		// Maybe TODO PATH_INFO is a path after the matching script name without url-encoding
-		// https://stackoverflow.com/a/2261971/13352218
-		//envp.push_back("PATH_INFO=" + reqPath.getNormalizedPath());
-		// PATH_TRANSLATED is a transformation of PATH_INFO
-		//envp.push_back("PATH_TRANSLATED=" + reqPath.getPath());
-
-	    /// headers required for cgi request with body (body is passed by parent on stdin) only POST should send body
-		if (this->_method == "POST")
-		{
+		if (this->_method == "POST") {
 			std::stringstream contentLengthStream;
 			contentLengthStream << _body.size();
 			std::string contentLength = contentLengthStream.str();
 			if (!contentLength.empty()) {
-				envp.push_back("CONTENT_LENGTH=" + contentLength);
-				std::string contentType =
-					_headers.getHeader("Content-Type");
-				if (contentType.empty())
-					contentType = "application/x-www-form-urlencoded";
-				envp.push_back("CONTENT_TYPE=" + contentType);
+				envp.push_back(std::string("CONTENT_LENGTH=") + contentLength);
+				std::string contentType;
+				if (this->hasMultipart())
+					contentType = "application/octet-stream";
+				else {
+					contentType = _headers.getHeader("Content-Type");
+					if (contentType.empty())
+						contentType = "application/x-www-form-urlencoded";
+				}
+				envp.push_back(std::string("CONTENT_TYPE=") + contentType);
 			}
-
 		}
-		////
 
-		//// headers required for passing query string
 		if (!reqPath.getQueryString().empty())
-		{
 			envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
-		}
-		////
 	}
 }
