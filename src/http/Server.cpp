@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/27 12:14:52 by maurodri         ###   ########.fr       */
+//   Updated: 2025/10/29 00:02:23 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,9 +144,7 @@ namespace http
 
 		if (pid == 0) {
 			std::cout << "child" << std::endl;
-			
-			
-			
+
 			//prevent dangling pointer from getFilePath.c_str() after shutdown 
 			std::string filePathCopy = reqPath.getFilePath();
 			// PHP-CGI
@@ -162,7 +160,7 @@ namespace http
 			close(sockets[0]);
 			// all child outputs to stdout now go to socket
 			// and will be interpreted as cgi response
-			
+
 			char **envp = client.getRequest().envp();
 			if (!envp)
 			{
@@ -171,9 +169,9 @@ namespace http
 				// TODO check output format is right
 				::exit(11);
 			}
-			
+
 			// shutdown EventLoop, carreful with dangling pointers and closed fds
-			monitor.shutdown(); 
+			monitor.shutdown();
 			// nothing coming from EventLoop is valid anymore
 
 			execve(args[0], const_cast<char **>(args), envp);
@@ -192,7 +190,7 @@ namespace http
 			// Both exec fail
 			std::cerr << "Failed to exec on retry: "
 					  << strerror(errno) << std::endl;
-			
+
 			for (size_t i = 0; envp[i] != 0; ++i) {
 				delete[] envp[i];
 			}
@@ -205,6 +203,7 @@ namespace http
 		// parent
 		close(sockets[0]);
 		std::cout << "parent" << std::endl;
+		client.setCgiPid(pid);
 		int cgiFd = sockets[1];
 		monitor.subscribeCgi(cgiFd, client.getFd());
 	}
@@ -280,7 +279,13 @@ namespace http
 			std::string status = response.getHeader("Status");
 			bool statusSet = false;
 			if (status != "")
+			{
 				statusSet = response.setStatusCodeStr(status);
+				if (statusSet && response.getStatusCode() >= 500)
+				{
+					response.addHeader("Connection", "close");
+				}
+			}
 			if (!statusSet)
 				response.setOk();
 			else
