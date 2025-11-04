@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 14:06:36 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/11/04 19:27:05 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <cstring>
 #include <string>
 #include <fstream>
+#include "pathUtils.hpp"
 
 namespace http
 {
@@ -121,10 +122,8 @@ namespace http
 				std::string contentType = _headers.getHeader("Content-Type");
 
 				if (!contentType.empty()) {
-					std::string lowercase = contentType;
-					for (size_t i = 0; i < lowercase.size(); ++i)
-						lowercase[i] = static_cast<char>(std::tolower(lowercase[i]));
-					if (lowercase.find("multipart/form-data") != std::string::npos) {
+					std::string contentTypeLowercase = utils::lowercaseCopy(contentType);
+					if (utils::startsWith("multipart/form-data", contentTypeLowercase)) {
 						size_t bpos = contentType.find("boundary=");
 						if (bpos != std::string::npos) {
 							std::string boundary = contentType.substr(bpos + 9);

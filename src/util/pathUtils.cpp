@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 20:13:58 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/04 19:27:18 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,26 @@ namespace utils {
 		if (ext == "zip") return "application/zip";
 
 		return "application/octet-stream"; // fallback
+	}
+
+	std::string lowercaseCopy(const std::string &str)
+	{
+		std::string lowercase = str;
+		for (size_t i = 0; i < lowercase.size(); ++i)
+			lowercase[i] = static_cast<char>(std::tolower(lowercase[i]));
+		return str;
+	}
+
+	bool startsWith(const std::string &prefix, const std::string &maybeHasPrefix)
+	{
+		if (prefix.size() > maybeHasPrefix.size())
+			return false;
+		for (size_t i = 0; i < prefix.size(); ++i)
+		{
+			if (prefix.at(i) != maybeHasPrefix.at(i))
+				return false;
+		}
+		return true;
 	}
 }
 
