@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 12:43:29 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/11/04 13:29:14 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,11 +78,16 @@ namespace http
 		ReadState readChunkedBody(BufferedReader &reader);
 
 		std::string _multipartBoundary;
+		std::string _tmpBodyBuffer;
+		std::string _multipartBodyAccum;
+		std::vector<std::string> _uploadedFiles;
+
 		struct MultipartPart {
 			std::string headers;
 			std::string body;
 			std::string filename;
 		};
+
 		std::vector<MultipartPart> _multipartParts;
 
 	};

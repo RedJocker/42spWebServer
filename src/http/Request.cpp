@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 12:58:45 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/11/04 13:28:27 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,39 +172,137 @@ namespace http
 		std::pair<BufferedReader::ReadState, char*> result;
 
 		std::string contentLength = _headers.getHeader("Content-Length");
+		std::string contentType = _headers.getHeader("Content-Type");
 		size_t expectedLength = 0;
 		if (!contentLength.empty()) {
 			expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
 		}
 
-		result = reader.read(expectedLength);
-		switch(result.first) {
-		case BufferedReader::READING:
-			return _state;
-		case BufferedReader::ERROR: {
-			std::cout << "error:" << result.second << std::endl;
-			_state = READ_ERROR;
-			return _state;
-		}
-		case BufferedReader::NO_CONTENT: {
-			_state = READ_EOF;
-			return _state;
-		}
-		case BufferedReader::DONE: {
-			if (!_body.parse(result.second, expectedLength)) {
+		bool isMultipart = !_multipartBoundary.empty();
+
+		if (isMultipart) {
+			result = reader.readAll();
+			switch (result.first) {
+			case BufferedReader::READING:
+				return _state;
+
+			case BufferedReader::ERROR: {
+				std::cout << "error:" << result.second << std::endl;
+				_state = READ_ERROR;
+				return _state;
+			}
+
+			case BufferedReader::NO_CONTENT: {
+				_state = READ_EOF;
 				delete[] result.second;
 				return _state;
 			}
-			delete[] result.second;
 
-			// Check if the body has been fully read
-			if (_body.size() >= expectedLength) {
-				_state = READ_COMPLETE;
+			case BufferedReader::DONE: {
+				if (result.second)
+				{
+					_tmpBodyBuffer.append(result.second);
+					delete[] result.second;
+				}
+
+				std::string &buf = _tmpBodyBuffer;
+				std::string boundary = _multipartBoundary;
+				std::string endBoundary = _multipartBoundary + "--";
+
+				while (true)
+				{
+					size_t boundaryPos = buf.find(boundary);
+					if (boundaryPos == std::string::npos)
+						break;
+
+					size_t nextPos = boundaryPos + boundary.size();
+					bool isFinal = false;
+					if (nextPos + 1 < buf.size() &&
+						buf[nextPos] == '-' && buf[nextPos + 1] == '-')
+					{
+						isFinal = true;
+					}
+
+					size_t partEnd = boundaryPos;
+					if (partEnd > 0)
+					{
+						std::string part = buf.substr(0, partEnd);
+						size_t headerEnd = part.find("\r\n\r\n");
+						if (headerEnd != std::string::npos)
+						{
+							std::string headerSection = part.substr(0, headerEnd);
+							std::string bodySection = part.substr(headerEnd + 4);
+
+							size_t dispPos = headerSection.find("Content-Disposition:");
+							if (dispPos != std::string::npos)
+							{
+								size_t fnPos = headerSection.find("filename=", dispPos);
+								if (fnPos != std::string::npos)
+								{
+									fnPos += 9;
+									std::string filename;
+									while (fnPos < headerSection.size() &&
+										(headerSection[fnPos] == ' ' ||
+											headerSection[fnPos] == '"'))
+										++fnPos;
+									while (fnPos < headerSection.size() &&
+										headerSection[fnPos] != '"' &&
+										headerSection[fnPos] != '\r' &&
+										headerSection[fnPos] != '\n')
+										filename += headerSection[fnPos++];
+									if (!filename.empty())
+										_uploadedFiles.push_back(filename);
+								}
+							}
+							_multipartBodyAccum += bodySection;
+						}
+					}
+					if (isFinal)
+					{
+						_body.setContent(_multipartBodyAccum);
+						_tmpBodyBuffer.clear();
+						_multipartBodyAccum.clear();
+						_state = READ_COMPLETE;
+						return _state;
+					}
+					buf.erase(0, nextPos);
+				}
+				return READING_BODY;
 			}
-			return _state;
+
+			default:
+				return _state;
+			}
 		}
-		default:
-			return _state;
+
+		// Non-multipart
+		result = reader.read(expectedLength);
+		switch (result.first) {
+			case BufferedReader::READING:
+				return _state;
+			case BufferedReader::ERROR: {
+				std::cout << "error:" << result.second << std::endl;
+				_state = READ_ERROR;
+				return _state;
+			}
+			case BufferedReader::NO_CONTENT: {
+				_state = READ_EOF;
+				return _state;
+			}
+			case BufferedReader::DONE: {
+				if (!_body.parse(result.second, expectedLength)) {
+					delete[] result.second;
+					return _state;
+				}
+				delete[] result.second;
+
+				if (_body.size() >= expectedLength) {
+					_state = READ_COMPLETE;
+				}
+				return _state;
+			}
+			default:
+				return _state;
 		}
 	}
 
