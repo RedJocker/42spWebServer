@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 19:52:59 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/04 20:17:09 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ namespace http
 				if (!contentType.empty()) {
 					std::string contentTypeLowercase = utils::lowercaseCopy(contentType);
 					if (utils::startsWith("multipart/form-data", contentTypeLowercase)) {
-						_multipartBoundary = "" // clear previous boundaries
+						_multipartBoundary = ""; // clear previous boundaries
 						size_t bpos = contentType.find("boundary=");
 						if (bpos != std::string::npos) {
 							std::string boundary = contentType.substr(bpos + 9);
@@ -139,6 +139,8 @@ namespace http
 								boundary = boundary.substr(1, boundary.size() - 2);
 							if (!boundary.empty())
 								_multipartBoundary = std::string("--") + boundary;
+							else
+								_state = READ_BAD_REQUEST; // multipart without boundary is badreq
 						}
 					}
 				}
