@@ -91,13 +91,15 @@
       - [ ] configurable file upload
         - may allow or dissalow file upload (depends on POST method being allowed)
         - may configure a folder to upload files into
-      - implementation sugestion
-        - create a (interface||abstract class) Route that has at least
-          - a virtual bool matches(RequestPath path, method) const
-          - a virtual void serve(Client client, Monitor monitor) const
-        - create implementations for RouteCgi and RouteStaticFile
-		  - use existing code to implement serve and matches for these
-		    specific implementations
+      - [x] create a (interface||abstract class) Route that has at least
+        - a virtual bool matches(RequestPath path, method) const
+        - a virtual void serve(Client client, Monitor monitor) const
+        -[x] create implementations for RouteCgi and RouteStaticFile
+          - use existing code to implement serve and matches for these
+            specific implementations
+          - [x] create Route
+          - [x] implement RouteCgi
+          - [x] implement RouteStaticFile
         - route based configuration should be responsability of Route classes
   - [ ] Virtual Servers
     - configuration may define serveral servers for same port, that is same tcp connection
@@ -128,11 +130,11 @@
     - header should be read by server, removed from headers and sent as status code
   - [x] deal with cgi unresponsiveness
     - some timeout system is required for cgi specifically, but also for all fd operations in general
-	- return status 504 Gateway Timeout
-	  - [504 reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/504#status)
+        - return status 504 Gateway Timeout
+          - [504 reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/504#status)
   - [X] deal with cgi crashes
-	- php-cgi handles runtime errors and return Status: 500 through socket pair
-	  so reading status from cgi response contemplates this item
+        - php-cgi handles runtime errors and return Status: 500 through socket pair
+          so reading status from cgi response contemplates this item
 
 - Connection
   - [ ] timeout system for clients

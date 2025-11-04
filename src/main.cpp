@@ -6,14 +6,15 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/28 21:35:30 by maurodri         ###   ########.fr       //
+//   Updated: 2025/10/30 21:34:36 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventLoop.hpp"
 #include <iostream>
 #include <signal.h>
-
+#include "RouteCgi.hpp"
+#include "RouteStaticFile.hpp"
 
 void signalHandler(int sig)
 {
@@ -30,9 +31,20 @@ int main(void)
 	conn::EventLoop eventLoop;
 
 	http::Server server("localhost", "./www", 8080);
-	server.addCgiRoute("/todo.cgi");
-	server.addCgiRoute("/42/todo.cgi");
-	server.addCgiRoute("/42/loop.cgi");
+
+	http::RouteCgi cgiRoutes[3] = {
+		http::RouteCgi("/todo.cgi"),
+		http::RouteCgi("/42/todo.cgi"),
+		http::RouteCgi("/42/loop.cgi")
+	};
+	for (size_t i = 0; i < sizeof(cgiRoutes) / sizeof(http::RouteCgi); ++i)
+		server.addRoute(cgiRoutes + i);
+	http::RouteStaticFile staticFileRoutes[1] = {
+		http::RouteStaticFile("/"),
+	};
+	for (size_t i = 0; i < sizeof(staticFileRoutes) / sizeof(http::RouteStaticFile); ++i)
+		server.addRoute(staticFileRoutes + i);
+
 	std::pair<int, std::string> maybeServerFd = server.createAndListen();
 	if (maybeServerFd.first < 0)
 	{
