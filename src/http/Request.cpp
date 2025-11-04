@@ -191,7 +191,7 @@ namespace http
 			std::string chunk(result.second, expectedLength);
 			delete[] result.second;
 
-			if (contentType.find("multipart/form-data") != std::string::npos)
+			if (utils::startsWith("multipart/form-data", contentType))
 			{
 				_multipartBodyAccum.append(chunk);
 				if (_multipartBodyAccum.size() >= expectedLength)
