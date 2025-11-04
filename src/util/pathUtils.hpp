@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 19:28:20 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/04 19:44:40 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ namespace utils {
 	std::string lowercaseCopy(const std::string &str);
 	bool startsWith(
 		const std::string &prefix, const std::string &maybeHasPrefix);
+	std::string &trimInPlace(std::string &maybeHasLeadAndTrailingSpaces);
 }
 
 #endif

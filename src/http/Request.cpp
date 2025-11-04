@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 19:27:05 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/04 19:52:59 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,7 @@ namespace http
 				if (!contentType.empty()) {
 					std::string contentTypeLowercase = utils::lowercaseCopy(contentType);
 					if (utils::startsWith("multipart/form-data", contentTypeLowercase)) {
+						_multipartBoundary = "" // clear previous boundaries
 						size_t bpos = contentType.find("boundary=");
 						if (bpos != std::string::npos) {
 							std::string boundary = contentType.substr(bpos + 9);
@@ -131,12 +132,10 @@ namespace http
 							if (semicolon != std::string::npos) {
 								boundary = boundary.substr(0, semicolon);
 							}
-							while (!boundary.empty() && std::isspace(boundary[0]))
-								boundary.erase(0, 1);
-							while (!boundary.empty() && std::isspace(boundary[boundary.size() - 1]))
-								boundary.erase(boundary.size() - 1, 1);
-
-							if (boundary.size() >= 2 && boundary[0] == '"' && boundary[boundary.size() - 1] == '"')
+							utils::trimInPlace(boundary);
+							if (boundary.size() >= 2
+								&& boundary[0] == '"'
+								&& boundary[boundary.size() - 1] == '"')
 								boundary = boundary.substr(1, boundary.size() - 2);
 							if (!boundary.empty())
 								_multipartBoundary = std::string("--") + boundary;
