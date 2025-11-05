@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/04 23:18:16 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 19:30:12 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -138,9 +138,8 @@ namespace http {
 		// parent
 		close(sockets[0]);
 		std::cout << "parent" << std::endl;
-		client.setCgiPid(pid);
 		int cgiFd = sockets[1];
-		monitor.subscribeCgi(cgiFd, client.getFd());
+		monitor.subscribeCgi(cgiFd, pid, client.getFd());
 	}
 
 	void RouteCgi::respond(http::Client &client,  const Operation &operation) const

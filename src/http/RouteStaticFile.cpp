@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/05 00:19:52 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 20:33:20 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -122,7 +122,6 @@ namespace http {
 
 	// at this moment keep body from multipart as a regular body
 	// write to file while on .handlePost using uploadFolder config
-	// TODO deal with multiple files sent on one request
 	bool RouteStaticFile::parseMultipartBody(
 		const std::string &boundary, const std::string &body)
 	{
@@ -212,9 +211,6 @@ namespace http {
 				_multipartParts.clear();
 				return;
 			}
-
-			// TODO currently sending multiple files does not work because
-			// EventLoop is not supporting multiple operations for same client
 			monitor.subscribeFileWrite(fd, client.getFd(), it->body);	
 		}
 		_multipartParts.clear();

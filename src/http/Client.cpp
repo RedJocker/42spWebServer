@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/30 21:25:29 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 20:29:19 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,26 @@
 
 namespace http {
 
-	Client::Client(): conn::TcpClient(0) {}
+	Client::Client(): conn::TcpClient(0), pendingFileWrites(0) {}
 
 	Client::Client(int clientFd, Server *server)
-		: conn::TcpClient(clientFd), server(server) {}
+		: conn::TcpClient(clientFd), server(server), pendingFileWrites(0){}
 
 	Client::Client(const Client &other): conn::TcpClient(other),
 		server(other.server),
 		request(other.request),
-		response(other.response) {
+		response(other.response),
+		pendingFileWrites(other.pendingFileWrites)
+	{
 	}
 
 	Client &Client::operator=(const Client &other) {
-		if (this == &other) {
+		if (this != &other) {
 			conn::TcpClient::operator=(other);
 			server = other.server;
 			request = other.request;
 			response = other.response;
+			pendingFileWrites = other.pendingFileWrites;
 		}
 		return *this;
 	}
@@ -70,10 +73,21 @@ namespace http {
 
 	void Client::clear()
 	{
-		this->reader.saveBuffer();
 		this->request.clear();
 		this->response.clear();
-		this->clearCgiPid();
-		this->clearReadOperation(); // restores buffer
+	}
+
+	void Client::pendingFileWritesIncrement(void)
+	{
+		++this->pendingFileWrites;
+	}
+	void Client::pendingFileWritesDecrement(void)
+	{
+		if (this->pendingFileWrites > 0)
+			--this->pendingFileWrites;
+	}
+	size_t Client::getPendingFileWrites(void) const
+	{
+		return this->pendingFileWrites;
 	}
 }

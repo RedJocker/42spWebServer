@@ -42,12 +42,6 @@
   - issue is probably on Server.cpp:314 on call to RequestPath.getFilePath
     returning state set by RequestPath.initRequestPath
 
-- when uploading multiple files on same request
-  - expected all files to be uploaded
-  - application crashed
-  - issue is related to how operations are managed by EventLoop
-    - currently EventLoop only support one operation per client request 
-
 ## Sprint 1
 
 - Http

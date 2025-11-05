@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/31 00:29:11 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/05 20:27:10 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,17 +90,17 @@ namespace conn
 
 	void EventLoop::unsubscribeOperation(int operationFd)
 	{
-		std::cout << "unsubscribeOperation " <<  operationFd << std::endl;
+		std::cout << "unsubscribeOperation " <<	 operationFd << std::endl;
 		this->unsubscribeFd(operationFd);
-		Operation op = Operation::declare(Operation::ANY, operationFd, EventLoop::timeoutLimit);
+		Operation op = Operation::matcher(operationFd);
 		MapOperations::iterator opIt = this->operations.find(op);
 		if (opIt != this->operations.end())
 		{
-			http::Client *client = opIt->second;
-			if (client)
-			{
-				client->clearCgiPid();
-			}
+			const Operation &opRef = opIt->first;
+			if (opRef.writer)
+				delete opRef.writer;
+			if (opRef.reader)
+				delete opRef.reader;
 		}
 		this->operations.erase(op);
 	}
@@ -162,10 +162,10 @@ namespace conn
 			event.events = POLLIN; // subscribe for reads
 			event.fd = fileFd;
 			this->subscribeFds.push_back(event);
-			client->setOperationFd(fileFd);
-			Operation op =
-				Operation::declare(Operation::FILE_READ, fileFd, EventLoop::timeoutLimit);
-			this->operations.insert(std::make_pair(op, client));
+
+			std::pair<Operation, http::Client *> entry =
+				std::make_pair(Operation::declare(Operation::FILE_READ, fileFd, EventLoop::timeoutLimit), client);
+			this->operations.insert(entry);
 		}
 	}
 
@@ -175,21 +175,21 @@ namespace conn
 		http::Client *client = this->clients.at(clientFd);
 		if (client)
 		{
+			client->pendingFileWritesIncrement();
 			std::cout << "subscribeFileWrite " << fileFd << std::endl;
 			struct pollfd event;
 			event.events = POLLOUT; // subscribe for writes
 			event.fd = fileFd;
 			this->subscribeFds.push_back(event);
-			client->setOperationFd(fileFd, content);
 			Operation op =
 				Operation::declare(Operation::FILE_WRITE, fileFd, EventLoop::timeoutLimit);
+			op.writer->setMessage(content);
 			this->operations.insert(std::make_pair(op, client));
 		}
 	}
 
-	void EventLoop::subscribeCgi(int cgiFd, int clientFd)
+	void EventLoop::subscribeCgi(int cgiFd, pid_t cgiPid, int clientFd)
 	{
-
 		http::Client *clientPtr = this->clients.at(clientFd);
 		if (clientPtr)
 		{
@@ -199,35 +199,32 @@ namespace conn
 			event.events = POLLIN | POLLOUT; // subscribe for reads and writes
 			event.fd = cgiFd;
 			this->subscribeFds.push_back(event);
+			Operation op =
+				Operation::declare(Operation::CGI, cgiFd, EventLoop::timeoutLimit);
+			op.cgiPid = cgiPid;
 			std::string body = client.getRequest().getBody();
 			if (client.getRequest().getMethod() == "POST" && !body.empty())
 			{ // only write on posts with body
-				client.setOperationFd(cgiFd, client.getRequest().getBody());
+				op.writer->setMessage(client.getRequest().getBody());
 			}
-			else
-			{ // skip to reading
-				client.setOperationFd(cgiFd);
-			}
-			Operation op =
-				Operation::declare(Operation::CGI, cgiFd, EventLoop::timeoutLimit);
+
 			this->operations.insert(std::make_pair(op, clientPtr));
 		}
 	}
 
-	void EventLoop::handleFileWrite(
-		http::Client &client,  ListEvents::iterator &eventIt)
+	void EventLoop::handleFileWrite(const Operation &op, http::Client &client)
 	{
 		std::cout << "clientFd = " << client.getFd() << std::endl;
-		std::cout << "handleFileWrite: " << eventIt->fd << std::endl;
+		std::cout << "handleFileWrite: " << op.fd << std::endl;
 
-		if (client.getWriterState() != BufferedWriter::WRITING)
+		if (op.writer->getState() != BufferedWriter::WRITING)
 		{
 			throw std::domain_error("called handleFileWrite without"
 									"content to write");
 		}
 
 		std::pair<WriteState, char*> writeResult =
-			client.flushOperation();
+			op.writer->flushMessage();
 
 		if (writeResult.first == BufferedWriter::WRITING)
 		{
@@ -235,47 +232,46 @@ namespace conn
 		}
 		if (writeResult.first == BufferedWriter::DONE)
 		{
-			std::cout << "file writing done" << eventIt->fd << std::endl;
-			client.clearWriteOperation();
-			http::Route *route = client.getRoute();
-			Operation op = Operation::declare(Operation::FILE_WRITE, -22, 0);
-			if (route)
-				route->respond(client, op);
+			std::cout << "file writing done" << op.fd << std::endl;
+			client.pendingFileWritesDecrement();
+			if (client.getPendingFileWrites() == 0)
+			{
+				http::Route *route = client.getRoute();
+				if (route)
+					route->respond(client, op);
+			}
 		} else
 		{
 			std::cout << "file writing error "
 					  << writeResult.second
 					  << " "
-					  << eventIt->fd << std::endl;
+					  << op.fd << std::endl;
 			http::Route *route = client.getRoute();
 			if (route)
 				route->onServerError(client);
 		}
 
-		this->unsubscribeOperation(eventIt->fd);
-		client.clearWriteOperation();
+		this->unsubscribeOperation(op.fd);
 	}
 
-	void EventLoop::handleFileReads(
-		http::Client *client,  ListEvents::iterator &eventIt)
+	void EventLoop::handleFileReads(const Operation &op, http::Client &client)
 	{
-		std::cout << "clientFd = " << client->getFd() << std::endl;
+		std::cout << "clientFd = " << client.getFd() << std::endl;
 		std::cout << "handleFileReads" << std::endl;
 
 		std::pair<BufferedReader::ReadState, char*> readResult
-			= client->readAllOperationFd();
+			= op.reader->readAll();
 
 		if(readResult.first == BufferedReader::READING)
 			return ;
 		std::cout << "handleFileReads after reading" << std::endl;
 		if (readResult.first == BufferedReader::NO_CONTENT)
 		{
-			Operation op = Operation::declare(Operation::FILE_READ, -22, 0);
 			op.content = std::string(readResult.second);
 			delete[] readResult.second;
-			http::Route *route = client->getRoute();
+			http::Route *route = client.getRoute();
 			if (route)
-				route->respond(*client, op);
+				route->respond(client, op);
 
 		} else
 		{
@@ -283,21 +279,17 @@ namespace conn
 					  << readResult.second << std::endl;
 		}
 
-		this->unsubscribeOperation(eventIt->fd);
-		client->clearReadOperation();
+		this->unsubscribeOperation(op.fd);
 	}
 
-	void EventLoop::handleCgiWrite(
-		http::Client &client, ListEvents::iterator &eventIt)
+	void EventLoop::handleCgiWrite(const Operation &op, http::Client &client)
 	{
-
-		if (client.getWriterState() != BufferedWriter::WRITING)
+		if (op.writer->getState() != BufferedWriter::WRITING)
 			return ;
-		int cgiFd = eventIt->fd;
 		// Write CGI request
 		std::cout << "parent writing to cgi: " << std::endl;
 
-		std::pair<WriteState, char *> flushResult = client.flushOperation();
+		std::pair<WriteState, char *> flushResult = op.writer->flushMessage();
 		if (flushResult.first == BufferedWriter::WRITING)
 			return;
 
@@ -310,18 +302,16 @@ namespace conn
 				route->onServerError(client);
 		}
 		std::cout << "parent done writing to cgi:" << std::endl;
-		client.clearWriteOperation();
-		client.setOperationFd(cgiFd);
-
 		return;
 	}
 
-	void EventLoop::handleCgiRead(
-		http::Client &client, ListEvents::iterator &eventIt)
+	void EventLoop::handleCgiRead(const Operation &op, http::Client &client)
 	{
-		int cgiFd = eventIt->fd;
+		if (op.writer->getState() == BufferedWriter::WRITING)
+			return ;
+		int cgiFd = op.fd;
 		// Read CGI response
-		std::pair<ReadState, char *> readResult = client.readAllOperationFd();
+		std::pair<ReadState, char *> readResult = op.reader->readAll();
 		if(readResult.first == BufferedReader::READING)
 		{
 			std::cout << "parent reading" << std::endl;
@@ -332,30 +322,26 @@ namespace conn
 		{
 			std::cerr << "error cgi reading: " << strerror(errno) << std::endl;
 			this->unsubscribeOperation(cgiFd);
-			client.clearReadOperation();
 			client.getResponse().setInternalServerError();
 			client.setMessageToSend(client.getResponse().toString());
 			return ;
 		}
 
-		Operation op = Operation::declare(Operation::CGI, -22, 0);
 		op.content = std::string(readResult.second);
 		delete[] readResult.second;
-
-		std::cout << "CGI Response: "<< op.content << std::endl;
-
-		this->unsubscribeOperation(cgiFd);
-		client.clearReadOperation();
+		std::cout << "CGI Response: " << op.content << std::endl;
 
 		http::Route *route = client.getRoute();
 		if (route)
 			route->respond(client, op);
+
+		this->unsubscribeOperation(cgiFd);
 	}
 
 	void EventLoop::handleClientRequest(
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
-		if (client->getOperationFd() >= 0)
+		if (client->getWriterState() != BufferedWriter::DONE)
 			return ; // client is already being served
 		http::Request &req = client->readHttpRequest();
 
@@ -476,15 +462,14 @@ namespace conn
 		if (monitoredIt->revents & POLLOUT)
 		{ // fd is available for write
 			// std::cout << "out "  << monitoredIt->fd << std::endl;
-			Operation op =
-				Operation::declare(Operation::ANY, monitoredIt->fd, EventLoop::timeoutLimit);
+			Operation op = Operation::matcher(monitoredIt->fd);
 			MapOperations::iterator operationIt = this->operations.find(op);
 			if (operationIt != this->operations.end()
 				&& operationIt->first.type == Operation::FILE_WRITE)
 			{
 				http::Client *client = operationIt->second;
 				if (client) {
-					this->handleFileWrite(*client, monitoredIt);
+					this->handleFileWrite(operationIt->first, *client);
 				}
 				return;
 			}
@@ -493,15 +478,14 @@ namespace conn
 			{
 				http::Client *client = operationIt->second;
 				if (client) {
-					this->handleCgiWrite(*client, monitoredIt);
+					this->handleCgiWrite(operationIt->first, *client);
 				}
 			}
 			MapClient::iterator clientIt = this->clients.find(monitoredIt->fd);
 			if (clientIt != this->clients.end())
 			{
 				http::Client *client = clientIt->second;
-				if (client->getOperationFd() < 0
-					&& client->getWriterState() == BufferedWriter::WRITING)
+				if (client->getWriterState() == BufferedWriter::WRITING)
 				{
 					this->handleClientWriteResponse(client, monitoredIt);
 					return;
@@ -526,14 +510,14 @@ namespace conn
 				return;
 			}
 			Operation op =
-				Operation::declare(Operation::ANY, monitoredIt->fd, EventLoop::timeoutLimit);
+				Operation::matcher(monitoredIt->fd);
 			MapOperations::iterator operationIt =
 				this->operations.find(op);
 			if (operationIt != this->operations.end()
 				&& operationIt->first.type == Operation::FILE_READ)
 			{
 				http::Client *client = operationIt->second;
-				this->handleFileReads(client, monitoredIt);
+				this->handleFileReads(operationIt->first, *client);
 				return;
 			}
 			if (operationIt != this->operations.end()
@@ -541,7 +525,7 @@ namespace conn
 			{
 				http::Client *client = operationIt->second;
 				if (client)
-					this->handleCgiRead(*client, monitoredIt);
+					this->handleCgiRead(operationIt->first, *client);
 				return;
 			}
 		}
@@ -578,40 +562,33 @@ namespace conn
 	{
 
 		time_t minTimeout = EventLoop::timeoutLimit;
-		for (MapOperations::iterator op = this->operations.begin();
-			 op != this->operations.end();)
+		for (MapOperations::iterator opIt = this->operations.begin();
+			 opIt != this->operations.end();)
 		{
-			time_t expirationTime = op->first.timeToExpire();
+			time_t expirationTime = opIt->first.timeToExpire();
 			//std::cout << "expirationTime" << expirationTime << std::endl;
 			if (expirationTime < 0)
 			{
-				std::cout << "expiredOp fd:" << op->first.fd << std::endl;
-				http::Client *client = op->second;
-				if (client && op->first.type == Operation::CGI
-					&& client->getWriterState() == BufferedWriter::DONE)
+				std::cout << "expiredOp fd:" << opIt->first.fd << std::endl;
+				http::Client *client = opIt->second;
+				if (client && opIt->first.type == Operation::CGI
+					&& opIt->first.writer->getState() != BufferedWriter::WRITING)
 				{
-					client->clearReadOperation();
 					client->getResponse()
 						.setGatewayTimeout();
 					client->setMessageToSend(client->getResponse().toString());
-					pid_t cgiPid = client->getCgiPid();
-					if (cgiPid <= 0)
-					{
-						throw std::domain_error("unexpected pid while"
-									"removing timeout cgi operation");
-					}
+					pid_t cgiPid = opIt->first.cgiPid;
 					kill(cgiPid, SIGKILL);
-					client->clearCgiPid();
 				}
 				// avoid call to unsubscribeOperation to avoid iterator invalidation
-				this->unsubscribeFd(op->first.fd);
-				this->operations.erase(op++);
+				this->unsubscribeFd(opIt->first.fd);
+				this->operations.erase(opIt++);
 			}
 			else
 			{
 				minTimeout = expirationTime < minTimeout ?
 					expirationTime : minTimeout;
-				++op;
+				++opIt;
 			}
 		}
 		return minTimeout;

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/10 02:37:54 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 20:21:32 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -185,14 +185,6 @@ void BufferedReader::clear()
 	this->readBefore = 0;
 }
 
-void BufferedReader::setFd(int fd)
-{
-	if (fd != this->fd)
-	{
-		this->clear();
-		this->fd = fd;
-	}
-}
 
 std::pair<ReadState, char *> BufferedReader::readAll(void)
 {
@@ -223,20 +215,4 @@ std::pair<ReadState, char *> BufferedReader::readAll(void)
 			readBuffer + currentRead);
 
 	return std::make_pair(READING, reinterpret_cast<char *>(0));
-}
-
-void BufferedReader::saveBuffer(void)
-{
-	this->saved.insert(this->saved.end(),
-		this->buffered.begin(),
-		this->buffered.end());
-}
-
-void BufferedReader::restoreSavedBuffer(void)
-{
-	this->buffered.clear();
-	this->buffered.insert(this->buffered.end(),
-		this->saved.begin(),
-		this->saved.end());
-	this->saved.clear();
 }

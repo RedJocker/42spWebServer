@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/10 12:24:03 by maurodri          #+#    #+#             */
-/*   Updated: 2025/10/15 17:38:13 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/05 20:28:03 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,9 @@ namespace conn {
 		virtual bool subscribeHttpClient(int fd, http::Server *server) = 0;
 		virtual void unsubscribeHttpClient(ListEvents::iterator &eventIt) = 0;
 		virtual void subscribeFileRead(int fileFd, int clientFd) = 0;
-		virtual void subscribeFileWrite(int fileFd, int clientFd, std::string content) = 0;
-		virtual void subscribeCgi(int fileFd, int clientFd) = 0;
+		virtual void subscribeFileWrite(
+			int fileFd, int clientFd, std::string content) = 0;
+		virtual void subscribeCgi(int fileFd, pid_t cgiPid, int clientFd) = 0;
 		virtual void shutdown(void) = 0;
 	};
 
