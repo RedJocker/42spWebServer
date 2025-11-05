@@ -42,11 +42,17 @@
   - issue is probably on Server.cpp:314 on call to RequestPath.getFilePath
     returning state set by RequestPath.initRequestPath
 
+- when uploading multiple files on same request
+  - expected all files to be uploaded
+  - application crashed
+  - issue is related to how operations are managed by EventLoop
+    - currently EventLoop only support one operation per client request 
+
 ## Sprint 1
 
 - Http
   - file upload
-    - [-] give support for 'Content-Type: multiplart/form-data; boundary ---some-bounderyadfkjla'
+    - [x] give support for 'Content-Type: multiplart/form-data; boundary ---some-bounderyadfkjla'
       - another request body format
       - has a delimiter defined as part of header that delimits body in parts
       - each body part may contain more headers
@@ -57,7 +63,7 @@
       - if this is part of a cgi request
         - keep body as is and send to cgi with contentType
     - [ ] download files to a folder specified by configuration
-      - may start with a hardcoded folder as temporary implementation
+      - [x] may start with a hardcoded folder as temporary implementation
   - Configurable server
     - [ ] Configurable port
       - configuration may choose a port for server

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/03 16:25:31 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/04 23:01:52 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -41,7 +41,7 @@ namespace http
 		Route(const Route &other);
 		Route &operator=(const Route &other);
 		virtual ~Route(void);
-		virtual void serve(http::Client &client,  conn::Monitor &monitor) const = 0;
+		virtual void serve(http::Client &client,  conn::Monitor &monitor) = 0;
 		virtual void respond(http::Client &client, const Operation &operation) const = 0;
 		bool matches(const RequestPath &path, const std::string &method) const;
 		Route &addMethod(const std::string &methodAllowed);

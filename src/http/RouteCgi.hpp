@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:17 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/04 02:07:44 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/04 23:18:08 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -29,7 +29,7 @@ namespace http {
 		RouteCgi(const RouteCgi &other);
 		RouteCgi &operator=(const RouteCgi &other);
 		virtual ~RouteCgi();
-		virtual void serve(http::Client &client,  conn::Monitor &monitor) const;
+		virtual void serve(http::Client &client,  conn::Monitor &monitor);
 		virtual void respond(http::Client &client, const Operation &operation) const;
 	};
 

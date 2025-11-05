@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/04 14:04:58 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/04 22:08:40 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ int main(void)
 	http::RouteCgi cgiRoutes[1] = {
 		http::RouteCgi("/**.cgi"),
 	};
+
 	for (size_t i = 0; i < sizeof(cgiRoutes) / sizeof(http::RouteCgi); ++i)
 	{
 		cgiRoutes[i]
@@ -43,9 +44,11 @@ int main(void)
 		server.addRoute(cgiRoutes + i);
 	}
 
+	// TODO validate upload folder exists
 	http::RouteStaticFile staticFileRoutes[1] = {
-		http::RouteStaticFile("/**"),
+		http::RouteStaticFile("/**", "./www/uploads"),
 	};
+
 	for (size_t i = 0; i < sizeof(staticFileRoutes) / sizeof(http::RouteStaticFile); ++i)
 	{
 		staticFileRoutes[i]

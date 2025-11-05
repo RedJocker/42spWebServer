@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 20:56:54 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/05 00:21:35 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,28 +70,14 @@ namespace http
 
 		ReadState _state;
 
+		std::string _multipartBoundary;
+
 		void envpInit(std::vector<std::string> &envp) const;
 		bool parseRequestLine(const std::string &line);
 		ReadState readRequestLine(BufferedReader &reader);
 		ReadState readHeaderLine(BufferedReader &reader);
 		ReadState readBody(BufferedReader &reader);
 		ReadState readChunkedBody(BufferedReader &reader);
-
-		std::string _multipartBoundary;
-
-		// std::string _tmpBodyBuffer;
-		// std::string _multipartBodyAccum;
-		// std::vector<std::string> _uploadedFiles;
-
-		// struct MultipartPart {
-		// 	std::string headers;
-		// 	std::string body;
-		// 	std::string filename;
-		// };
-
-		//std::vector<MultipartPart> _multipartParts;
-		bool parseMultipartBody(void);
-
 	};
 }
 

@@ -6,13 +6,14 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/04 13:58:10 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/05 00:19:52 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "RouteStaticFile.hpp"
 #include "Server.hpp"
 #include "Monitor.hpp"
+#include "devUtil.hpp"
 #include "pathUtils.hpp"
 #include "RequestPath.hpp"
 #include <sys/socket.h>
@@ -20,39 +21,38 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sstream>
 
 namespace http {
 
 	RouteStaticFile::RouteStaticFile()
 	{
-		//TODO
-	}
-
-	RouteStaticFile::RouteStaticFile(std::string pathSpecification)
-		: Route(pathSpecification)
-	{
-		//TODO
 	}
 
 	RouteStaticFile::RouteStaticFile(
-		const RouteStaticFile &other) : Route(other)
+		const std::string &pathSpecification, const std::string &uploadFolder)
+		: Route(pathSpecification), uploadFolder(uploadFolder)
 	{
-		(void) other;
-		//TODO
+	}
+
+	RouteStaticFile::RouteStaticFile(
+		const RouteStaticFile &other) : Route(other), uploadFolder(other.uploadFolder)
+	{
 	}
 
 	RouteStaticFile &RouteStaticFile::operator=(const RouteStaticFile &other)
 	{
 		if (this == &other)
 			return *this;
-		//TODO
+		this->uploadFolder = other.uploadFolder;
+		Route::operator=(other);
 		return *this;
 	}
 
 	RouteStaticFile::~RouteStaticFile()
 	{
-		//TODO
 	}
 
 	void RouteStaticFile::handleGetFile(http::Client &client, conn::Monitor &monitor) const
@@ -120,25 +120,104 @@ namespace http {
 		client.setMessageToSend(response.toString());
 	}
 
-	void RouteStaticFile::handlePost(http::Client &client, conn::Monitor &monitor) const
+	// at this moment keep body from multipart as a regular body
+	// write to file while on .handlePost using uploadFolder config
+	// TODO deal with multiple files sent on one request
+	bool RouteStaticFile::parseMultipartBody(
+		const std::string &boundary, const std::string &body)
 	{
-		const RequestPath &reqPath = client.getRequest().getPath();
+		size_t pos = body.find(boundary) + boundary.size();
+		size_t next = pos;
 
-		const std::string &filePath = reqPath.getFilePath();
+		while ((next = body.find(boundary, pos)) != std::string::npos) {
+			std::string partStr = body.substr(pos, next - pos);
+			pos = next + boundary.size();
+			
+			if (partStr.empty())
+				return false;
 
-		int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		if (fd < 0)
-		{
-			// TODO
-			// we need to check reason failed to open
-			// and give a response based on the reason
-			std::cerr << "Failed to open file: " << filePath << std::endl;
-			this->onServerError(client);
-			return;
+			std::string::size_type headerEnd = partStr.find("\r\n\r\n");
+			if (headerEnd == std::string::npos)
+				return false;
+
+			MultipartPart part;
+
+			part.headers = partStr.substr(0, headerEnd);
+			part.body = partStr.substr(headerEnd + 4);
+
+			// Extract filename
+			std::string::size_type fnPos = part.headers.find("filename=\"");
+			if (fnPos == std::string::npos)
+				return false;
+
+			fnPos += 10;
+			std::string::size_type fnEnd = part.headers.find("\"", fnPos);
+			if (fnEnd == std::string::npos)
+				return false;
+
+			part.filename = part.headers.substr(fnPos, fnEnd - fnPos);
+			utils::trimInPlace(part.filename);
+			if (part.filename.size() == 0)
+				return false;
+
+			_multipartParts.push_back(part);
 		}
 
-		monitor.subscribeFileWrite(
-			fd, client.getFd(), client.getRequest().getBody());
+		std::string rest = body.substr(pos);
+		std::cout << "rest:" << rest << std::endl;
+		if (rest != "--\r\n")
+			return false;
+		return true;
+	}
+
+	void RouteStaticFile::handlePost(http::Client &client, conn::Monitor &monitor)
+	{
+		Request &request = client.getRequest();
+		RequestPath &reqPath = request.getPath();
+
+		if (request.hasMultipart())
+		{
+			bool hasParsed = this->parseMultipartBody(
+				request.getMultipartBoundary(), request.getBody());
+			if (!hasParsed)
+			{
+				this->_multipartParts.clear();
+				client.getResponse().setBadRequest();
+				client.setMessageToSend(client.getResponse().toString());
+				return ;
+			}
+		}
+		else
+		{   // not multipart using this just to keep filename
+			MultipartPart part;
+			part.filename = reqPath.getPath();
+			part.body = request.getBody();
+			_multipartParts.push_back(part);
+		}
+		// at this point _multipartParts has all files that should be written
+		
+		for (std::vector<MultipartPart>::iterator it = _multipartParts.begin();
+			 it != _multipartParts.end();
+			 ++it)
+		{
+			std::string path = this->uploadFolder + "/" + it->filename;
+			int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			if (fd < 0)
+			{
+				// TODO
+				// we need to check reason failed to open
+				// and give a response based on the reason
+				std::cerr << "Failed to open file: " << it->filename << std::endl;
+				this->onServerError(client);
+				_multipartParts.clear();
+				return;
+			}
+
+			// TODO currently sending multiple files does not work because
+			// EventLoop is not supporting multiple operations for same client
+			monitor.subscribeFileWrite(fd, client.getFd(), it->body);	
+		}
+		_multipartParts.clear();
 	}
 
 	void RouteStaticFile::handleDelete(http::Client &client, conn::Monitor &monitor) const
@@ -169,9 +248,9 @@ namespace http {
 		client.setMessageToSend(response.toString());
 	}
 
-	void RouteStaticFile::serve(http::Client &client, conn::Monitor &monitor) const
+	void RouteStaticFile::serve(http::Client &client, conn::Monitor &monitor)
 	{
-		std::cout << "RouteStaticFile::serve: " <<  client.getFd() << std::endl;
+		std::cout << "RouteStaticFile::serve: " <<	client.getFd() << std::endl;
 
 		const RequestPath &reqPath = client.getRequest().getPath();
 		const std::string &method = client.getRequest().getMethod();
@@ -222,7 +301,7 @@ namespace http {
 		client.setMessageToSend(client.getResponse().toString());
 	}
 
-	void RouteStaticFile::respond(http::Client &client,  const Operation &operation) const
+	void RouteStaticFile::respond(http::Client &client,	 const Operation &operation) const
 	{
 		switch (operation.type) {
 		case Operation::FILE_READ: return onFileRead(client, operation.content);

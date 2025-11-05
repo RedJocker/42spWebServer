@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/04 19:57:58 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/04 23:18:16 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -53,7 +53,7 @@ namespace http {
 		//TODO
 	}
 
-	void RouteCgi::serve(http::Client &client, conn::Monitor &monitor) const
+	void RouteCgi::serve(http::Client &client, conn::Monitor &monitor)
 	{
 		std::cout << "RouteCgi::serve: " <<  client.getFd() << std::endl;
 

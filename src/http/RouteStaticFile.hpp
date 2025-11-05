@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:17 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/04 02:08:13 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/05 00:22:24 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,23 +22,32 @@ namespace http {
 
 	class RouteStaticFile : public Route
 	{
+		std::string uploadFolder;
 		RouteStaticFile();
 
 		void handleGetFile(http::Client &client, conn::Monitor &monitor) const;
 		void handleGetDirectory(http::Client &client, conn::Monitor &monitor) const;
-		void handlePost(http::Client &client, conn::Monitor &monitor) const;
+		void handlePost(http::Client &client, conn::Monitor &monitor);
 		void handleDelete(http::Client &client, conn::Monitor &monitor) const;
 
 		void onFileRead(http::Client &client, const std::string &fileContent) const;
 		void onFileWritten(http::Client &client) const;
 
+		struct MultipartPart {
+			std::string headers;
+			std::string body;
+			std::string filename;
+		};
+
+		std::vector<MultipartPart> _multipartParts;
+		bool parseMultipartBody(const std::string &boundary, const std::string &body);
 	public:
 
-		RouteStaticFile(std::string path);
+		RouteStaticFile(const std::string &path, const std::string &uploadFolder);
 		RouteStaticFile(const RouteStaticFile &other);
 		RouteStaticFile &operator=(const RouteStaticFile &other);
 		virtual ~RouteStaticFile();
-		virtual void serve(http::Client &client,  conn::Monitor &monitor) const;
+		virtual void serve(http::Client &client,  conn::Monitor &monitor);
 		virtual void respond(http::Client &client, const Operation &operation) const;
 	};
 }
