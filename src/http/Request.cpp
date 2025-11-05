@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/16 20:37:59 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/04 21:37:24 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <fstream>
+#include "pathUtils.hpp"
 
 namespace http
 {
@@ -114,9 +116,35 @@ namespace http
 			delete[] result.second;
 
 			if (line.empty()) { // End of Headers
+				_multipartBoundary = ""; // clear previous multipart boundaries
 				std::string contentLength =
 					_headers.getHeader("Content-Length");
 				std::string transferEncoding = _headers.getHeader("Transfer-Encoding");
+				std::string contentType = _headers.getHeader("Content-Type");
+
+				if (!contentType.empty()) {
+					std::string contentTypeLowercase = utils::lowercaseCopy(contentType);
+					if (utils::startsWith("multipart/form-data", contentTypeLowercase)) {
+						size_t bpos = contentType.find("boundary=");
+						if (bpos != std::string::npos) {
+							std::string boundary = contentType.substr(bpos + 9);
+							size_t semicolon = boundary.find(';');
+							if (semicolon != std::string::npos) {
+								boundary = boundary.substr(0, semicolon);
+							}
+							utils::trimInPlace(boundary);
+							if (boundary.size() >= 2
+								&& boundary[0] == '"'
+								&& boundary[boundary.size() - 1] == '"')
+								boundary = boundary.substr(1, boundary.size() - 2);
+							if (!boundary.empty())
+								_multipartBoundary = std::string("--") + boundary;
+							else
+								_state = READ_BAD_REQUEST; // multipart without boundary is badreq
+						}
+					}
+				}
+
 				if (!contentLength.empty())
 					_state = READING_BODY;
 				else if (transferEncoding == "chunked")
@@ -143,36 +171,46 @@ namespace http
 	Request::ReadState Request::readBody(BufferedReader &reader)
 	{
 		std::pair<BufferedReader::ReadState, char*> result;
-
 		std::string contentLength = _headers.getHeader("Content-Length");
+		std::string contentType = _headers.getHeader("Content-Type");
 		size_t expectedLength = 0;
-		if (!contentLength.empty()) {
+
+		if (!contentLength.empty())
 			expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
-		}
 
 		result = reader.read(expectedLength);
-		switch(result.first) {
+		switch (result.first) {
 		case BufferedReader::READING:
 			return _state;
-		case BufferedReader::ERROR: {
-			std::cout << "error:" << result.second << std::endl;
+		case BufferedReader::ERROR:
 			_state = READ_ERROR;
 			return _state;
-		}
-		case BufferedReader::NO_CONTENT: {
+		case BufferedReader::NO_CONTENT:
 			_state = READ_EOF;
 			return _state;
-		}
-		case BufferedReader::DONE: {
-			if (!_body.parse(result.second, expectedLength)) {
-				delete[] result.second;
-				return _state;
-			}
+		case BufferedReader::DONE:
+		{
+			std::string chunk(result.second, expectedLength);
 			delete[] result.second;
 
-			// Check if the body has been fully read
-			if (_body.size() >= expectedLength) {
-				_state = READ_COMPLETE;
+			// if (utils::startsWith("multipart/form-data", contentType))
+			// {
+			// 	_multipartBodyAccum.append(chunk);
+			// 	if (_multipartBodyAccum.size() >= expectedLength)
+			// 	{
+			// 		if (!parseMultipartBody()) {
+			// 			_state = READ_BAD_REQUEST;
+			// 			return _state;
+			// 		}
+			// 		_state = READ_COMPLETE;
+			// 	}
+			// }
+			// else
+			{
+				if (!_body.parse(chunk.c_str(), expectedLength))
+					return _state;
+				if (_body.size() >= expectedLength)
+					_state = READ_COMPLETE;
 			}
 			return _state;
 		}
@@ -280,15 +318,73 @@ namespace http
 		return envp_on_heap;
 	}
 
+	bool Request::hasMultipart(void) const
+	{
+		return !_multipartBoundary.empty();
+	}
+
+	const std::string &Request::getMultipartBoundary(void) const
+	{
+		return _multipartBoundary;
+	}
+
+	// TODO transfer parse multipart logic to RouteStaticFile.handlePost
+	// at this moment keep body from multipart as a regular body
+	// write to file while on .handlePost using uploadFolder config
+	// TODO deal with multiple files sent on one request
+	// bool Request::parseMultipartBody(void)
+	// {
+	// 	if (_multipartBoundary.empty())
+	// 		return false;
+
+	// 	std::string endBoundary = _multipartBoundary + "--";
+	// 	std::string::size_type pos = 0;
+	// 	std::string::size_type next = 0;
+
+	// 	while ((next = _multipartBodyAccum.find(_multipartBoundary, pos)) != std::string::npos) {
+	// 		std::string part = _multipartBodyAccum.substr(pos, next - pos);
+	// 		pos = next + _multipartBoundary.size();
+
+	// 		if (part.empty())
+	// 			continue;
+
+	// 		std::string::size_type headerEnd = part.find("\r\n\r\n");
+	// 		if (headerEnd == std::string::npos)
+	// 			continue;
+
+	// 		std::string headerBlock = part.substr(0, headerEnd);
+	// 		std::string body = part.substr(headerEnd + 4);
+
+	// 		// Extract filename
+	// 		std::string::size_type fnPos = headerBlock.find("filename=\"");
+	// 		if (fnPos != std::string::npos) {
+	// 			fnPos += 10;
+	// 			std::string::size_type fnEnd = headerBlock.find("\"", fnPos);
+	// 			std::string filename = headerBlock.substr(fnPos, fnEnd - fnPos);
+
+	// 			std::string filepath = "/tmp/" + filename;
+	// 			std::ofstream ofs(filepath.c_str(), std::ios::binary);
+	// 			if (ofs.is_open()) {
+	// 				ofs.write(body.data(), body.size());
+	// 				ofs.close();
+	// 				_uploadedFiles.push_back(filepath);
+	// 			}
+	// 		}
+	// 		else {
+	// 			_body.append(body.c_str(), body.size());
+	// 		}
+	// }
+
+	// // Trim trailing boundary
+	// if (_multipartBodyAccum.find(endBoundary) != std::string::npos)
+	// 	return true;
+	// return false;
+	// }
+
 	void Request::envpInit(std::vector<std::string> &envp) const
 	{
 		const RequestPath &reqPath = _path;
-	    // TODO fill envp with variables for cgi process
-	    // taken from request data
-
 		envp.clear();
-
-	    //// headers required for all cgi request
 		envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
 		envp.push_back("SERVER_SOFTWARE=webserv/1.0");
 		envp.push_back("REQUEST_METHOD=" + _method);
@@ -296,20 +392,21 @@ namespace http
 		envp.push_back("REDIRECT_STATUS=0");
 		envp.push_back("SCRIPT_FILENAME=" + reqPath.getFilePath());
 
-		// Optional variables
-		// Maybe TODO PATH_INFO is a path after the matching script name without url-encoding
-		// https://stackoverflow.com/a/2261971/13352218
-		//envp.push_back("PATH_INFO=" + reqPath.getNormalizedPath());
-		// PATH_TRANSLATED is a transformation of PATH_INFO
-		//envp.push_back("PATH_TRANSLATED=" + reqPath.getPath());
-
-	    /// headers required for cgi request with body (body is passed by parent on stdin) only POST should send body
-		if (this->_method == "POST")
-		{
+		if (this->_method == "POST") {
 			std::stringstream contentLengthStream;
 			contentLengthStream << _body.size();
 			std::string contentLength = contentLengthStream.str();
 			if (!contentLength.empty()) {
+				envp.push_back(std::string("CONTENT_LENGTH=") + contentLength);
+				std::string contentType;
+				// if (this->hasMultipart())
+				// 	contentType = "application/octet-stream";
+				// else {
+				// 	contentType = _headers.getHeader("Content-Type");
+				// 	if (contentType.empty())
+				// 		contentType = "application/x-www-form-urlencoded";
+				// }
+				// envp.push_back(std::string("CONTENT_TYPE=") + contentType);
 				envp.push_back("CONTENT_LENGTH=" + contentLength);
 				std::string contentType =
 					_headers.getHeader("Content-Type");
@@ -317,15 +414,9 @@ namespace http
 					contentType = "application/x-www-form-urlencoded";
 				envp.push_back("CONTENT_TYPE=" + contentType);
 			}
-
 		}
-		////
 
-		//// headers required for passing query string
 		if (!reqPath.getQueryString().empty())
-		{
 			envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
-		}
-		////
 	}
 }
