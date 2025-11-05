@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 20:17:09 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/04 21:37:24 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ namespace http
 			delete[] result.second;
 
 			if (line.empty()) { // End of Headers
+				_multipartBoundary = ""; // clear previous multipart boundaries
 				std::string contentLength =
 					_headers.getHeader("Content-Length");
 				std::string transferEncoding = _headers.getHeader("Transfer-Encoding");
@@ -124,7 +125,6 @@ namespace http
 				if (!contentType.empty()) {
 					std::string contentTypeLowercase = utils::lowercaseCopy(contentType);
 					if (utils::startsWith("multipart/form-data", contentTypeLowercase)) {
-						_multipartBoundary = ""; // clear previous boundaries
 						size_t bpos = contentType.find("boundary=");
 						if (bpos != std::string::npos) {
 							std::string boundary = contentType.substr(bpos + 9);
@@ -193,19 +193,19 @@ namespace http
 			std::string chunk(result.second, expectedLength);
 			delete[] result.second;
 
-			if (utils::startsWith("multipart/form-data", contentType))
-			{
-				_multipartBodyAccum.append(chunk);
-				if (_multipartBodyAccum.size() >= expectedLength)
-				{
-					if (!parseMultipartBody()) {
-						_state = READ_BAD_REQUEST;
-						return _state;
-					}
-					_state = READ_COMPLETE;
-				}
-			}
-			else
+			// if (utils::startsWith("multipart/form-data", contentType))
+			// {
+			// 	_multipartBodyAccum.append(chunk);
+			// 	if (_multipartBodyAccum.size() >= expectedLength)
+			// 	{
+			// 		if (!parseMultipartBody()) {
+			// 			_state = READ_BAD_REQUEST;
+			// 			return _state;
+			// 		}
+			// 		_state = READ_COMPLETE;
+			// 	}
+			// }
+			// else
 			{
 				if (!_body.parse(chunk.c_str(), expectedLength))
 					return _state;
@@ -328,63 +328,58 @@ namespace http
 		return _multipartBoundary;
 	}
 
-	void Request::extractMultipartBoundary(void)
-	{
-		std::string contentType = _headers.getHeader("Content-Type");
-		std::string key = "boundary=";
-		std::string::size_type pos = contentType.find(key);
-		if (pos != std::string::npos)
-			_multipartBoundary = "--" + contentType.substr(pos + key.size());
-	}
+	// TODO transfer parse multipart logic to RouteStaticFile.handlePost
+	// at this moment keep body from multipart as a regular body
+	// write to file while on .handlePost using uploadFolder config
+	// TODO deal with multiple files sent on one request
+	// bool Request::parseMultipartBody(void)
+	// {
+	// 	if (_multipartBoundary.empty())
+	// 		return false;
 
-	bool Request::parseMultipartBody(void)
-	{
-		if (_multipartBoundary.empty())
-		return false;
+	// 	std::string endBoundary = _multipartBoundary + "--";
+	// 	std::string::size_type pos = 0;
+	// 	std::string::size_type next = 0;
 
-		std::string endBoundary = _multipartBoundary + "--";
-		std::string::size_type pos = 0;
-		std::string::size_type next = 0;
+	// 	while ((next = _multipartBodyAccum.find(_multipartBoundary, pos)) != std::string::npos) {
+	// 		std::string part = _multipartBodyAccum.substr(pos, next - pos);
+	// 		pos = next + _multipartBoundary.size();
 
-		while ((next = _multipartBodyAccum.find(_multipartBoundary, pos)) != std::string::npos) {
-			std::string part = _multipartBodyAccum.substr(pos, next - pos);
-			pos = next + _multipartBoundary.size();
+	// 		if (part.empty())
+	// 			continue;
 
-			if (part.empty())
-				continue;
+	// 		std::string::size_type headerEnd = part.find("\r\n\r\n");
+	// 		if (headerEnd == std::string::npos)
+	// 			continue;
 
-			std::string::size_type headerEnd = part.find("\r\n\r\n");
-			if (headerEnd == std::string::npos)
-				continue;
+	// 		std::string headerBlock = part.substr(0, headerEnd);
+	// 		std::string body = part.substr(headerEnd + 4);
 
-			std::string headerBlock = part.substr(0, headerEnd);
-			std::string body = part.substr(headerEnd + 4);
+	// 		// Extract filename
+	// 		std::string::size_type fnPos = headerBlock.find("filename=\"");
+	// 		if (fnPos != std::string::npos) {
+	// 			fnPos += 10;
+	// 			std::string::size_type fnEnd = headerBlock.find("\"", fnPos);
+	// 			std::string filename = headerBlock.substr(fnPos, fnEnd - fnPos);
 
-			// Extract filename
-			std::string::size_type fnPos = headerBlock.find("filename=\"");
-			if (fnPos != std::string::npos) {
-				fnPos += 10;
-				std::string::size_type fnEnd = headerBlock.find("\"", fnPos);
-				std::string filename = headerBlock.substr(fnPos, fnEnd - fnPos);
+	// 			std::string filepath = "/tmp/" + filename;
+	// 			std::ofstream ofs(filepath.c_str(), std::ios::binary);
+	// 			if (ofs.is_open()) {
+	// 				ofs.write(body.data(), body.size());
+	// 				ofs.close();
+	// 				_uploadedFiles.push_back(filepath);
+	// 			}
+	// 		}
+	// 		else {
+	// 			_body.append(body.c_str(), body.size());
+	// 		}
+	// }
 
-				std::string filepath = "/tmp/" + filename;
-				std::ofstream ofs(filepath.c_str(), std::ios::binary);
-				if (ofs.is_open()) {
-					ofs.write(body.data(), body.size());
-					ofs.close();
-					_uploadedFiles.push_back(filepath);
-				}
-			}
-			else {
-				_body.append(body.c_str(), body.size());
-			}
-	}
-
-	// Trim trailing boundary
-	if (_multipartBodyAccum.find(endBoundary) != std::string::npos)
-		return true;
-	return false;
-	}
+	// // Trim trailing boundary
+	// if (_multipartBodyAccum.find(endBoundary) != std::string::npos)
+	// 	return true;
+	// return false;
+	// }
 
 	void Request::envpInit(std::vector<std::string> &envp) const
 	{
@@ -404,14 +399,20 @@ namespace http
 			if (!contentLength.empty()) {
 				envp.push_back(std::string("CONTENT_LENGTH=") + contentLength);
 				std::string contentType;
-				if (this->hasMultipart())
-					contentType = "application/octet-stream";
-				else {
-					contentType = _headers.getHeader("Content-Type");
-					if (contentType.empty())
-						contentType = "application/x-www-form-urlencoded";
-				}
-				envp.push_back(std::string("CONTENT_TYPE=") + contentType);
+				// if (this->hasMultipart())
+				// 	contentType = "application/octet-stream";
+				// else {
+				// 	contentType = _headers.getHeader("Content-Type");
+				// 	if (contentType.empty())
+				// 		contentType = "application/x-www-form-urlencoded";
+				// }
+				// envp.push_back(std::string("CONTENT_TYPE=") + contentType);
+				envp.push_back("CONTENT_LENGTH=" + contentLength);
+				std::string contentType =
+					_headers.getHeader("Content-Type");
+				if (contentType.empty())
+					contentType = "application/x-www-form-urlencoded";
+				envp.push_back("CONTENT_TYPE=" + contentType);
 			}
 		}
 
