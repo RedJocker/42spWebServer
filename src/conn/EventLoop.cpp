@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/05 20:27:10 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/05 20:53:40 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ namespace conn
 	}
 
 	void EventLoop::unsubscribeOperation(int operationFd)
-	{
+	{ // if changing this check also EventLoop.markExpiredOperations
 		std::cout << "unsubscribeOperation " <<	 operationFd << std::endl;
 		this->unsubscribeFd(operationFd);
 		Operation op = Operation::matcher(operationFd);
@@ -581,6 +581,10 @@ namespace conn
 					kill(cgiPid, SIGKILL);
 				}
 				// avoid call to unsubscribeOperation to avoid iterator invalidation
+				if (opIt->first.writer)
+					delete opIt->first.writer;
+				if (opIt->first.reader)
+					delete opIt->first.reader;
 				this->unsubscribeFd(opIt->first.fd);
 				this->operations.erase(opIt++);
 			}
