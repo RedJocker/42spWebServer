@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 14:25:00 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/04 21:46:01 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,37 @@ namespace utils {
 		if (ext == "zip") return "application/zip";
 
 		return "application/octet-stream"; // fallback
+	}
+
+	std::string lowercaseCopy(const std::string &str)
+	{
+		std::string lowercase = str;
+		for (size_t i = 0; i < lowercase.size(); ++i)
+			lowercase[i] = static_cast<char>(std::tolower(lowercase[i]));
+		return str;
+	}
+
+	bool startsWith(const std::string &prefix, const std::string &maybeHasPrefix)
+	{
+		if (prefix.size() > maybeHasPrefix.size())
+			return false;
+		for (size_t i = 0; i < prefix.size(); ++i)
+		{
+			if (prefix.at(i) != maybeHasPrefix.at(i))
+				return false;
+		}
+		return true;
+	}
+
+	// return same string from input to make possible chaining
+	std::string &trimInPlace(std::string &maybeHasLeadAndTrailingSpaces)
+	{
+		std::string &str = maybeHasLeadAndTrailingSpaces;
+		while (!str.empty() && std::isspace(str[0]))
+			str.erase(0, 1);
+		while (!str.empty() && std::isspace(str[str.size() - 1]))
+			str.erase(str.size() - 1, 1);
+		return str;
 	}
 
 	bool endsWith(const std::string &maybeHasSuffix, const std::string &suffix)

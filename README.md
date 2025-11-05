@@ -46,7 +46,7 @@
 
 - Http
   - file upload
-    - [ ] give support for 'Content-Type: multiplart/form-data; boundary ---some-bounderyadfkjla'
+    - [-] give support for 'Content-Type: multiplart/form-data; boundary ---some-bounderyadfkjla'
       - another request body format
       - has a delimiter defined as part of header that delimits body in parts
       - each body part may contain more headers
@@ -55,8 +55,7 @@
         - try sending a request with this format with current webserver implementation to see
           the body of request on webserver log
       - if this is part of a cgi request
-        - cgi should receive body already joined, without delimiters
-        - content size sent to cgi must be content size of already joined body
+        - keep body as is and send to cgi with contentType
     - [ ] download files to a folder specified by configuration
       - may start with a hardcoded folder as temporary implementation
   - Configurable server
