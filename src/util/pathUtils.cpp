@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 21:46:01 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/06 18:15:37 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,12 @@ namespace utils {
 		while (!str.empty() && std::isspace(str[str.size() - 1]))
 			str.erase(str.size() - 1, 1);
 		return str;
+	}
+
+	std::string trimCopy(const std::string &maybeHasLeadAndTrailingSpaces)
+	{
+		std::string str = maybeHasLeadAndTrailingSpaces;
+		return trimInPlace(str);
 	}
 
 	bool endsWith(const std::string &maybeHasSuffix, const std::string &suffix)

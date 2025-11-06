@@ -6,15 +6,17 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/04 22:08:40 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/06 19:49:09 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventLoop.hpp"
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
+#include "VirtualServer.hpp"
 #include <iostream>
 #include <signal.h>
+
 
 void signalHandler(int sig)
 {
@@ -30,7 +32,10 @@ int main(void)
 	signal(SIGINT, &signalHandler);
 	conn::EventLoop eventLoop;
 
-	http::Server server("localhost", "./www", 8080);
+	http::VirtualServer vservers[1] = {
+		http::VirtualServer("localhost", "./www"),
+	};
+
 
 	http::RouteCgi cgiRoutes[1] = {
 		http::RouteCgi("/**.cgi"),
@@ -41,7 +46,7 @@ int main(void)
 		cgiRoutes[i]
 			.addMethod("GET")
 			.addMethod("POST");
-		server.addRoute(cgiRoutes + i);
+		vservers[0].addRoute(cgiRoutes + i);
 	}
 
 	// TODO validate upload folder exists
@@ -55,9 +60,14 @@ int main(void)
 			.addMethod("GET")
 			.addMethod("POST")
 			.addMethod("DELETE");
-		server.addRoute(staticFileRoutes + i);
+		vservers[0].addRoute(staticFileRoutes + i);
 	}
 
+	http::Server server("./www", 8080);
+	for (size_t i = 0; i < sizeof(vservers) / sizeof(http::VirtualServer); ++i)
+	{
+		server.addVirtualServer(vservers[i]);
+	}
 	std::pair<int, std::string> maybeServerFd = server.createAndListen();
 	if (maybeServerFd.first < 0)
 	{

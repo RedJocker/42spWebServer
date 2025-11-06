@@ -92,10 +92,10 @@
          - using /path/specific.html to match only /path/specific.html
       - [ ] configuration for directory files
         - may have a configurable default file (ex: index.html, index.php, any.xxx)
-		  - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
+          - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
         - may list directory content
-		  - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
-		    - ngix first tries index file if that is configured
+          - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
+            - ngix first tries index file if that is configured
         - may be forbiden access
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
@@ -105,7 +105,7 @@
         - configuration should point to a file that will be used on response
         - these files may be loaded to memory before starting server so it may be pre-cached
           during response handling
-		- [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
+        - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
       - [ ] configurable redirection
         - a route may be configured to redirect requests to another route
       - [ ] configurable file upload
@@ -121,18 +121,20 @@
           - [x] implement RouteCgi
           - [x] implement RouteStaticFile
         - route based configuration should be responsability of Route classes
-  - [ ] Virtual Servers
+  - [X] Virtual Servers
     - configuration may define serveral servers for same port, that is same tcp connection
     - each virtual server should have the same capacities as a normal server
-    - on client connection it will not be possible to determine which virtual server this connection
-      is related to
+    - on client connection it will not be possible to determine which virtual server this connection is related to
       - only after reading header 'Host: somedomainname' it will be possible to determine
         which virtual server should handle the request being parsed
-    - [ ] reasearch how to implement in a way that does not require too much rewriting
-      - maybe we can have all http::Server to contain a list of virtual servers with at least
-        one default virtual server and have the current 'server responsabilities' delegated
-        to virtual servers and server would only be responsible to determine the virtual server
+    - [X] implementation: every http::Server contains a list of virtual servers with
+        at leastone default virtual server the server responsability is to forward the request
+        for the correct virtual server or fallback to a default if it is no possible to determine
+        the right virtual server
         that is responsible to handle client request
+    - http::VirtualServer configuration scope is similar to nginx `server` context
+    - http::Server configuration scope is similar to nginx `http` context
+    - http::Route configuration scope is similar to nginx `location` context
 
 - CGI
   - [-] change cgi process current directory to folder of requested resource
@@ -144,7 +146,7 @@
         would need to do something like split filename in folder + file
         set chdir to folder and pass only filename as script
     - cgi process should be able to use relative path to acess other files
-      - relative to folder of cgi resource, "folder where script is located" 
+      - relative to folder of cgi resource, "folder where script is located"
   - [x] read status response from cgi
     - cgi may respond with status code through cgi response headers
     - header should be read by server, removed from headers and sent as status code

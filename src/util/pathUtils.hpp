@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 21:48:43 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/06 18:15:36 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ namespace utils {
 	bool startsWith(
 		const std::string &prefix, const std::string &maybeHasPrefix);
 	std::string &trimInPlace(std::string &maybeHasLeadAndTrailingSpaces);
-
+	std::string trimCopy(const std::string &maybeHasLeadAndTrailingSpaces);
 }
 
 #endif

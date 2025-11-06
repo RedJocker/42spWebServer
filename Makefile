@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/10/30 21:35:41 by maurodri         ###   ########.fr        #
+#    Updated: 2025/11/06 17:34:01 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,6 +35,7 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Client.cpp \
 					Response.cpp \
 					Server.cpp \
+					VirtualServer.cpp \
 					RequestPath.cpp \
 					Route.cpp \
 					RouteCgi.cpp \

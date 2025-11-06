@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 14:03:38 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/06 17:41:59 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include "TcpServer.hpp"
 # include "Client.hpp"
-# include "Route.hpp"
+# include "VirtualServer.hpp"
 # include <string>
 # include <set>
 
@@ -23,29 +23,19 @@ namespace http
 {
     class Server : public conn::TcpServer
 	{
-		struct OrderRoutes
-		{
-			bool operator()(const Route *s1, const Route *s2) const;
-		};
-
-		std::string hostname;
 		std::string docroot;
-		std::set<Route*, OrderRoutes> routes;
+		std::vector<VirtualServer> vservers;
 
 	public:
-		const static std::string DEFAULT_DOCROOT;
 
-		Server(const std::string &hostname,
-			   const std::string &docroot,
-			   unsigned short port);
+		Server(const std::string &docroot, unsigned short port);
 		Server(const Server &other);
 		Server &operator=(const Server &other);
 		virtual ~Server(void);
 
-		const std::string &getHostname() const;
 		const std::string &getDocroot() const;
 
-		void addRoute(Route *route);
+		void addVirtualServer(VirtualServer &virtualServer);
 		void serve(Client &client, conn::Monitor &monitor);
 	};
 }
