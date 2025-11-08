@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 20:33:20 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/07 21:22:54 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -153,8 +153,12 @@ namespace http {
 			std::string::size_type fnEnd = part.headers.find("\"", fnPos);
 			if (fnEnd == std::string::npos)
 				return false;
-
 			part.filename = part.headers.substr(fnPos, fnEnd - fnPos);
+			size_t lastSlash = utils::findLastFromEnd('/', part.filename, 0);
+			if (lastSlash != std::string::npos)
+			{
+				part.filename = part.filename.substr(lastSlash);
+			}
 			utils::trimInPlace(part.filename);
 			if (part.filename.size() == 0)
 				return false;
@@ -163,7 +167,6 @@ namespace http {
 		}
 
 		std::string rest = body.substr(pos);
-		std::cout << "rest:" << rest << std::endl;
 		if (rest != "--\r\n")
 			return false;
 		return true;
@@ -206,7 +209,7 @@ namespace http {
 				// TODO
 				// we need to check reason failed to open
 				// and give a response based on the reason
-				std::cerr << "Failed to open file: " << it->filename << std::endl;
+				std::cerr << "Failed to open file: " << path << std::endl;
 				this->onServerError(client);
 				_multipartParts.clear();
 				return;
