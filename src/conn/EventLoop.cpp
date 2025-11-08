@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/05 20:53:40 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/07 19:58:04 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,14 +112,12 @@ namespace conn
 		int clientFd = eventIt->fd;
 
 		for (MapOperations::iterator it = operations.begin();
-			 it != operations.end();
-			 it++)
+			 it != operations.end();)
 		{
 			if (it->second->getFd() == clientFd)
 			{
 				unsubscribeFd(it->first.fd);
-				operations.erase(it);
-				break;
+				operations.erase(it++);
 			}
 		}
 
