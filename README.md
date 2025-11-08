@@ -36,11 +36,7 @@
 
 ## To fix
 
-- when listing directory of address '/'
-  - expected to see h1 with content 'Index of /'
-  - actual was  'Index of //'
-  - issue is probably on Server.cpp:314 on call to RequestPath.getFilePath
-    returning state set by RequestPath.initRequestPath
+empty
 
 ## Sprint 1
 
@@ -77,9 +73,9 @@
       - configuration may choose a root server folder that maps to server file system
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#root)
         - nginx allows this config on
-          - http contenxt (equivalent to our http::Server)
-          - server context (equivalent to our virtual server to be implemented)
-          - location context (equivalent to our http::Route)
+          - `http` contenxt (equivalent to our `http::Server`)
+          - `server` context (equivalent to our `http::VirtualServer`)
+          - `location` context (equivalent to our `http::Route`)
     - [ ] Configurable routing system
       - part of server configuration (including virtual servers)
       - [X] configurable allowed methods for a specific route

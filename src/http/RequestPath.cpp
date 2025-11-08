@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:58:32 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 14:44:37 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/07 21:22:51 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,7 +208,7 @@ void RequestPath::normalize()
 			sanitized += "/";
 		sanitized += segments[k];
 	}
-	if (path[path.size() - 1] == '/')
+	if (path[path.size() - 1] == '/' && path.size() != 1)
 		sanitized.push_back('/');
 	this->originalPathNormalized = sanitized;
 }
