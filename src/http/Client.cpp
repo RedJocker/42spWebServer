@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/05 20:29:19 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/07 23:07:35 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ namespace http {
 	{
 		this->request.clear();
 		this->response.clear();
+		this->pendingFileWrites = 0;
 	}
 
 	void Client::pendingFileWritesIncrement(void)
