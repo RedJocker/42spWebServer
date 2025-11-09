@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 19:30:12 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/08 02:02:13 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -29,9 +29,14 @@ namespace http {
 	}
 
 	RouteCgi::RouteCgi(const std::string &pathSpecification)
-		: Route(pathSpecification)
+		: Route(pathSpecification, "")
 	{
-		//TODO
+	}
+
+	RouteCgi::RouteCgi(
+		const std::string &pathSpecification, const std::string &docroot)
+		: Route(pathSpecification, docroot)
+	{
 	}
 
 	RouteCgi::RouteCgi(const RouteCgi &other) : Route(other)
@@ -44,7 +49,7 @@ namespace http {
 	{
 		if (this == &other)
 			return *this;
-		//TODO
+		Route::operator=(other);
 		return *this;
 	}
 

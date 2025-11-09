@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:54:53 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/04 13:59:43 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/08 02:17:30 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,24 +32,26 @@ class RequestPath
 		bool isDirectory() const;
 		bool isFile() const;
 		bool needsTrailingSlashRedirect() const;
-		void initRequestPath(
-			const std::string &rawPath, const std::string &docroot);
+		void initRequestPath(const std::string &rawPath);
 		bool matchesPathSpecification(
 			const std::string &pathSpecification) const;
-
+		void analyzePath(const std::string &docroot);
 	private:
-		std::string originalPath;   // from request
-		std::string originalPathNormalized; // original normalized
-		std::string path;    // normalized just path part, must have / on start
-		std::string queryString;   // normalized just query part
+		//// set on initRequestPath
+			std::string originalPath;   // from request
+			std::string originalPathNormalized; // original normalized
+			std::string path;    // normalized just path part, must have / on start
+			std::string queryString;   // normalized just query part
+		//// set on initRequestPath
 
-		std::string filePath; // docroot + path
-		std::string extension; // just extension of normalized
-		std::string docroot; //  server docroot, does not have / on end
-		bool directory;
-		bool redirectNeeded;
-		bool _isFile;
-		void analyzePath();
+		//// set on analyzePath
+			std::string filePath; // docroot + path
+			std::string extension; // just extension of normalized
+			bool directory;
+			bool redirectNeeded;
+			bool _isFile;
+		//// set on analyzePath
+
 		void splitQueryFromPath();
 		void normalize();
 };

@@ -69,7 +69,7 @@ empty
           - location context (equivalent to our http::Route)
       - we can also allow this config on all 3 levels and use the most specific
         - route > virtual server > server
-    - [ ] Configurable docroot
+    - [X] Configurable docroot
       - configuration may choose a root server folder that maps to server file system
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#root)
         - nginx allows this config on
@@ -89,9 +89,17 @@ empty
       - [ ] configuration for directory files
         - may have a configurable default file (ex: index.html, index.php, any.xxx)
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
+		  - nginx allows this config on
+            - `http` contenxt (equivalent to our `http::Server`)
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
         - may list directory content
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
             - ngix first tries index file if that is configured
+		  - nginx allows this config on
+            - `http` contenxt (equivalent to our `http::Server`)
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
         - may be forbiden access
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
@@ -102,6 +110,10 @@ empty
         - these files may be loaded to memory before starting server so it may be pre-cached
           during response handling
         - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
+		- nginx allows this config on
+            - `http` contenxt (equivalent to our `http::Server`)
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
       - [ ] configurable redirection
         - a route may be configured to redirect requests to another route
       - [ ] configurable file upload

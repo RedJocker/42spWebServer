@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/06 19:49:09 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/09 06:44:32 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,15 @@ int main(void)
 	signal(SIGINT, &signalHandler);
 	conn::EventLoop eventLoop;
 
-	http::VirtualServer vservers[1] = {
+	// TODO: Improve instantiation of dependencies
+	http::VirtualServer vservers[2] = {
 		http::VirtualServer("localhost", "./www"),
+		http::VirtualServer("domain.com", "./www2"),
 	};
 
 
 	http::RouteCgi cgiRoutes[1] = {
-		http::RouteCgi("/**.cgi"),
+		http::RouteCgi("/**.cgi", "./www"),
 	};
 
 	for (size_t i = 0; i < sizeof(cgiRoutes) / sizeof(http::RouteCgi); ++i)
@@ -51,7 +53,7 @@ int main(void)
 
 	// TODO validate upload folder exists
 	http::RouteStaticFile staticFileRoutes[1] = {
-		http::RouteStaticFile("/**", "./www/uploads"),
+		http::RouteStaticFile("/**", "./www/uploads", "./www"),
 	};
 
 	for (size_t i = 0; i < sizeof(staticFileRoutes) / sizeof(http::RouteStaticFile); ++i)
@@ -64,6 +66,11 @@ int main(void)
 	}
 
 	http::Server server("./www", 8080);
+	http::RouteStaticFile otherStaticRoute("/**", "./www/uploads");
+	otherStaticRoute
+		.addMethod("GET");
+	otherStaticRoute.setDocrootIfEmpty(vservers[1].getDocroot());
+	vservers[1].addRoute(&otherStaticRoute);
 	for (size_t i = 0; i < sizeof(vservers) / sizeof(http::VirtualServer); ++i)
 	{
 		server.addVirtualServer(vservers[i]);

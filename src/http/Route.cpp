@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/04 14:00:28 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/08 02:03:19 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,21 +17,23 @@ namespace http {
 	int Route::idGenerator = 0;
 
 	Route::Route(void)
-		: id(Route::idGenerator++), methodsAllowed(), pathSpecification("/")
+		: id(Route::idGenerator++), methodsAllowed(), pathSpecification("/"), docroot("")
 	{
 	}
 
-	Route::Route(const std::string &pathSpecification)
+	Route::Route(const std::string &pathSpecification, const std::string &docroot)
 		: id(Route::idGenerator++),
 		  methodsAllowed(),
-		  pathSpecification(pathSpecification)
+		  pathSpecification(pathSpecification),
+		  docroot(docroot)
 	{
 	}
 
 	Route::Route(const Route &other)
 		: id(other.id),
 		  methodsAllowed(other.methodsAllowed),
-		  pathSpecification(other.pathSpecification)
+		  pathSpecification(other.pathSpecification),
+		  docroot(other.docroot)
 	{	
 	}
 
@@ -42,6 +44,7 @@ namespace http {
 		this->id = other.id;
 		this->methodsAllowed = other.methodsAllowed;
 		this->pathSpecification = other.pathSpecification;
+		this->docroot = other.docroot;
 		return *this;
 	}
 
@@ -78,5 +81,16 @@ namespace http {
 	int Route::getId(void) const
 	{
 		return this->id;
+	}
+
+	void Route::setDocrootIfEmpty(const std::string &docroot)
+	{
+		if (this->docroot.empty())
+			this->docroot = docroot;
+	}
+
+	const std::string &Route::getDocroot(void) const
+	{
+		return this->docroot;
 	}
 }

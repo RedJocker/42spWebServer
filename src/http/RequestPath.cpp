@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:58:32 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/07 21:22:51 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/09 06:33:21 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,6 @@ const std::string &RequestPath::getExtension() const {
 	return extension;
 }
 
-const std::string &RequestPath::getDocroot() const {
-	return docroot;
-}
-
-
 bool RequestPath::isDirectory() const {
 	return directory;
 }
@@ -80,21 +75,33 @@ bool RequestPath::matchesPathSpecification(
 	size_t spec_i = 0;
 	size_t path_i = 0;
 
-	std::cout << spec << " -> " << this->path << std::endl;
+	bool isMatch = false;
+
 	while (true)
 	{
 		//std::cout << spec_i << ":" << path_i << std::endl;
 		if (spec_i == spec_len)
-			return path_i == path_len;
+		{
+			isMatch = path_i == path_len;
+			break;
+		}
 		if (path_i == path_len)
-			return spec_i == spec_len - 1 && spec.at(spec_i) == '*';
-		if (spec_i == spec_len - 3
-			&& spec.substr(spec_i) == "/**")
-			return this->path.at(path_i) == '/';
+		{
+			isMatch = spec_i == spec_len - 1 && spec.at(spec_i) == '*';
+			break;
+		}
+		if (spec_i == spec_len - 3 && spec.substr(spec_i) == "/**")
+		{
+			isMatch = this->path.at(path_i) == '/';
+			break;
+		}
 		if (spec.substr(spec_i, 3) == "/**")
 		{
 			if (this->path.at(path_i) != '/')
-				return false;
+			{
+				isMatch = false;
+				break;
+			}
 			// there is at least one '/' at path_i, npos return not possible
 			size_t path_last_slash =
 				utils::findLastFromEnd('/', this->path, path_i);
@@ -102,13 +109,17 @@ bool RequestPath::matchesPathSpecification(
 			std::string path_end = this->path.substr(path_last_slash + 1);
 			std::string spec_suffix = spec.substr(spec_i + 3);
 
-			return utils::endsWith(path_end, spec_suffix);
+			isMatch = utils::endsWith(path_end, spec_suffix);
+			break;
 		}
 
 		if (spec.at(spec_i) != '*')
 		{
 			if (spec.at(spec_i) != this->path.at(path_i))
-				return false;
+			{
+				isMatch = false;
+				break;
+			}
 			else
 			{
 				++spec_i;
@@ -118,28 +129,32 @@ bool RequestPath::matchesPathSpecification(
 		}
 		if (spec.at(spec_i) == '*' && spec_i == spec_len - 1)
 		{
-			return this->path.find('/', path_i) == std::string::npos;
+			isMatch = this->path.find('/', path_i) == std::string::npos;
+			break;
 		}
 		// at this point spec[spec_i] == '*' and not at end
 		++spec_i;
 		char nextSpecChar = spec.at(spec_i);
 		path_i = this->path.find(nextSpecChar, path_i);
 		if (path_i == std::string::npos)
-			return false;
+		{
+			isMatch = false;
+			break;
+		}
 		// at this point spec[spec_i] == path[path_i]
 		++spec_i;
 		++path_i;
 	}
+	std::cout << spec << " -> " << this->path << (isMatch ? " [YES]" : " [NO]")
+			  << std::endl;
+	return isMatch;
 }
 
-void RequestPath::initRequestPath(
-	const std::string &rawPath, const std::string &docroot)
+void RequestPath::initRequestPath(const std::string &rawPath)
 {
 	this->originalPath = rawPath;
-	this->docroot = docroot;
 	this->normalize();
 	this->splitQueryFromPath();
-	this->analyzePath();
 }
 
 void RequestPath::splitQueryFromPath()
@@ -213,9 +228,9 @@ void RequestPath::normalize()
 	this->originalPathNormalized = sanitized;
 }
 
-void RequestPath::analyzePath() {
+void RequestPath::analyzePath(const std::string &docroot) {
 
-	this->filePath = this->docroot + this->path;
+	this->filePath = docroot + this->path;
 
 	struct stat pathStat;
 	if (stat(this->filePath.c_str(), &pathStat) == 0) {

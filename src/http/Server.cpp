@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/06 19:22:19 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/08 01:39:04 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,29 +58,11 @@ namespace http
 
 	void Server::addVirtualServer(VirtualServer &virtualServer)
     {
-	    if (virtualServer.getDocroot().empty())
-	    {
-			virtualServer.setDocroot(this->docroot);
-	    }
 		this->vservers.push_back(virtualServer);
 	}
 
 	void Server::serve(Client &client, conn::Monitor &monitor)
 	{
-		RequestPath &reqPath = client.getRequest().getPath();
-
-		// Redirect if not '/' for directory listing
-		if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
-			Response &response = client.getResponse();
-			std::string location = reqPath.getPath() + "/";
-			response.clear();
-			response.setStatusCode(308);
-			response.setStatusInfo("Permanent Redirect");
-			response.addHeader("Location", location);
-			response.addHeader("Content-Length", "0");
-			client.setMessageToSend(response.toString());
-			return;
-	    }
 	    const std::string &host = client.getRequest().getHeader("Host");
 
 	    if (host.empty())

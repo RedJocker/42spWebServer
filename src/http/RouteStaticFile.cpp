@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/07 21:22:54 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/08 02:34:50 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -33,12 +33,20 @@ namespace http {
 
 	RouteStaticFile::RouteStaticFile(
 		const std::string &pathSpecification, const std::string &uploadFolder)
-		: Route(pathSpecification), uploadFolder(uploadFolder)
+		: Route(pathSpecification, ""), uploadFolder(uploadFolder) 
 	{
 	}
 
 	RouteStaticFile::RouteStaticFile(
-		const RouteStaticFile &other) : Route(other), uploadFolder(other.uploadFolder)
+		const std::string &pathSpecification,
+		const std::string &uploadFolder,
+		const std::string &docroot)
+		: Route(pathSpecification, docroot), uploadFolder(uploadFolder)
+	{
+	}
+
+	RouteStaticFile::RouteStaticFile(const RouteStaticFile &other)
+		: Route(other), uploadFolder(other.uploadFolder)
 	{
 	}
 
@@ -102,7 +110,7 @@ namespace http {
 
 		std::stringstream html;
 		html << "<html><body>"
-			 << "<h1> Index of " << dirPath.substr(reqPath.getDocroot().size())
+			 << "<h1> Index of " << dirPath.substr(this->getDocroot().size())
 			 << "</h1>"
 			 << "<hr>"
 			 << "<ul>";

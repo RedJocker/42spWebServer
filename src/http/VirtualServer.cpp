@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/06 19:39:43 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/09 06:41:04 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -82,9 +82,10 @@ namespace http
 		return this->docroot;
 	}
 
-	void VirtualServer::setDocroot(const std::string &docroot)
+	void VirtualServer::setDocrootIfEmpty(const std::string &docroot)
 	{
-		this->docroot = docroot;
+		if (this->docroot.empty())
+			this->docroot = docroot;
 	}
 
 	bool VirtualServer::matches(const std::string &hostname)
@@ -99,20 +100,6 @@ namespace http
 
 	void VirtualServer::serve(Client &client, conn::Monitor &monitor)
 	{
-		RequestPath &reqPath = client.getRequest().getPath();
-
-		// Redirect if not '/' for directory listing
-		if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
-			Response &response = client.getResponse();
-			std::string location = reqPath.getPath() + "/";
-			response.clear();
-			response.setStatusCode(308);
-			response.setStatusInfo("Permanent Redirect");
-			response.addHeader("Location", location);
-			response.addHeader("Content-Length", "0");
-			client.setMessageToSend(response.toString());
-			return;
-		}
 		const std::string &method = client.getRequest().getMethod();
 
 		for (std::set<Route*>::iterator routeIt = this->routes.begin();
@@ -122,8 +109,23 @@ namespace http
 			if (!(*routeIt)) // test not NULL
 				continue;
 			Route &route = *(*routeIt);
+			RequestPath &reqPath = client.getRequest().getPath();
 			if (route.matches(reqPath, method))
 			{
+
+				reqPath.analyzePath(route.getDocroot());
+				// Redirect if not '/' for directory listing
+				if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
+					Response &response = client.getResponse();
+					std::string location = reqPath.getPath() + "/";
+					response.clear();
+					response.setStatusCode(308);
+					response.setStatusInfo("Permanent Redirect");
+					response.addHeader("Location", location);
+					response.addHeader("Content-Length", "0");
+					client.setMessageToSend(response.toString());
+					return;
+				}
 				client.setRoute(&route);
 				route.serve(client, monitor);
 				return ;

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/04 23:01:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/09 06:39:17 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -34,10 +34,11 @@ namespace http
 
 	protected:
 		std::string pathSpecification;
+		std::string docroot;
 
 	public:
 		Route(void);
-		Route(const std::string &pathSpecification);
+		Route(const std::string &pathSpecification, const std::string &docroot);
 		Route(const Route &other);
 		Route &operator=(const Route &other);
 		virtual ~Route(void);
@@ -48,6 +49,8 @@ namespace http
 		bool isMethodAllowed(const std::string &maybeMethodAllowed) const;
 		void onServerError(http::Client &client) const;
 		int getId(void) const;
+		void setDocrootIfEmpty(const std::string &docroot);
+		const std::string &getDocroot(void) const;
 	};
 }
 

@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:12:50 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/06 18:49:20 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/08 01:52:00 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -15,6 +15,7 @@
 
 # include "Route.hpp"
 # include "Client.hpp"
+
 namespace http {
 	class VirtualServer
 	{
@@ -37,7 +38,7 @@ namespace http {
 		void addRoute(Route *route);
 		void serve(Client &client, conn::Monitor &monitor);
 		const std::string &getDocroot(void) const;
-		void setDocroot(const std::string &docroot);
+		void setDocrootIfEmpty(const std::string &docroot);
 		bool matches(const std::string &hostname);
 	};
 }

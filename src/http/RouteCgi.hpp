@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/04 23:18:08 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/08 02:01:20 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,6 +25,8 @@ namespace http {
 		RouteCgi();
 	public:
 
+		RouteCgi(
+			const std::string &pathSpecification, const std::string &docroot);
 		RouteCgi(const std::string &pathSpecification);
 		RouteCgi(const RouteCgi &other);
 		RouteCgi &operator=(const RouteCgi &other);

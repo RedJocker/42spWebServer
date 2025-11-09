@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/05 00:22:24 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/08 02:36:26 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -44,6 +44,10 @@ namespace http {
 	public:
 
 		RouteStaticFile(const std::string &path, const std::string &uploadFolder);
+		RouteStaticFile(
+			const std::string &path,
+			const std::string &uploadFolder,
+ 			const std::string &docroot);
 		RouteStaticFile(const RouteStaticFile &other);
 		RouteStaticFile &operator=(const RouteStaticFile &other);
 		virtual ~RouteStaticFile();
