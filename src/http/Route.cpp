@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/08 02:03:19 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/10 01:26:02 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,9 +21,11 @@ namespace http {
 	{
 	}
 
-	Route::Route(const std::string &pathSpecification, const std::string &docroot)
+	Route::Route(const std::string &pathSpecification,
+				 const std::string &docroot,
+				 const std::vector<std::string> methodsAllowed)
 		: id(Route::idGenerator++),
-		  methodsAllowed(),
+		  methodsAllowed(methodsAllowed.begin(), methodsAllowed.end()),
 		  pathSpecification(pathSpecification),
 		  docroot(docroot)
 	{
@@ -65,12 +67,6 @@ namespace http {
 			.find(maybeAllowedMethod) != methodsAllowed.end();
 	}
 
-	Route &Route::addMethod(const std::string &allowedMethod)
-	{
-		this->methodsAllowed.insert(allowedMethod);
-		return *this;
-	}
-
 	void Route::onServerError(http::Client &client) const
 	{
 		client.getResponse()
@@ -81,12 +77,6 @@ namespace http {
 	int Route::getId(void) const
 	{
 		return this->id;
-	}
-
-	void Route::setDocrootIfEmpty(const std::string &docroot)
-	{
-		if (this->docroot.empty())
-			this->docroot = docroot;
 	}
 
 	const std::string &Route::getDocroot(void) const

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/08 02:34:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/09 13:14:21 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -32,22 +32,19 @@ namespace http {
 	}
 
 	RouteStaticFile::RouteStaticFile(
-		const std::string &pathSpecification, const std::string &uploadFolder)
-		: Route(pathSpecification, ""), uploadFolder(uploadFolder) 
-	{
-	}
-
-	RouteStaticFile::RouteStaticFile(
 		const std::string &pathSpecification,
 		const std::string &uploadFolder,
-		const std::string &docroot)
-		: Route(pathSpecification, docroot), uploadFolder(uploadFolder)
+		const std::string &docroot,
+		const std::vector<std::string> &methodsAllowed)
+		: Route(pathSpecification, docroot, methodsAllowed),
+		  uploadFolder(uploadFolder)
 	{
 	}
 
 	RouteStaticFile::RouteStaticFile(const RouteStaticFile &other)
 		: Route(other), uploadFolder(other.uploadFolder)
 	{
+		*this = other;
 	}
 
 	RouteStaticFile &RouteStaticFile::operator=(const RouteStaticFile &other)

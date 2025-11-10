@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 06:39:17 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/10 01:25:25 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -38,18 +38,18 @@ namespace http
 
 	public:
 		Route(void);
-		Route(const std::string &pathSpecification, const std::string &docroot);
+		Route(const std::string &pathSpecification,
+			  const std::string &docroot,
+			  const std::vector<std::string> allowedMethods);
 		Route(const Route &other);
 		Route &operator=(const Route &other);
 		virtual ~Route(void);
 		virtual void serve(http::Client &client,  conn::Monitor &monitor) = 0;
 		virtual void respond(http::Client &client, const Operation &operation) const = 0;
 		bool matches(const RequestPath &path, const std::string &method) const;
-		Route &addMethod(const std::string &methodAllowed);
 		bool isMethodAllowed(const std::string &maybeMethodAllowed) const;
 		void onServerError(http::Client &client) const;
 		int getId(void) const;
-		void setDocrootIfEmpty(const std::string &docroot);
 		const std::string &getDocroot(void) const;
 	};
 }

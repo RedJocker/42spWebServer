@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/08 01:39:04 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/10 00:26:36 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,10 @@
 
 namespace http
 {
-	Server::Server(const std::string &docroot, unsigned short port)
-		: conn::TcpServer(port), docroot(docroot)
+	Server::Server(const std::string &docroot,
+				   unsigned short port,
+				   std::vector<VirtualServer> virtualServers)
+		: conn::TcpServer(port), docroot(docroot), vservers(virtualServers)
 	{
 		this->docroot = docroot;
 		while (!this->docroot.empty()
@@ -45,6 +47,7 @@ namespace http
 		{
 			this->docroot = other.docroot;
 			this->port = other.port;
+			this->vservers = other.vservers;
 		}
 		return *this;
 	}
@@ -56,17 +59,13 @@ namespace http
 		return this->docroot;
 	}
 
-	void Server::addVirtualServer(VirtualServer &virtualServer)
-    {
-		this->vservers.push_back(virtualServer);
-	}
-
 	void Server::serve(Client &client, conn::Monitor &monitor)
 	{
 	    const std::string &host = client.getRequest().getHeader("Host");
 
 	    if (host.empty())
 	    { // use default virtual server
+			std::cout << "using default virtual server" << std::endl;
 		    vservers.at(0).serve(client, monitor);
 			return;
 		}
@@ -103,6 +102,17 @@ namespace http
 			}
 		}
 	    // use default virtual server
+		std::cout << "using default virtual server" << std::endl;
 		vservers.at(0).serve(client, monitor);
 	}
+
+	void Server::shutdown(void)
+	{
+		for (std::vector<VirtualServer>::iterator vserverIt = vservers.begin();
+			 vserverIt != this->vservers.end();
+			 ++vserverIt)
+		{
+			vserverIt->shutdown();
+		}
+	};
 }

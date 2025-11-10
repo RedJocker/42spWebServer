@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/06 17:41:59 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/09 13:30:05 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,16 @@ namespace http
 
 	public:
 
-		Server(const std::string &docroot, unsigned short port);
+		Server(const std::string &docroot,
+			   unsigned short port,
+			   std::vector<VirtualServer> virtualServers);
 		Server(const Server &other);
 		Server &operator=(const Server &other);
 		virtual ~Server(void);
 
 		const std::string &getDocroot() const;
-
-		void addVirtualServer(VirtualServer &virtualServer);
 		void serve(Client &client, conn::Monitor &monitor);
+		void shutdown(void);
 	};
 }
 

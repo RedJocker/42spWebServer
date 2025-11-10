@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/09 06:41:04 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/10 01:15:09 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -46,8 +46,10 @@ namespace http
 	}
 
 	VirtualServer::VirtualServer(
-		const std::string &hostname, const std::string &docroot)
-		: hostname(hostname), docroot(docroot)
+		const std::string &hostname,
+		const std::string &docroot,
+		const std::vector<Route *> &routes)
+		: hostname(hostname), docroot(docroot), routes(routes.begin(), routes.end())
 	{
 		this->docroot = utils::trimCopy(docroot);
 		while (!this->docroot.empty()
@@ -82,20 +84,12 @@ namespace http
 		return this->docroot;
 	}
 
-	void VirtualServer::setDocrootIfEmpty(const std::string &docroot)
-	{
-		if (this->docroot.empty())
-			this->docroot = docroot;
-	}
-
 	bool VirtualServer::matches(const std::string &hostname)
 	{
+		std::cout << this->hostname << "::matches: " << hostname
+				  << (this->hostname == hostname ? " [YES]" : " [NO]")
+				  << std::endl;
 		return this->hostname == hostname;
-	}
-
-	void VirtualServer::addRoute(Route *route)
-	{
-		this->routes.insert(route);
 	}
 
 	void VirtualServer::serve(Client &client, conn::Monitor &monitor)
@@ -135,5 +129,17 @@ namespace http
 		response.clear();
 		response.setNotFound();
 		client.setMessageToSend(response.toString());
+	}
+
+	void VirtualServer::shutdown(void)
+	{
+		for (std::set<Route*>::iterator routeIt = this->routes.begin();
+			 routeIt != this->routes.end();
+			 ++routeIt)
+		{
+			Route *route = *routeIt;
+			if (route)
+				delete route;
+		}
 	}
 }

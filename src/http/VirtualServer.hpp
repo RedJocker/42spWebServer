@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:12:50 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/08 01:52:00 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/09 13:30:52 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -29,17 +29,19 @@ namespace http {
 		std::set<Route*, OrderRoutes> routes;
 	public:
 		VirtualServer();
-		VirtualServer(const std::string &hostname, const std::string &docroot);
+		VirtualServer(
+			const std::string &hostname,
+			const std::string &docroot,
+			const std::vector<Route *> &routes);
 		VirtualServer(const VirtualServer &other);
 
 		VirtualServer& operator=(const VirtualServer &other);
 		~VirtualServer();
 
-		void addRoute(Route *route);
 		void serve(Client &client, conn::Monitor &monitor);
 		const std::string &getDocroot(void) const;
-		void setDocrootIfEmpty(const std::string &docroot);
 		bool matches(const std::string &hostname);
+		void shutdown(void);
 	};
 }
 #endif

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/07 19:58:04 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/10 01:17:39 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 #include "BufferedWriter.hpp"
 #include "Monitor.hpp"
 #include "devUtil.hpp"
-
-#include <limits>
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
@@ -538,6 +536,14 @@ namespace conn
 			close(monitoredIt->fd);
 		}
 		events.clear();
+		for (MapServer::iterator serverIt = servers.begin();
+			 serverIt != servers.end();
+			 ++serverIt)
+		{
+			http::Server *server = serverIt->second;
+			if (server)
+				server->shutdown();
+		}
 		servers.clear();
 		for (MapClient::iterator clientIt = clients.begin();
 			 clientIt != clients.end();

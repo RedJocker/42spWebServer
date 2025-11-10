@@ -6,14 +6,12 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/08 02:02:13 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/10 01:20:29 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "RouteCgi.hpp"
-#include "Server.hpp"
 #include "Monitor.hpp"
-#include "pathUtils.hpp"
 #include "RequestPath.hpp"
 #include <cerrno>
 #include <cstring>
@@ -28,21 +26,17 @@ namespace http {
 		//TODO
 	}
 
-	RouteCgi::RouteCgi(const std::string &pathSpecification)
-		: Route(pathSpecification, "")
-	{
-	}
-
 	RouteCgi::RouteCgi(
-		const std::string &pathSpecification, const std::string &docroot)
-		: Route(pathSpecification, docroot)
+		const std::string &pathSpecification,
+		const std::string &docroot,
+		const std::vector<std::string> &methodsAllowed)
+		: Route(pathSpecification, docroot, methodsAllowed)
 	{
 	}
 
 	RouteCgi::RouteCgi(const RouteCgi &other) : Route(other)
 	{
-		(void) other;
-		//TODO
+		*this = other;
 	}
 
 	RouteCgi &RouteCgi::operator=(const RouteCgi &other)

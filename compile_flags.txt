@@ -9,4 +9,6 @@
 ./src/http
 -I
 ./src/util
+-I
+./src/config
 
