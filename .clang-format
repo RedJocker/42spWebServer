@@ -1,7 +1,7 @@
 AlignAfterOpenBracket: DontAlign
 AlignEscapedNewlines: Left
 AlignOperands: AlignAfterOperator
-AlignConsecutiveDeclarations: Consecutive
+#AlignConsecutiveDeclarations: Consecutive
 AlignEscapedNewlinesLeft: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: Never
@@ -28,7 +28,7 @@ SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 TabWidth: 4
-UseTab: ForIndentation
+UseTab: Always
 AllowAllArgumentsOnNextLine: true
 BraceWrapping:
   AfterFunction: true

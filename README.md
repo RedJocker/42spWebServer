@@ -14,7 +14,7 @@
   - [reference RFC](https://www.rfc-editor.org/rfc/rfc2616)
   - [http overview mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview)
   - [crlf](https://stackoverflow.com/questions/1552749/difference-between-cr-lf-lf-and-cr-line-break-types)
-  - [status codes]([https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/)
+  - [status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/)
 - cgi
   - [reference RFC](https://www.rfc-editor.org/rfc/rfc3875)
   - [some examples in different languages](https://gist.github.com/stokito/a9a2732ffc7982978a16e40e8d063c8f)
@@ -36,17 +36,13 @@
 
 ## To fix
 
-- when listing directory of address '/'
-  - expected to see h1 with content 'Index of /'
-  - actual was  'Index of //'
-  - issue is probably on Server.cpp:314 on call to RequestPath.getFilePath
-    returning state set by RequestPath.initRequestPath
+empty
 
 ## Sprint 1
 
 - Http
   - file upload
-    - [-] give support for 'Content-Type: multiplart/form-data; boundary ---some-bounderyadfkjla'
+    - [x] give support for 'Content-Type: multiplart/form-data; boundary ---some-bounderyadfkjla'
       - another request body format
       - has a delimiter defined as part of header that delimits body in parts
       - each body part may contain more headers
@@ -57,25 +53,53 @@
       - if this is part of a cgi request
         - keep body as is and send to cgi with contentType
     - [ ] download files to a folder specified by configuration
-      - may start with a hardcoded folder as temporary implementation
+      - [x] may start with a hardcoded folder as temporary implementation
   - Configurable server
     - [ ] Configurable port
       - configuration may choose a port for server
+      - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
+        - nginx allows this config only on http context (equivalent to out http::Server)
     - [ ] Configurable max size of body request
       - configuration may choose a limit for body size
-      - research what is the apropriate response for this case
-    - [ ] Configurable docroot
+      - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size)
+        - nginx responds with 413 Request Entity Too Large
+        - nginx allows this config on
+          - http contenxt (equivalent to our http::Server)
+          - server context (equivalent to our virtual server to be implemented)
+          - location context (equivalent to our http::Route)
+      - we can also allow this config on all 3 levels and use the most specific
+        - route > virtual server > server
+    - [X] Configurable docroot
       - configuration may choose a root server folder that maps to server file system
+      - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#root)
+        - nginx allows this config on
+          - `http` contenxt (equivalent to our `http::Server`)
+          - `server` context (equivalent to our `http::VirtualServer`)
+          - `location` context (equivalent to our `http::Route`)
     - [ ] Configurable routing system
       - part of server configuration (including virtual servers)
-      - [ ] configurable allowed methods for a specific route
+      - [X] configurable allowed methods for a specific route
         - a certain route at '/some-route' can define only GET to be allowed, or only GET and POST, etc
-      - [ ] file extension based route matching
-        - a route may be defined based on file extensions like '/some-route/*.php'
-          - actual syntax can be defined by implementation, but wildcards was a minishell item
+      - [X] file extension based route matching
+        - using /path/\*\*.ext to match files that end in .ext at /path folder or subfolders
+         - using /path/\*\* to match any files at path folder or subfolder
+         - using /path/*.ext to match files that end in .ext at /path folder only
+         - using /path/* to match any file at /path folder only
+         - using /path/specific.html to match only /path/specific.html
       - [ ] configuration for directory files
         - may have a configurable default file (ex: index.html, index.php, any.xxx)
+          - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
+		  - nginx allows this config on
+            - `http` contenxt (equivalent to our `http::Server`)
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
         - may list directory content
+          - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
+            - ngix first tries index file if that is configured
+		  - nginx allows this config on
+            - `http` contenxt (equivalent to our `http::Server`)
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
         - may be forbiden access
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
@@ -85,6 +109,11 @@
         - configuration should point to a file that will be used on response
         - these files may be loaded to memory before starting server so it may be pre-cached
           during response handling
+        - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
+		- nginx allows this config on
+            - `http` contenxt (equivalent to our `http::Server`)
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
       - [ ] configurable redirection
         - a route may be configured to redirect requests to another route
       - [ ] configurable file upload
@@ -93,25 +122,27 @@
       - [x] create a (interface||abstract class) Route that has at least
         - a virtual bool matches(RequestPath path, method) const
         - a virtual void serve(Client client, Monitor monitor) const
-        -[x] create implementations for RouteCgi and RouteStaticFile
+        - [x] create implementations for RouteCgi and RouteStaticFile
           - use existing code to implement serve and matches for these
             specific implementations
           - [x] create Route
           - [x] implement RouteCgi
           - [x] implement RouteStaticFile
         - route based configuration should be responsability of Route classes
-  - [ ] Virtual Servers
+  - [X] Virtual Servers
     - configuration may define serveral servers for same port, that is same tcp connection
     - each virtual server should have the same capacities as a normal server
-    - on client connection it will not be possible to determine which virtual server this connection
-      is related to
+    - on client connection it will not be possible to determine which virtual server this connection is related to
       - only after reading header 'Host: somedomainname' it will be possible to determine
         which virtual server should handle the request being parsed
-    - [ ] reasearch how to implement in a way that does not require too much rewriting
-      - maybe we can have all http::Server to contain a list of virtual servers with at least
-        one default virtual server and have the current 'server responsabilities' delegated
-        to virtual servers and server would only be responsible to determine the virtual server
+    - [X] implementation: every http::Server contains a list of virtual servers with
+        at leastone default virtual server the server responsability is to forward the request
+        for the correct virtual server or fallback to a default if it is no possible to determine
+        the right virtual server
         that is responsible to handle client request
+    - http::VirtualServer configuration scope is similar to nginx `server` context
+    - http::Server configuration scope is similar to nginx `http` context
+    - http::Route configuration scope is similar to nginx `location` context
 
 - CGI
   - [-] change cgi process current directory to folder of requested resource
@@ -123,7 +154,7 @@
         would need to do something like split filename in folder + file
         set chdir to folder and pass only filename as script
     - cgi process should be able to use relative path to acess other files
-      - relative to folder of cgi resource, "folder where script is located" 
+      - relative to folder of cgi resource, "folder where script is located"
   - [x] read status response from cgi
     - cgi may respond with status code through cgi response headers
     - header should be read by server, removed from headers and sent as status code

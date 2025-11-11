@@ -6,52 +6,44 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-/*   Updated: 2025/10/31 15:03:01 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/10 01:20:29 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "RouteCgi.hpp"
-#include "Server.hpp"
 #include "Monitor.hpp"
-#include "pathUtils.hpp"
-#include "devUtil.hpp"
 #include "RequestPath.hpp"
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <iostream>
-#include <sstream>
 #include <cerrno>
-#include <cstdlib>
 #include <cstring>
-
-
+#include <cstdlib>
+#include <iostream>
+#include <sys/socket.h>
 
 namespace http {
 
-	RouteCgi::RouteCgi()
+	RouteCgi::RouteCgi() : Route()
 	{
 		//TODO
 	}
 
-	RouteCgi::RouteCgi(std::string path) : path(path)
+	RouteCgi::RouteCgi(
+		const std::string &pathSpecification,
+		const std::string &docroot,
+		const std::vector<std::string> &methodsAllowed)
+		: Route(pathSpecification, docroot, methodsAllowed)
 	{
-		//TODO
 	}
 
 	RouteCgi::RouteCgi(const RouteCgi &other) : Route(other)
 	{
-		(void) other;
-		//TODO
+		*this = other;
 	}
 
 	RouteCgi &RouteCgi::operator=(const RouteCgi &other)
 	{
 		if (this == &other)
 			return *this;
-		//TODO
+		Route::operator=(other);
 		return *this;
 	}
 
@@ -60,17 +52,7 @@ namespace http {
 		//TODO
 	}
 
-
-	bool RouteCgi::matches(const RequestPath &path, const std::string &method) const
-	{
-		// TODO make configurable method checking
-		(void) method;
-
-		// TODO make possible to match on fileExtension ex "/42/*.cgi"
-		return path.getPath() == this->path;
-	}
-
-	void RouteCgi::serve(http::Client &client, conn::Monitor &monitor) const
+	void RouteCgi::serve(http::Client &client, conn::Monitor &monitor)
 	{
 		std::cout << "RouteCgi::serve: " <<  client.getFd() << std::endl;
 
@@ -155,9 +137,8 @@ namespace http {
 		// parent
 		close(sockets[0]);
 		std::cout << "parent" << std::endl;
-		client.setCgiPid(pid);
 		int cgiFd = sockets[1];
-		monitor.subscribeCgi(cgiFd, client.getFd());
+		monitor.subscribeCgi(cgiFd, pid, client.getFd());
 	}
 
 	void RouteCgi::respond(http::Client &client,  const Operation &operation) const

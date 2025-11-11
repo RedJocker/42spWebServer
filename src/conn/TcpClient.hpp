@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:02 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/28 23:43:42 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 17:54:58 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -20,8 +20,6 @@ namespace conn {
 class TcpClient
 	{
 		int clientFd;
-		int operationFd;
-		pid_t cgiPid;
 
 		TcpClient();
 
@@ -46,14 +44,6 @@ class TcpClient
 		std::pair<ReadState, char*> readAllOperationFd();
 		bool hasBufferedContent() const;
 		int getFd() const;
-		int getOperationFd() const;
-		pid_t getCgiPid(void) const;
-		void setOperationFd(int operationFd);
-		void setOperationFd(int operationFd, std::string writeContent);
-		void setCgiPid(pid_t cgiPid);
-		void clearReadOperation();
-		void clearWriteOperation();
-		void clearCgiPid(void);
 	};
 }
 

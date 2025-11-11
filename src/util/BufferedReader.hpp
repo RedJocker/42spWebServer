@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:23 by maurodri          #+#    #+#             //
-//   Updated: 2025/10/08 10:39:46 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 20:21:03 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -47,11 +47,7 @@ public:
 	std::pair<ReadState, char *> readlineCrlf(void);
 	std::pair<ReadState, char *> readAll(void);
 
-
-	void setFd(int fd);
 	bool hasBufferedContent() const;
-	void saveBuffer(void);
-	void restoreSavedBuffer(void);
 };
 
 typedef BufferedReader::ReadState ReadState;

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/28 23:41:58 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 20:23:03 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,10 @@ namespace conn
 			http::Client *client, ListEvents::iterator &eventIt);
 		void handleClientWriteResponse(
 			http::Client *client, ListEvents::iterator &eventIt);
-		void handleFileReads(
-			http::Client *client,  ListEvents::iterator &eventIt);
-		void handleFileWrite(
-			http::Client &client,  ListEvents::iterator &eventIt);
-		void handleCgiWrite(
-			http::Client &client,  ListEvents::iterator &eventIt);
-		void handleCgiRead(
-			http::Client &client,  ListEvents::iterator &eventIt);
+		void handleFileReads(const Operation &op, http::Client &client);
+		void handleFileWrite(const Operation &op, http::Client &client);
+		void handleCgiWrite(const Operation &op, http::Client &client);
+		void handleCgiRead(const Operation &op, http::Client &client);
 
 		void handleFdEvent(ListEvents::iterator &monitoredIt);
 		void unsubscribeFd(int fd);
@@ -69,7 +65,7 @@ namespace conn
 		void unsubscribeHttpClient(ListEvents::iterator &eventIt);
 		void subscribeFileRead(int fileFd, int clientFd);
 		void subscribeFileWrite(int fileFd, int clientFd, std::string content);
-		void subscribeCgi(int fileFd, int clientFd);
+		void subscribeCgi(int fileFd, pid_t cgiFd, int clientFd);
 		void shutdown(void);
 	};
 

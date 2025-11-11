@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 19:44:56 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/06 18:15:37 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,5 +121,38 @@ namespace utils {
 			str.erase(str.size() - 1, 1);
 		return str;
 	}
-}
 
+	std::string trimCopy(const std::string &maybeHasLeadAndTrailingSpaces)
+	{
+		std::string str = maybeHasLeadAndTrailingSpaces;
+		return trimInPlace(str);
+	}
+
+	bool endsWith(const std::string &maybeHasSuffix, const std::string &suffix)
+	{
+		if (maybeHasSuffix.size() < suffix.size())
+				return false;
+		size_t maybeHasSuffix_i = maybeHasSuffix.size() - 1;
+		size_t suffix_i = suffix.size() - 1;
+
+		while (suffix_i > 0
+			   && maybeHasSuffix.at(maybeHasSuffix_i) == suffix.at(suffix_i))
+		{
+			--maybeHasSuffix_i;
+			--suffix_i;
+		}
+		return	maybeHasSuffix.at(maybeHasSuffix_i) == suffix.at(suffix_i);
+	}
+
+	size_t findLastFromEnd(char toFind, std::string toSearch, size_t leftLimit)
+	{
+		size_t toSearchLen = toSearch.size() - 1;
+		while (toSearchLen >= leftLimit
+			   && toSearch.at(toSearchLen) != toFind)
+		{
+			--toSearchLen;
+		}
+		return toSearch.at(toSearchLen) == toFind ?
+			toSearchLen : std::string::npos;
+	}
+}

@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/10/30 21:35:41 by maurodri         ###   ########.fr        #
+#    Updated: 2025/11/09 11:37:33 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,10 +15,12 @@ TEST_DIR := ./test
 CONN_DIR := $(addprefix $(BASE_DIR), /conn)
 UTIL_DIR := $(addprefix $(BASE_DIR), /util)
 HTTP_DIR := $(addprefix $(BASE_DIR), /http)
+CONFIG_DIR := $(addprefix $(BASE_DIR), /config)
 INCLUDE_DIRS := $(BASE_DIR) \
 	$(CONN_DIR) \
 	$(UTIL_DIR) \
-	$(HTTP_DIR) # add other module directories here
+	$(HTTP_DIR) \
+	$(CONFIG_DIR) # add other module directories here
 
 BASE_FILES := $(addprefix $(BASE_DIR)/, main.cpp)
 CONN_FILES := $(addprefix $(CONN_DIR)/, TcpServer.cpp \
@@ -35,14 +37,22 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Client.cpp \
 					Response.cpp \
 					Server.cpp \
+					VirtualServer.cpp \
 					RequestPath.cpp \
 					Route.cpp \
 					RouteCgi.cpp \
 					RouteStaticFile.cpp \
 					Dispatcher.cpp)
+
+CONFIG_FILES := $(addprefix $(CONFIG_DIR)/, ServerSpec.cpp \
+					VirtualServerSpec.cpp \
+					RouteSpec.cpp)
+
 MODULE_FILES := $(CONN_FILES) \
 	$(UTIL_FILES) \
-	$(HTTP_FILES) # add other module files here
+	$(HTTP_FILES) \
+	$(CONFIG_FILES)
+# add other module files here
 
 FILES := $(BASE_FILES) $(MODULE_FILES) # files to create main executable
 

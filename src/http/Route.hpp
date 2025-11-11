@@ -6,15 +6,16 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-/*   Updated: 2025/10/31 15:40:45 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/10 01:25:25 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #ifndef ROUTE_HPP
 # define ROUTE_HPP
 
-#include "Client.hpp"
-#include "Operation.hpp"
+# include "Client.hpp"
+# include "Operation.hpp"
+# include <set>
 
 namespace conn
 {
@@ -29,18 +30,27 @@ namespace http
 	{
 		static int idGenerator;
 		int id;
+		std::set<std::string> methodsAllowed;
+
+	protected:
+		std::string pathSpecification;
+		std::string docroot;
 
 	public:
 		Route(void);
+		Route(const std::string &pathSpecification,
+			  const std::string &docroot,
+			  const std::vector<std::string> allowedMethods);
 		Route(const Route &other);
 		Route &operator=(const Route &other);
 		virtual ~Route(void);
-		virtual bool matches(const RequestPath &path, const std::string &method) const = 0;
-		virtual void serve(http::Client &client,  conn::Monitor &monitor) const = 0;
+		virtual void serve(http::Client &client,  conn::Monitor &monitor) = 0;
 		virtual void respond(http::Client &client, const Operation &operation) const = 0;
-
+		bool matches(const RequestPath &path, const std::string &method) const;
+		bool isMethodAllowed(const std::string &maybeMethodAllowed) const;
 		void onServerError(http::Client &client) const;
 		int getId(void) const;
+		const std::string &getDocroot(void) const;
 	};
 }
 

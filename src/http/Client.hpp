@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:34:03 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/30 21:25:38 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/05 20:29:57 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ namespace http
 		Route *route;
 		Request request;
 		Response response;
-
+		size_t pendingFileWrites;
 		Client();
 
 	public:
@@ -47,6 +47,10 @@ namespace http
 		void setRoute(Route *server);
 
 		void clear(void);
+
+		void pendingFileWritesIncrement(void);
+		void pendingFileWritesDecrement(void);
+		size_t getPendingFileWrites(void) const;
 	};
 }
 

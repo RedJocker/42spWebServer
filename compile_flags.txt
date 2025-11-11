@@ -1,3 +1,4 @@
+-std=c++98
 -I
 ./
 -I
@@ -8,4 +9,6 @@
 ./src/http
 -I
 ./src/util
+-I
+./src/config
 

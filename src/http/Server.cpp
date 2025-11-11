@@ -6,60 +6,23 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/31 15:55:37 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/10 00:26:36 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "Monitor.hpp"
-#include "pathUtils.hpp"
-#include "devUtil.hpp"
-#include "RequestPath.hpp"
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <iostream>
-#include <sstream>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
+#include "constants.hpp"
+#include <iostream>
+#include <sstream>
 
 namespace http
 {
-	bool Server::OrderRoutes::operator()(
-		http::Route const *routeA, http::Route const *routeB) const {
-		// true if routeA has precedence over routeB
-		if (routeA == routeB)
-			return false;
-		if (!routeA)
-			return false;
-		if (!routeB)
-			return true;
-		RouteCgi const *routeAAsCgi = dynamic_cast<RouteCgi const*>(routeA);
-		RouteCgi const *routeBAsCgi = dynamic_cast<RouteCgi const*>(routeB);
-		if (routeAAsCgi && routeBAsCgi)
-			// giving precedence to route that was declared last
-			return routeAAsCgi->getId() > routeBAsCgi->getId();
-		RouteStaticFile const *routeAAsStatic = dynamic_cast<RouteStaticFile const*>(routeA);
-		RouteStaticFile const *routeBAsStatic = dynamic_cast<RouteStaticFile const*>(routeB);
-		if (routeAAsStatic && routeBAsStatic)
-			// giving precedence to route that was declared last
-			return routeAAsStatic->getId() > routeBAsStatic->getId();
-		// we know they are not null and not same type give precedence to cgi
-		if (routeAAsCgi)
-			return true;
-		return false;
-	}
-
-	const std::string Server::DEFAULT_DOCROOT = "./www";
-	Server::Server(const std::string &hostname,
-				   const std::string &docroot,
-				   unsigned short port)
-		: conn::TcpServer(port), hostname(hostname), docroot(docroot)
+	Server::Server(const std::string &docroot,
+				   unsigned short port,
+				   std::vector<VirtualServer> virtualServers)
+		: conn::TcpServer(port), docroot(docroot), vservers(virtualServers)
 	{
 		this->docroot = docroot;
 		while (!this->docroot.empty()
@@ -82,62 +45,74 @@ namespace http
 	{
 		if (this != &other)
 		{
-			this->hostname = other.hostname;
 			this->docroot = other.docroot;
 			this->port = other.port;
+			this->vservers = other.vservers;
 		}
 		return *this;
 	}
 
 	Server::~Server(void) {}
 
-	const std::string &Server::getHostname() const
-	{
-		return this->hostname;
-	}
-
 	const std::string &Server::getDocroot() const
 	{
 		return this->docroot;
 	}
 
-	void Server::addRoute(Route *route)
-	{
-		this->routes.insert(route);
-	}
-
 	void Server::serve(Client &client, conn::Monitor &monitor)
 	{
-		RequestPath &reqPath = client.getRequest().getPath();
+	    const std::string &host = client.getRequest().getHeader("Host");
 
-		// Redirect if not '/' for directory listing
-		if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
-			Response &response = client.getResponse();
-			std::string location = reqPath.getPath() + "/";
-			response.clear();
-			response.setStatusCode(308);
-			response.setStatusInfo("Permanent Redirect");
-			response.addHeader("Location", location);
-			response.addHeader("Content-Length", "0");
-			client.setMessageToSend(response.toString());
+	    if (host.empty())
+	    { // use default virtual server
+			std::cout << "using default virtual server" << std::endl;
+		    vservers.at(0).serve(client, monitor);
 			return;
 		}
-		const std::string &method = client.getRequest().getMethod();
 
-
-		for (std::set<Route*>::iterator routeIt = this->routes.begin();
-			 routeIt != this->routes.end();
-			 ++routeIt)
+		size_t sepI = host.find(':');
+		unsigned short hostPort = 80;
+		std::string hostname = "";
+		if (sepI != std::string::npos)
 		{
-			if (!(*routeIt)) // test not NULL
-				continue;
-			Route &route = *(*routeIt);
-			if (route.matches(reqPath, method))
+			std::istringstream ss(host);
+			std::getline(ss, hostname, ':');
+			ss >> hostPort;
+			if (ss.fail() || !ss.eof())
 			{
-				client.setRoute(&route);
-				route.serve(client, monitor);
+				client.getResponse().setBadRequest();
+				client.setMessageToSend(client.getResponse().toString());
+				return;
+			}
+		}
+		else
+		{
+			hostname = host;
+		}
+
+		for (std::vector<VirtualServer>::iterator vserverIt = vservers.begin();
+			 vserverIt != this->vservers.end();
+			 ++vserverIt)
+		{
+
+			if (vserverIt->matches(hostname))
+			{
+				vserverIt->serve(client, monitor);
 				return ;
 			}
 		}
+	    // use default virtual server
+		std::cout << "using default virtual server" << std::endl;
+		vservers.at(0).serve(client, monitor);
 	}
+
+	void Server::shutdown(void)
+	{
+		for (std::vector<VirtualServer>::iterator vserverIt = vservers.begin();
+			 vserverIt != this->vservers.end();
+			 ++vserverIt)
+		{
+			vserverIt->shutdown();
+		}
+	};
 }
