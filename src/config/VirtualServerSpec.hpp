@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 18:34:20 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:03:56 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -26,6 +26,7 @@ namespace config {
 		std::string docroot;
 		std::string uploadFolder;
 		ssize_t maxSizeBody;
+		bool listDirectories;
 		std::vector<RouteSpec> routes;
 
 	public:
@@ -39,11 +40,14 @@ namespace config {
 		VirtualServerSpec &setHostname(const std::string &hostname);
 		VirtualServerSpec &setDocroot(const std::string &docroot);
 		VirtualServerSpec &setDocrootIfEmpty(const std::string &docroot);
-		VirtualServerSpec &addRoute(RouteSpec &route);
-
 		VirtualServerSpec &setUploadFolder(const std::string &uploadFolder);
 		VirtualServerSpec &setMaxSizeBody(const ssize_t &maxSizeBody);
 		VirtualServerSpec &setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody);
+		VirtualServerSpec &setListDirectories(bool listDirectories);
+		VirtualServerSpec &setListDirectoriesIfUnset(bool listDirectories);
+
+		VirtualServerSpec &addRoute(RouteSpec &route);
+
 		http::VirtualServer toVirtualServer(void);
 	};
 }

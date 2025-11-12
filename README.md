@@ -94,23 +94,24 @@ empty
          - using /path/* to match any file at /path folder only
          - using /path/specific.html to match only /path/specific.html
       - [ ] configuration for directory files
-        - may have a configurable default file (ex: index.html, index.php, any.xxx)
+        - [ ] configurable "index" file (ex: index.html, index.php, any.xxx)
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
             - nginx allows this config on
               - `http` contenxt (equivalent to our `http::Server`)
               - `server` context (equivalent to our `http::VirtualServer`)
               - `location` context (equivalent to our `http::Route`)
-        - may list directory content
+        - [ ] configuration for listing directory content
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
             - ngix first tries index file if that is configured
               - nginx allows this config on
                 - `http` contenxt (equivalent to our `http::Server`)
                 - `server` context (equivalent to our `http::VirtualServer`)
                 - `location` context (equivalent to our `http::Route`)
-        - may be forbiden access
+          - [X] allow to declare directory listing
+          - [ ] implement checking directory listing
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
-            - priority based is likely better option something like 'forbiden > index > listing'
+            - priority based is likely better option something like 'index > listing'
       - [ ] configuration for default responses
         - body content of error responses like 404 or 500 may be customized
         - configuration should point to a file that will be used on response

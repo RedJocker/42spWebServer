@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 18:32:37 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:05:26 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -23,6 +23,7 @@ namespace config
 		pathSpec(DEFAULT_PATH_SPEC),
 		uploadFolder(""), // default on VirtualServerSpec
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
+		listDirectories(false), // default on ServerSpec
 		allowedMethods()
 	{
 	}
@@ -42,6 +43,7 @@ namespace config
 		this->pathSpec = other.pathSpec;
 		this->uploadFolder = other.uploadFolder;
 		this->maxSizeBody = other.maxSizeBody;
+		this->listDirectories = other.listDirectories;
 		this->allowedMethods = other.allowedMethods;
 		return *this;
 	}
@@ -95,6 +97,19 @@ namespace config
 		return *this;
 	}
 
+	RouteSpec &RouteSpec::setListDirectories(bool listDirectory)
+	{
+		this->listDirectory = listDirectory;
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setListDirectoriesIfUnset(bool listDirectory)
+	{
+		if (this->listDirectory == false)
+			this->listDirectory = listDirectory;
+		return *this;
+	}
+
 	const std::string &RouteSpec::getPathSpec(void) const
 	{
 		return this->pathSpec;
@@ -126,9 +141,11 @@ namespace config
 	http::Route *RouteSpec::toRoute(void)
 	{
 
+		// TODO set maxBodySize on Routes and implement feature
+		// TODO set listDirectories on Routes and implement feature (do not list if false)
 		http::Route *route;
 		if (this->isCgi)
-		{ // TODO set maxBodySize on Routes and implement feature
+		{
 			route = new http::RouteCgi(this->pathSpec,
 									   this->docroot,
 									   this->allowedMethods);

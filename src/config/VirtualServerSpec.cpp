@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 18:34:08 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:02:56 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,6 +21,7 @@ namespace config {
 		docroot(""), // default on ServerSpec
 		uploadFolder(DEFAULT_UPLOAD_FOLDER),
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
+		listDirectories(false), // default on ServerSpec
 		routes()
 	{
 
@@ -41,6 +42,7 @@ namespace config {
 		this->routes = other.routes;
 		this->uploadFolder = other.uploadFolder;
 		this->maxSizeBody = other.maxSizeBody;
+		this->listDirectories = other.listDirectories;
 		return *this;
 	}
 
@@ -99,6 +101,19 @@ namespace config {
 		return *this;
 	}
 
+	VirtualServerSpec &VirtualServerSpec::setListDirectories(bool listDirectory)
+	{
+		this->listDirectory = listDirectory;
+		return *this;
+	}
+
+	VirtualServerSpec &VirtualServerSpec::setListDirectoriesIfUnset(bool listDirectory)
+	{
+		if (this->listDirectory == false)
+			this->listDirectory = listDirectory;
+		return *this;
+	}
+
 	http::VirtualServer VirtualServerSpec::toVirtualServer(void)
 	{
 		std::vector<http::Route*> _routes;
@@ -109,9 +124,10 @@ namespace config {
 			 ++routeIt)
 		{
 			http::Route *route = (*routeIt)
-				.setDocrootIfEmpty(this->docroot)
 				.setUploadFolderIfEmpty(this->uploadFolder)
+				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
+				.setListDirectoriesIfUnset(this->listDirectories)
 				.toRoute();
 			_routes.push_back(route);
 		}
