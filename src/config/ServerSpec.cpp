@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/10 01:28:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 18:19:51 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,10 +18,11 @@
 namespace config {
 
 
-	ServerSpec::ServerSpec()
+	ServerSpec::ServerSpec():
+		port(DEFAULT_PORT),
+		docroot(DEFAULT_DOCROOT),
+		maxSizeBody(MAX_SIZE_BODY_UNLIMITED)
 	{
-		this->port = 8080;
-		this->docroot = DEFAULT_DOCROOT;
 	}
 
 	ServerSpec::ServerSpec(const  ServerSpec &other)
@@ -33,8 +34,9 @@ namespace config {
 	{
 		if (this == &other)
 			return *this;
-		this->docroot = other.docroot;
 		this->port = other.port;
+		this->docroot = other.docroot;
+		this->maxSizeBody = other.maxSizeBody;
 		this->virtualServers = other.virtualServers;
 		return *this;
 	}
@@ -63,6 +65,12 @@ namespace config {
 	ServerSpec &ServerSpec::setPort(const unsigned short &port)
 	{
 		this->port = port;
+		return *this;
+	}
+
+	ServerSpec &ServerSpec::setMaxSizeBody(const ssize_t maxSizeBody)
+	{
+		this->maxSizeBody = maxSizeBody;
 		return *this;
 	}
 

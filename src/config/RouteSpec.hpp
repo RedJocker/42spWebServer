@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 13:17:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 18:30:23 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -26,6 +26,7 @@ namespace config
 		std::string docroot;
 		std::string pathSpec;
 		std::string uploadFolder;
+		ssize_t maxSizeBody;
 		std::vector<std::string> allowedMethods;
 
 	public:
@@ -44,6 +45,9 @@ namespace config
 		RouteSpec &setPathSpec(const std::string &pathSpec);
 		RouteSpec &addAllowedMethod(const std::string &method);
 		RouteSpec &setUploadFolder(const std::string &uploadFolder);
+		RouteSpec &setUploadFolderIfEmpty(const std::string &uploadFolder);
+		RouteSpec &setMaxSizeBody(const ssize_t &maxSizeBody);
+		RouteSpec &setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody);
 
 		http::Route *toRoute(void);
 	};
