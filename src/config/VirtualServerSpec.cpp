@@ -6,17 +6,21 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/10 01:28:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 17:43:47 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "VirtualServerSpec.hpp"
+#include "constants.hpp"
 
 namespace config {
 
 
 	VirtualServerSpec::VirtualServerSpec(void) :
-		hostname("localhost"), docroot(""), routes()
+		hostname(DEFAULT_HOSTNAME),
+		docroot(""), // default on ServerSpec
+		uploadFolder(DEFAULT_UPLOAD_FOLDER),
+		routes()
 	{
 
 	}
@@ -33,6 +37,7 @@ namespace config {
 		this->hostname = other.hostname;
 		this->docroot = other.docroot;
 		this->routes = other.routes;
+		this->uploadFolder = other.uploadFolder;
 		return *this;
 	}
 
@@ -65,6 +70,12 @@ namespace config {
 		return *this;
 	}
 
+	VirtualServerSpec &VirtualServerSpec::setUploadFolder(const std::string &uploadFolder)
+	{
+		this->uploadFolder = uploadFolder;
+		return *this;
+	}
+
 	VirtualServerSpec &VirtualServerSpec::addRoute(RouteSpec &route)
 	{
 		this->routes.push_back(route);
@@ -83,6 +94,7 @@ namespace config {
 		{
 			http::Route *route = (*routeIt)
 				.setDocrootIfEmpty(this->docroot)
+				.setUploadFolderIfEmpty(this->uploadFolder)
 				.toRoute();
 			_routes.push_back(route);
 		}

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/10 01:25:29 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 17:37:29 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ int main(void)
 		.setPort(8080);
 
 	config::VirtualServerSpec virtualServer1;
+	virtualServer1
+		.setUploadFolder("./www/uploads");
 	{
 		config::RouteSpec routeSpec[2];
 		routeSpec[0]

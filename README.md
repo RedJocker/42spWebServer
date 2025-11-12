@@ -52,8 +52,13 @@ empty
           the body of request on webserver log
       - if this is part of a cgi request
         - keep body as is and send to cgi with contentType
-    - [ ] download files to a folder specified by configuration
+    - [X] upload files to a folder specified by configuration
       - [x] may start with a hardcoded folder as temporary implementation
+      - nginx needs an extension module for file uploads
+        - [equivalent nginx extension directive](https://github.com/fdintino/nginx-upload-module?tab=readme-ov-file#upload_pass)
+          - extension module accepts upload folder config on
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
   - Configurable server
     - [ ] Configurable port
       - configuration may choose a port for server
@@ -89,17 +94,17 @@ empty
       - [ ] configuration for directory files
         - may have a configurable default file (ex: index.html, index.php, any.xxx)
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
-		  - nginx allows this config on
-            - `http` contenxt (equivalent to our `http::Server`)
-            - `server` context (equivalent to our `http::VirtualServer`)
-            - `location` context (equivalent to our `http::Route`)
+            - nginx allows this config on
+              - `http` contenxt (equivalent to our `http::Server`)
+              - `server` context (equivalent to our `http::VirtualServer`)
+              - `location` context (equivalent to our `http::Route`)
         - may list directory content
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
             - ngix first tries index file if that is configured
-		  - nginx allows this config on
-            - `http` contenxt (equivalent to our `http::Server`)
-            - `server` context (equivalent to our `http::VirtualServer`)
-            - `location` context (equivalent to our `http::Route`)
+              - nginx allows this config on
+                - `http` contenxt (equivalent to our `http::Server`)
+                - `server` context (equivalent to our `http::VirtualServer`)
+                - `location` context (equivalent to our `http::Route`)
         - may be forbiden access
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
@@ -110,7 +115,7 @@ empty
         - these files may be loaded to memory before starting server so it may be pre-cached
           during response handling
         - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
-		- nginx allows this config on
+          - nginx allows this config on
             - `http` contenxt (equivalent to our `http::Server`)
             - `server` context (equivalent to our `http::VirtualServer`)
             - `location` context (equivalent to our `http::Route`)

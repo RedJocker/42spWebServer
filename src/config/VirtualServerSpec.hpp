@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/10 00:19:58 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 17:38:05 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,6 +24,7 @@ namespace config {
 	{
 		std::string hostname;
 		std::string docroot;
+		std::string uploadFolder;
 		std::vector<RouteSpec> routes;
 
 	public:
@@ -38,6 +39,9 @@ namespace config {
 		VirtualServerSpec &setDocroot(const std::string &docroot);
 		VirtualServerSpec &setDocrootIfEmpty(const std::string &docroot);
 		VirtualServerSpec &addRoute(RouteSpec &route);
+
+		VirtualServerSpec &setUploadFolder(const std::string &uploadFolder);
+
 		http::VirtualServer toVirtualServer(void);
 	};
 }
