@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 20:05:26 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 19:56:30 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,6 +24,8 @@ namespace config
 		uploadFolder(""), // default on VirtualServerSpec
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		listDirectories(false), // default on ServerSpec
+		listDirectoriesWasSet(false),
+		indexFile(""),
 		allowedMethods()
 	{
 	}
@@ -44,6 +46,8 @@ namespace config
 		this->uploadFolder = other.uploadFolder;
 		this->maxSizeBody = other.maxSizeBody;
 		this->listDirectories = other.listDirectories;
+		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
+		this->indexFile = other.indexFile;
 		this->allowedMethods = other.allowedMethods;
 		return *this;
 	}
@@ -97,16 +101,30 @@ namespace config
 		return *this;
 	}
 
-	RouteSpec &RouteSpec::setListDirectories(bool listDirectory)
+	RouteSpec &RouteSpec::setListDirectories(bool listDirectories)
 	{
-		this->listDirectory = listDirectory;
+		this->listDirectories = listDirectories;
+		this->listDirectoriesWasSet = true;
 		return *this;
 	}
 
-	RouteSpec &RouteSpec::setListDirectoriesIfUnset(bool listDirectory)
+	RouteSpec &RouteSpec::setListDirectoriesIfUnset(bool listDirectories)
 	{
-		if (this->listDirectory == false)
-			this->listDirectory = listDirectory;
+		if (this->listDirectoriesWasSet == false)
+			this->setListDirectories(listDirectories);
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setIndexFile(const std::string &indexFile)
+	{
+		this->indexFile = indexFile;
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setIndexFileIfEmpty(const std::string &indexFile)
+	{
+		if (this->indexFile.empty())
+			this->indexFile = indexFile;
 		return *this;
 	}
 
@@ -143,6 +161,7 @@ namespace config
 
 		// TODO set maxBodySize on Routes and implement feature
 		// TODO set listDirectories on Routes and implement feature (do not list if false)
+		// TODO set indexFile on Routes and implement feature
 		http::Route *route;
 		if (this->isCgi)
 		{

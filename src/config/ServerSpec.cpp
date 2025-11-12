@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 20:03:53 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:09:35 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,7 +22,8 @@ namespace config {
 		port(DEFAULT_PORT),
 		docroot(DEFAULT_DOCROOT),
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
-		listDirectories(DEFAULT_LIST_DIRECTORIES)
+		listDirectories(DEFAULT_LIST_DIRECTORIES),
+		indexFile("") // no default
 	{
 	}
 
@@ -39,6 +40,7 @@ namespace config {
 		this->docroot = other.docroot;
 		this->maxSizeBody = other.maxSizeBody;
 		this->listDirectories = other.listDirectories;
+		this->indexFile = other.indexFile;
 		this->virtualServers = other.virtualServers;
 		return *this;
 	}
@@ -78,7 +80,7 @@ namespace config {
 
 	ServerSpec &ServerSpec::setListDirectories(bool listDirectory)
 	{
-		this->listDirectory = listDirectory;
+		this->listDirectories = listDirectory;
 		return *this;
 	}
 
@@ -102,8 +104,9 @@ namespace config {
 		{
 			http::VirtualServer virtualServer = (*virtualServerIt)
 				.setDocrootIfEmpty(this->docroot)
-				.setMaxBodySizeIfUnset(this->maxBodySize)
+				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.setListDirectoriesIfUnset(this->listDirectories)
+				.setIndexFileIfEmpty(this->indexFile)
 				.toVirtualServer();
 			vservers.push_back(virtualServer);
 		}

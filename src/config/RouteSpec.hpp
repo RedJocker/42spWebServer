@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 19:51:32 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:08:10 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -28,6 +28,8 @@ namespace config
 		std::string uploadFolder;
 		ssize_t maxSizeBody;
 		bool listDirectories;
+		bool listDirectoriesWasSet;
+		std::string indexFile;
 		std::vector<std::string> allowedMethods;
 
 	public:
@@ -50,6 +52,8 @@ namespace config
 		RouteSpec &setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody);
 		RouteSpec &setListDirectories(bool listDirectories);
 		RouteSpec &setListDirectoriesIfUnset(bool listDirectories);
+		RouteSpec &setIndexFile(const std::string &indexFile);
+		RouteSpec &setIndexFileIfEmpty(const std::string &indexFile);
 
 		RouteSpec &addAllowedMethod(const std::string &method);
 

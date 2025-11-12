@@ -100,6 +100,8 @@ empty
               - `http` contenxt (equivalent to our `http::Server`)
               - `server` context (equivalent to our `http::VirtualServer`)
               - `location` context (equivalent to our `http::Route`)
+            - [X] allow to declare index file
+            - [ ] implement checking index file
         - [ ] configuration for listing directory content
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
             - ngix first tries index file if that is configured

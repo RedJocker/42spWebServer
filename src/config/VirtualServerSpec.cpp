@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 20:02:56 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:12:42 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,6 +22,8 @@ namespace config {
 		uploadFolder(DEFAULT_UPLOAD_FOLDER),
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		listDirectories(false), // default on ServerSpec
+		listDirectoriesWasSet(false),
+		indexFile(""),
 		routes()
 	{
 
@@ -43,6 +45,8 @@ namespace config {
 		this->uploadFolder = other.uploadFolder;
 		this->maxSizeBody = other.maxSizeBody;
 		this->listDirectories = other.listDirectories;
+		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
+		this->indexFile = other.indexFile;
 		return *this;
 	}
 
@@ -101,18 +105,33 @@ namespace config {
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setListDirectories(bool listDirectory)
+	VirtualServerSpec &VirtualServerSpec::setListDirectories(bool listDirectories)
 	{
-		this->listDirectory = listDirectory;
+		this->listDirectories = listDirectories;
+		this->listDirectoriesWasSet = true;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setListDirectoriesIfUnset(bool listDirectory)
+	VirtualServerSpec &VirtualServerSpec::setListDirectoriesIfUnset(bool listDirectories)
 	{
-		if (this->listDirectory == false)
-			this->listDirectory = listDirectory;
+		if (this->listDirectoriesWasSet == false)
+			this->setListDirectories(listDirectories);
 		return *this;
 	}
+
+	VirtualServerSpec &VirtualServerSpec::setIndexFile(const std::string &indexFile)
+	{
+		this->indexFile = indexFile;
+		return *this;
+	}
+
+	VirtualServerSpec &VirtualServerSpec::setIndexFileIfEmpty(const std::string &indexFile)
+	{
+		if (this->indexFile.empty())
+			this->indexFile = indexFile;
+		return *this;
+	}
+
 
 	http::VirtualServer VirtualServerSpec::toVirtualServer(void)
 	{
@@ -128,6 +147,7 @@ namespace config {
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.setListDirectoriesIfUnset(this->listDirectories)
+				.setIndexFileIfEmpty(this->indexFile)
 				.toRoute();
 			_routes.push_back(route);
 		}
