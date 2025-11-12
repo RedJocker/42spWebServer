@@ -6,21 +6,22 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/10 01:27:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 17:48:25 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "RouteSpec.hpp"
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
+#include "constants.hpp"
 
 namespace config
 {
 	RouteSpec::RouteSpec(void):
 		isCgi(false),
-		docroot(""),
-		pathSpec("/**"),
-		uploadFolder("./"),
+		docroot(""), // default on ServerSpec
+		pathSpec(DEFAULT_PATH_SPEC),
+		uploadFolder(""), // default on VirtualServerSpec
 		allowedMethods()
 	{
 	}
@@ -62,6 +63,19 @@ namespace config
 	{
 		if (this->docroot.empty())
 			this->docroot = docroot;
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setUploadFolder(const std::string &uploadFolder)
+	{
+		this->uploadFolder = uploadFolder;
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setUploadFolderIfEmpty(const std::string &uploadFolder)
+	{
+		if (this->uploadFolder.empty())
+			this->uploadFolder = uploadFolder;
 		return *this;
 	}
 

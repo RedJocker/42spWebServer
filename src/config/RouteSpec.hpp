@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 13:17:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 17:27:15 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -44,6 +44,7 @@ namespace config
 		RouteSpec &setPathSpec(const std::string &pathSpec);
 		RouteSpec &addAllowedMethod(const std::string &method);
 		RouteSpec &setUploadFolder(const std::string &uploadFolder);
+		RouteSpec &setUploadFolderIfEmpty(const std::string &uploadFolder);
 
 		http::Route *toRoute(void);
 	};
