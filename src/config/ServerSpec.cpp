@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/10 01:28:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:03:53 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,10 +18,12 @@
 namespace config {
 
 
-	ServerSpec::ServerSpec()
+	ServerSpec::ServerSpec():
+		port(DEFAULT_PORT),
+		docroot(DEFAULT_DOCROOT),
+		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
+		listDirectories(DEFAULT_LIST_DIRECTORIES)
 	{
-		this->port = 8080;
-		this->docroot = DEFAULT_DOCROOT;
 	}
 
 	ServerSpec::ServerSpec(const  ServerSpec &other)
@@ -33,8 +35,10 @@ namespace config {
 	{
 		if (this == &other)
 			return *this;
-		this->docroot = other.docroot;
 		this->port = other.port;
+		this->docroot = other.docroot;
+		this->maxSizeBody = other.maxSizeBody;
+		this->listDirectories = other.listDirectories;
 		this->virtualServers = other.virtualServers;
 		return *this;
 	}
@@ -66,6 +70,18 @@ namespace config {
 		return *this;
 	}
 
+	ServerSpec &ServerSpec::setMaxSizeBody(const ssize_t maxSizeBody)
+	{
+		this->maxSizeBody = maxSizeBody;
+		return *this;
+	}
+
+	ServerSpec &ServerSpec::setListDirectories(bool listDirectory)
+	{
+		this->listDirectory = listDirectory;
+		return *this;
+	}
+
 	ServerSpec &ServerSpec::addVirtualServer(VirtualServerSpec &virtualServer)
 	{
 		this->virtualServers.push_back(virtualServer);
@@ -86,6 +102,8 @@ namespace config {
 		{
 			http::VirtualServer virtualServer = (*virtualServerIt)
 				.setDocrootIfEmpty(this->docroot)
+				.setMaxBodySizeIfUnset(this->maxBodySize)
+				.setListDirectoriesIfUnset(this->listDirectories)
 				.toVirtualServer();
 			vservers.push_back(virtualServer);
 		}
