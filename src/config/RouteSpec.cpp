@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 17:48:25 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 18:32:37 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,11 +22,13 @@ namespace config
 		docroot(""), // default on ServerSpec
 		pathSpec(DEFAULT_PATH_SPEC),
 		uploadFolder(""), // default on VirtualServerSpec
+		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		allowedMethods()
 	{
 	}
 
 	RouteSpec::RouteSpec(const RouteSpec &other)
+		: maxSizeBody(MAX_SIZE_BODY_UNLIMITED)
 	{
 		*this = other;
 	}
@@ -39,6 +41,7 @@ namespace config
 		this->docroot = other.docroot;
 		this->pathSpec = other.pathSpec;
 		this->uploadFolder = other.uploadFolder;
+		this->maxSizeBody = other.maxSizeBody;
 		this->allowedMethods = other.allowedMethods;
 		return *this;
 	}
@@ -79,6 +82,19 @@ namespace config
 		return *this;
 	}
 
+	RouteSpec &RouteSpec::setMaxSizeBody(const ssize_t &maxSizeBody)
+	{
+		this->maxSizeBody = maxSizeBody;
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody)
+	{
+		if (this->maxSizeBody < 0)
+			this->maxSizeBody = maxSizeBody;
+		return *this;
+	}
+
 	const std::string &RouteSpec::getPathSpec(void) const
 	{
 		return this->pathSpec;
@@ -112,7 +128,7 @@ namespace config
 
 		http::Route *route;
 		if (this->isCgi)
-		{
+		{ // TODO set maxBodySize on Routes and implement feature
 			route = new http::RouteCgi(this->pathSpec,
 									   this->docroot,
 									   this->allowedMethods);

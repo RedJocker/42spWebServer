@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 17:43:47 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 18:34:08 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -20,12 +20,14 @@ namespace config {
 		hostname(DEFAULT_HOSTNAME),
 		docroot(""), // default on ServerSpec
 		uploadFolder(DEFAULT_UPLOAD_FOLDER),
+		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		routes()
 	{
 
 	}
 
-	VirtualServerSpec::VirtualServerSpec(const  VirtualServerSpec &other)
+	VirtualServerSpec::VirtualServerSpec(const VirtualServerSpec &other)
+		: maxSizeBody(other.maxSizeBody)
 	{
 		*this = other;
 	}
@@ -38,6 +40,7 @@ namespace config {
 		this->docroot = other.docroot;
 		this->routes = other.routes;
 		this->uploadFolder = other.uploadFolder;
+		this->maxSizeBody = other.maxSizeBody;
 		return *this;
 	}
 
@@ -76,6 +79,19 @@ namespace config {
 		return *this;
 	}
 
+	VirtualServerSpec &VirtualServerSpec::setMaxSizeBody(const ssize_t &maxSizeBody)
+	{
+		this->maxSizeBody = maxSizeBody;
+		return *this;
+	}
+
+	VirtualServerSpec &VirtualServerSpec::setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody)
+	{
+		if (this->maxSizeBody < 0)
+			this->maxSizeBody = maxSizeBody;
+		return *this;
+	}
+
 	VirtualServerSpec &VirtualServerSpec::addRoute(RouteSpec &route)
 	{
 		this->routes.push_back(route);
@@ -95,6 +111,7 @@ namespace config {
 			http::Route *route = (*routeIt)
 				.setDocrootIfEmpty(this->docroot)
 				.setUploadFolderIfEmpty(this->uploadFolder)
+				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.toRoute();
 			_routes.push_back(route);
 		}

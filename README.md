@@ -74,6 +74,8 @@ empty
           - location context (equivalent to our http::Route)
       - we can also allow this config on all 3 levels and use the most specific
         - route > virtual server > server
+      - [x] allow to declare max size on specs
+      - [ ] implement max body size checking
     - [X] Configurable docroot
       - configuration may choose a root server folder that maps to server file system
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#root)
