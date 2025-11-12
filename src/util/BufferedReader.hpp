@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:23 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 20:21:03 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/11 18:52:56 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,6 +21,7 @@
 # include <utility>
 # include <cstddef>
 # include <unistd.h>
+# include <string>
 
 class BufferedReader
 {
@@ -48,6 +49,7 @@ public:
 	std::pair<ReadState, char *> readAll(void);
 
 	bool hasBufferedContent() const;
+	bool bufferedContentCanMatch(const std::string &str) const;
 };
 
 typedef BufferedReader::ReadState ReadState;

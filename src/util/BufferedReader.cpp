@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 20:21:32 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/11 18:48:59 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -52,6 +52,18 @@ BufferedReader::~BufferedReader()
 bool BufferedReader::hasBufferedContent() const
 {
 	return this->buffered.size() > 0;
+}
+
+bool BufferedReader::bufferedContentCanMatch(
+	const std::string &str) const
+{
+	size_t limit = std::min(str.size(), this->buffered.size());
+	for (size_t i = 0; i < limit; ++i)
+	{
+		if (this->buffered.at(i) != str.at(i))
+			return false;
+	}
+	return true;
 }
 
 ssize_t BufferedReader::crlfIndex(size_t start) const
@@ -149,6 +161,7 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
 	else
 	{
 		currentRead = ::read(this->fd, this->readBuffer, BUFFER_SIZE);
+
 		if (currentRead < 0)
 		{ // read fail
 			return std::make_pair(

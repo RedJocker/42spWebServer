@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/04 22:18:30 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/11 18:53:38 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,39 @@ namespace http
 		return true;
 	}
 
-	Request::ReadState Request::readRequestLine(BufferedReader &client)
+	bool Request::cannotBeRequestLine(BufferedReader &reader)
+	{
+		const static char *httpMethods[] ={
+			"GET",
+			"HEAD",
+			"POST",
+			"PUT",
+			"DELETE",
+			"CONNECT",
+			"OPTIONS",
+			"TRACE",
+			"PATCH"
+		};
+		for (size_t i = 0;
+			 i < sizeof(httpMethods) / sizeof(char *);
+			 ++i)
+		{
+			if(reader.bufferedContentCanMatch(httpMethods[i]))
+				return false;
+		}
+		return true;
+	}
+
+	Request::ReadState Request::readRequestLine(BufferedReader &reader)
 	{
 		std::pair<BufferedReader::ReadState, char*> result;
-		result = client.readlineCrlf();
-
+		result = reader.readlineCrlf();
 		switch(result.first) {
 		case BufferedReader::READING: {
+			if (cannotBeRequestLine(reader))
+			{
+				_state = READ_BAD_REQUEST;
+			}
 			return _state;
 		}
 		case BufferedReader::ERROR: {
@@ -83,8 +109,8 @@ namespace http
 			}
 			delete[] result.second;
 			_state = READING_HEADERS;
-			if (client.hasBufferedContent())
-				return this->readHeaderLine(client);
+			if (reader.hasBufferedContent())
+				return this->readHeaderLine(reader);
 			else
 				return _state;
 		}

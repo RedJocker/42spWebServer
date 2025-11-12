@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/05 00:21:35 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/11 18:53:45 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ namespace http
 
 		void envpInit(std::vector<std::string> &envp) const;
 		bool parseRequestLine(const std::string &line);
+		bool cannotBeRequestLine(BufferedReader &reader);
 		ReadState readRequestLine(BufferedReader &reader);
 		ReadState readHeaderLine(BufferedReader &reader);
 		ReadState readBody(BufferedReader &reader);

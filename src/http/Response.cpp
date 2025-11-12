@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/29 00:01:20 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/12 14:14:35 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,6 +176,9 @@ namespace http {
 		(*this)
 			.setStatusCode(400)
 			.setStatusInfo("Bad Request")
+			// must close to ensure we don't keep buffered trash
+			// that would be processed on another request
+			.addHeader("Connection", "close")
 			.addHeader("Content-Length", "0");
 		return *this;
 	}

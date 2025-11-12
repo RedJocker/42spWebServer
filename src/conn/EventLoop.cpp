@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/10 01:17:39 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/12 14:09:49 by maurodri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,7 +375,6 @@ namespace conn
 				std::cout << "bad request reading" << std::endl;
 
 				client->getResponse().setBadRequest();
-				client->getResponse().addHeader("Connection", "close");
 				client->setMessageToSend(client->getResponse().toString());
 
 				return;
