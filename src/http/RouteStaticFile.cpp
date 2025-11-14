@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 13:14:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 17:37:19 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -160,7 +160,7 @@ namespace http {
 				return false;
 			part.filename = part.headers.substr(fnPos, fnEnd - fnPos);
 			size_t lastSlash = utils::findLastFromEnd('/', part.filename, 0);
-			if (lastSlash != std::string::npos)
+			if (lastSlash < part.filename.size())
 			{
 				part.filename = part.filename.substr(lastSlash);
 			}
@@ -208,6 +208,7 @@ namespace http {
 			 ++it)
 		{
 			std::string path = this->uploadFolder + "/" + it->filename;
+			std::cout << "creating file: " << path << std::endl;
 			int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 			if (fd < 0)
 			{

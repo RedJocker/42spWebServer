@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/06 18:15:37 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/12 17:11:32 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,8 +146,8 @@ namespace utils {
 
 	size_t findLastFromEnd(char toFind, std::string toSearch, size_t leftLimit)
 	{
-		size_t toSearchLen = toSearch.size() - 1;
-		while (toSearchLen >= leftLimit
+		size_t toSearchLen = toSearch.size() > 0 ? toSearch.size() - 1 : 0;
+		while (toSearchLen > leftLimit
 			   && toSearch.at(toSearchLen) != toFind)
 		{
 			--toSearchLen;
