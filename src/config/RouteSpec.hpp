@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 13:17:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/12 20:08:10 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -26,6 +26,10 @@ namespace config
 		std::string docroot;
 		std::string pathSpec;
 		std::string uploadFolder;
+		ssize_t maxSizeBody;
+		bool listDirectories;
+		bool listDirectoriesWasSet;
+		std::string indexFile;
 		std::vector<std::string> allowedMethods;
 
 	public:
@@ -42,8 +46,16 @@ namespace config
 		RouteSpec &setDocroot(const std::string &docroot);
 		RouteSpec &setDocrootIfEmpty(const std::string &docroot);
 		RouteSpec &setPathSpec(const std::string &pathSpec);
-		RouteSpec &addAllowedMethod(const std::string &method);
 		RouteSpec &setUploadFolder(const std::string &uploadFolder);
+		RouteSpec &setUploadFolderIfEmpty(const std::string &uploadFolder);
+		RouteSpec &setMaxSizeBody(const ssize_t &maxSizeBody);
+		RouteSpec &setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody);
+		RouteSpec &setListDirectories(bool listDirectories);
+		RouteSpec &setListDirectoriesIfUnset(bool listDirectories);
+		RouteSpec &setIndexFile(const std::string &indexFile);
+		RouteSpec &setIndexFileIfEmpty(const std::string &indexFile);
+
+		RouteSpec &addAllowedMethod(const std::string &method);
 
 		http::Route *toRoute(void);
 	};
