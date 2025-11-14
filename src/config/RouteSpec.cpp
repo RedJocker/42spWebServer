@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/14 02:32:14 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 16:53:01 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,6 +27,7 @@ namespace config
 		listDirectories(false), // default on ServerSpec
 		listDirectoriesWasSet(false),
 		indexFile(""),
+		redirection(std::make_pair(0, "")),
 		errorPages(),
 		allowedMethods()
 	{
@@ -50,6 +51,7 @@ namespace config
 		this->listDirectories = other.listDirectories;
 		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
 		this->indexFile = other.indexFile;
+		this->redirection = other.redirection;
 		this->errorPages = other.errorPages;
 		this->allowedMethods = other.allowedMethods;
 		return *this;
@@ -131,9 +133,29 @@ namespace config
 		return *this;
 	}
 
+	RouteSpec &RouteSpec::setRedirection(
+		unsigned short int statusCode, const std::string &path)
+	{
+		// TODO validate arguments
+		this->redirection = std::make_pair(statusCode, path);
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setRedirectionIfUnset(
+		std::pair<unsigned short int, std::string> &redirection)
+	{
+		if (this->redirection.first == 0)
+		{
+			return *this;
+		}
+		this->redirection = redirection;
+		return *this;
+	}
+
 	RouteSpec &RouteSpec::addErrorPage(
 		unsigned short int status, const std::string &bodyPage)
 	{
+		// TODO validate arguments
 		this->errorPages.insert(std::make_pair(status, bodyPage));
 		return *this;
 	}

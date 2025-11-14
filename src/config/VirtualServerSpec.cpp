@@ -6,15 +6,15 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/13 01:16:55 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 17:07:44 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "VirtualServerSpec.hpp"
 #include "constants.hpp"
+#include <utility>
 
 namespace config {
-
 
 	VirtualServerSpec::VirtualServerSpec(void) :
 		hostname(DEFAULT_HOSTNAME),
@@ -24,6 +24,7 @@ namespace config {
 		listDirectories(false), // default on ServerSpec
 		listDirectoriesWasSet(false),
 		indexFile(""),
+		redirection(std::make_pair(0, "")),
 		errorPages(),
 		routes()
 	{
@@ -49,6 +50,7 @@ namespace config {
 		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
 		this->indexFile = other.indexFile;
 		this->errorPages = other.errorPages;
+		this->redirection = other.redirection;
 		return *this;
 	}
 
@@ -134,12 +136,21 @@ namespace config {
 		return *this;
 	}
 
+	VirtualServerSpec &VirtualServerSpec::setRedirection(
+		unsigned short int statusCode, const std::string &path)
+	{
+		// TODO validate arguments
+		this->redirection = std::make_pair(statusCode, path);
+		return *this;
+	}
+
 	VirtualServerSpec &VirtualServerSpec::addErrorPage(
 		unsigned short int status, const std::string &bodyPage)
 	{
 		this->errorPages.insert(std::make_pair(status, bodyPage));
 		return *this;
 	}
+
 	VirtualServerSpec &VirtualServerSpec::addErrorPagesIfUnset(
 		const std::map<unsigned short int, std::string> pages)
 	{
@@ -164,6 +175,7 @@ namespace config {
 				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
 				.addErrorPagesIfUnset(this->errorPages)
+				.setRedirectionIfUnset(this->redirection)
 				.toRoute();
 			_routes.push_back(route);
 		}
