@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 20:08:10 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/13 03:12:23 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,6 +17,7 @@
 # include "Route.hpp"
 # include <string>
 # include <vector>
+# include <map>
 
 namespace config
 {
@@ -30,6 +31,7 @@ namespace config
 		bool listDirectories;
 		bool listDirectoriesWasSet;
 		std::string indexFile;
+		std::map<unsigned short int, std::string> errorPages;
 		std::vector<std::string> allowedMethods;
 
 	public:
@@ -56,6 +58,9 @@ namespace config
 		RouteSpec &setIndexFileIfEmpty(const std::string &indexFile);
 
 		RouteSpec &addAllowedMethod(const std::string &method);
+		RouteSpec &addErrorPage(unsigned short int status, const std::string &bodyPage);
+		RouteSpec &addErrorPagesIfUnset(
+			const std::map<unsigned short int, std::string> pages);
 
 		http::Route *toRoute(void);
 	};

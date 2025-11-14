@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 20:09:35 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 01:27:04 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,13 +17,13 @@
 
 namespace config {
 
-
 	ServerSpec::ServerSpec():
 		port(DEFAULT_PORT),
 		docroot(DEFAULT_DOCROOT),
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		listDirectories(DEFAULT_LIST_DIRECTORIES),
-		indexFile("") // no default
+		indexFile(""), // no default
+		errorPages()
 	{
 	}
 
@@ -41,6 +41,7 @@ namespace config {
 		this->maxSizeBody = other.maxSizeBody;
 		this->listDirectories = other.listDirectories;
 		this->indexFile = other.indexFile;
+		this->errorPages = other.errorPages;
 		this->virtualServers = other.virtualServers;
 		return *this;
 	}
@@ -93,6 +94,13 @@ namespace config {
 		return *this;
 	}
 
+	ServerSpec &ServerSpec::addErrorPage(
+		unsigned short int status, const std::string &bodyPage)
+	{
+		this->errorPages.insert(std::make_pair(status, bodyPage));
+		return *this;
+	}
+
 	http::Server ServerSpec::toServer(void)
 	{
 		std::vector<http::VirtualServer> vservers;
@@ -107,6 +115,7 @@ namespace config {
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
+				.addErrorPagesIfUnset(this->errorPages)
 				.toVirtualServer();
 			vservers.push_back(virtualServer);
 		}

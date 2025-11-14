@@ -117,13 +117,13 @@ empty
       - [ ] configuration for default responses
         - body content of error responses like 404 or 500 may be customized
         - configuration should point to a file that will be used on response
-        - these files may be loaded to memory before starting server so it may be pre-cached
-          during response handling
         - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
           - nginx allows this config on
             - `http` contenxt (equivalent to our `http::Server`)
             - `server` context (equivalent to our `http::VirtualServer`)
             - `location` context (equivalent to our `http::Route`)
+        - [X] allow to declare errorPages
+        - [ ] implement errorPages feature
       - [ ] configurable redirection
         - a route may be configured to redirect requests to another route
       - [ ] configurable file upload

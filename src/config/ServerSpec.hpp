@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 20:03:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 01:23:47 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -28,6 +28,8 @@ namespace config {
 		ssize_t maxSizeBody;
 		bool listDirectories;
 		std::string indexFile;
+		std::map<unsigned short int, std::string> errorPages;
+
 		std::vector<VirtualServerSpec> virtualServers;
 
 	public:
@@ -44,6 +46,9 @@ namespace config {
 		ServerSpec &setMaxSizeBody(const ssize_t maxSizeBody);
 		ServerSpec &setListDirectories(bool listDirectories);
 		ServerSpec &setIndexFile(const std::string &indexFile);
+		ServerSpec &addErrorPage(
+			unsigned short int status, const std::string &bodyPage);
+
 		ServerSpec &addVirtualServer(VirtualServerSpec &virtualServer);
 
 		http::Server toServer(void);

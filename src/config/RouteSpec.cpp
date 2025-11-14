@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 19:56:30 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 02:32:14 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,7 @@
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
 #include "constants.hpp"
+
 
 namespace config
 {
@@ -26,6 +27,7 @@ namespace config
 		listDirectories(false), // default on ServerSpec
 		listDirectoriesWasSet(false),
 		indexFile(""),
+		errorPages(),
 		allowedMethods()
 	{
 	}
@@ -48,6 +50,7 @@ namespace config
 		this->listDirectories = other.listDirectories;
 		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
 		this->indexFile = other.indexFile;
+		this->errorPages = other.errorPages;
 		this->allowedMethods = other.allowedMethods;
 		return *this;
 	}
@@ -128,6 +131,20 @@ namespace config
 		return *this;
 	}
 
+	RouteSpec &RouteSpec::addErrorPage(
+		unsigned short int status, const std::string &bodyPage)
+	{
+		this->errorPages.insert(std::make_pair(status, bodyPage));
+		return *this;
+	}
+	RouteSpec &RouteSpec::addErrorPagesIfUnset(
+		const std::map<unsigned short int, std::string> pages)
+	{
+		// documentations states insert only inserts if key does not exist
+		this->errorPages.insert(pages.begin(), pages.end());
+		return *this;
+	}
+
 	const std::string &RouteSpec::getPathSpec(void) const
 	{
 		return this->pathSpec;
@@ -178,4 +195,5 @@ namespace config
 		}
 		return route;
 	}
+
 }

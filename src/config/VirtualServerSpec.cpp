@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 20:12:42 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/13 01:16:55 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,6 +24,7 @@ namespace config {
 		listDirectories(false), // default on ServerSpec
 		listDirectoriesWasSet(false),
 		indexFile(""),
+		errorPages(),
 		routes()
 	{
 
@@ -47,6 +48,7 @@ namespace config {
 		this->listDirectories = other.listDirectories;
 		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
 		this->indexFile = other.indexFile;
+		this->errorPages = other.errorPages;
 		return *this;
 	}
 
@@ -132,6 +134,19 @@ namespace config {
 		return *this;
 	}
 
+	VirtualServerSpec &VirtualServerSpec::addErrorPage(
+		unsigned short int status, const std::string &bodyPage)
+	{
+		this->errorPages.insert(std::make_pair(status, bodyPage));
+		return *this;
+	}
+	VirtualServerSpec &VirtualServerSpec::addErrorPagesIfUnset(
+		const std::map<unsigned short int, std::string> pages)
+	{
+		// documentations states insert only inserts if key does not exist
+		this->errorPages.insert(pages.begin(), pages.end());
+		return *this;
+	}
 
 	http::VirtualServer VirtualServerSpec::toVirtualServer(void)
 	{
@@ -148,6 +163,7 @@ namespace config {
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
+				.addErrorPagesIfUnset(this->errorPages)
 				.toRoute();
 			_routes.push_back(route);
 		}
