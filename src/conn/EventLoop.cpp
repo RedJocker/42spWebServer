@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/12 14:09:49 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/14 22:03:46 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,7 @@ namespace conn
 			close(clientFd);
 		} else {
 			std::cout << "connected client " << clientFd
-					  << " on server " << server->getPort() << std::endl;
+					  << " on server " << server->getAddressPort() << std::endl;
 		}
 	}
 

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 13:17:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 07:26:34 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,6 +17,7 @@
 # include "Route.hpp"
 # include <string>
 # include <vector>
+# include <map>
 
 namespace config
 {
@@ -26,6 +27,12 @@ namespace config
 		std::string docroot;
 		std::string pathSpec;
 		std::string uploadFolder;
+		ssize_t maxSizeBody;
+		bool listDirectories;
+		bool listDirectoriesWasSet;
+		std::string indexFile;
+		std::pair<unsigned short int, std::string> redirection;
+		std::map<unsigned short int, std::string> errorPages;
 		std::vector<std::string> allowedMethods;
 
 	public:
@@ -42,8 +49,23 @@ namespace config
 		RouteSpec &setDocroot(const std::string &docroot);
 		RouteSpec &setDocrootIfEmpty(const std::string &docroot);
 		RouteSpec &setPathSpec(const std::string &pathSpec);
-		RouteSpec &addAllowedMethod(const std::string &method);
 		RouteSpec &setUploadFolder(const std::string &uploadFolder);
+		RouteSpec &setUploadFolderIfEmpty(const std::string &uploadFolder);
+		RouteSpec &setMaxSizeBody(const ssize_t &maxSizeBody);
+		RouteSpec &setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody);
+		RouteSpec &setListDirectories(bool listDirectories);
+		RouteSpec &setListDirectoriesIfUnset(bool listDirectories);
+		RouteSpec &setIndexFile(const std::string &indexFile);
+		RouteSpec &setIndexFileIfEmpty(const std::string &indexFile);
+		RouteSpec &setRedirection(
+			unsigned short int statusCode, const std::string &path);
+		RouteSpec &setRedirectionIfUnset(
+			std::pair<unsigned short int, std::string> &redirection);
+		RouteSpec &addAllowedMethod(const std::string &method);
+		RouteSpec &addErrorPage(
+			unsigned short int status, const std::string &bodyPage);
+		RouteSpec &addErrorPagesIfUnset(
+			const std::map<unsigned short int, std::string> pages);
 
 		http::Route *toRoute(void);
 	};
