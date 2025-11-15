@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:36:49 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/14 22:04:42 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/14 22:20:38 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
@@ -91,6 +91,7 @@ namespace conn
 		{
 			portStr = DEFAULT_PORT;
 		}
+		this->addressPort = address + ":" + portStr;
 		struct addrinfo *resolvedAddress; // will be allocated
 		int retAddrInfo = getaddrinfo(
 			address.c_str(), portStr.c_str(), &hint, &resolvedAddress);
