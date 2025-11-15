@@ -6,11 +6,12 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:36:49 by maurodri          #+#    #+#             //
-/*   Updated: 2025/10/15 21:06:45 by maurodri         ###   ########.fr       */
+/*   Updated: 2025/11/14 22:04:42 by maurodri         ###   ########.fr       */
 //                                                                            //
 // ************************************************************************** //
 
 #include "TcpServer.hpp"
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <cerrno>
@@ -18,15 +19,19 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <iostream>
+#include "constants.hpp"
 
 namespace conn
 {
-	TcpServer::TcpServer() : port(8080)
+	TcpServer::TcpServer()
+		: addressPort(DEFAULT_ADDRESS_PORT)
 	{
 	}
 
-	TcpServer::TcpServer(unsigned short port) : port(port)
+	TcpServer::TcpServer(const std::string &addressPort)
+		: addressPort(addressPort)
 	{
+
 	}
 
 	TcpServer::TcpServer(const TcpServer &other)
@@ -39,6 +44,7 @@ namespace conn
 		if (this == &other)
 			return *this;
 		this->serverFd = other.serverFd;
+		this->addressPort = other.addressPort;
 		return *this;
 	}
 
@@ -47,7 +53,7 @@ namespace conn
 		if (this->serverFd >= 0)
 		{
 			std::cout << "Closing server with port "
-					  << this->port
+				//<< this->port
 					  << " and fd "
 					  << this->serverFd
 					  << std::endl;
@@ -56,10 +62,53 @@ namespace conn
 
 	std::pair<int, std::string> TcpServer::createAndListen()
 	{
-		this->serverFd = socket(AF_INET, SOCK_STREAM, 0);
+		struct addrinfo hint;
+		memset(&hint, 0, sizeof(struct addrinfo));
+		hint.ai_family = AF_INET; // use ipv4
+		hint.ai_socktype = SOCK_STREAM; // tcp type
+		hint.ai_flags = AI_NUMERICSERV;
+		hint.ai_protocol = 0;
+
+		std::string address;
+		std::string portStr;
+
+		size_t sep = addressPort.find(':');
+		if (sep == std::string::npos)
+		{
+			address = addressPort;
+			portStr = DEFAULT_PORT;
+		}
+		else
+		{
+			address = addressPort.substr(0, sep);
+			portStr = addressPort.substr(sep + 1);
+		}
+		if (address.empty())
+		{
+			address = DEFAULT_ADDRESS;
+		}
+		if (portStr.empty())
+		{
+			portStr = DEFAULT_PORT;
+		}
+		struct addrinfo *resolvedAddress; // will be allocated
+		int retAddrInfo = getaddrinfo(
+			address.c_str(), portStr.c_str(), &hint, &resolvedAddress);
+		if (retAddrInfo != 0)
+		{
+			return std::make_pair(
+				-1, std::string(gai_strerror(retAddrInfo)));
+		}
+		this->serverFd = socket(
+			resolvedAddress->ai_family,
+			resolvedAddress->ai_socktype,
+			resolvedAddress->ai_protocol);
+
 		if (this->serverFd < 0)
 		{
-			std::string errorMessage = "Error creating server: " + std::string(strerror(errno));
+			freeaddrinfo(resolvedAddress);
+			std::string errorMessage = "Error creating server "
+				+ this->addressPort + " : " + std::string(strerror(errno));
 			return std::make_pair(-1, errorMessage);
 		}
 		int reuseAddressValue = 1;
@@ -67,23 +116,28 @@ namespace conn
 			setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &reuseAddressValue, sizeof(int));
 		if (reuseResult != 0)
 		{
+			close(this->serverFd);
+			freeaddrinfo(resolvedAddress);
 			std::string errorMessage =
 				"Error setting server socket option: " + std::string(strerror(errno));
 			return std::make_pair(-1, errorMessage);
 		}
-		sockaddr_in serverAddress;
-    	serverAddress.sin_family = AF_INET; // use ipv4
-    	serverAddress.sin_port = htons(this->port); // bind to port
-    	serverAddress.sin_addr.s_addr = INADDR_ANY; // any ip address
+
 		int bindResult = bind(
-			this->serverFd, 
-			reinterpret_cast<struct sockaddr*>(&serverAddress), 
-			sizeof(serverAddress));
+			this->serverFd,
+			resolvedAddress->ai_addr,
+			resolvedAddress->ai_addrlen);
 		if (bindResult != 0)
 		{
-			std::string errorMessage = "Error biding server: " + std::string(strerror(errno));
+			std::string errorMessage = "Error biding server "
+				+ this->addressPort + " : "
+				+ std::string(strerror(errno));
+
+			freeaddrinfo(resolvedAddress);
+			close(this->serverFd);
 			return std::make_pair(-1, errorMessage);
 		}
+		freeaddrinfo(resolvedAddress);
 		int listenResult = listen(this->serverFd, 5);
 		if (listenResult != 0)
 		{
@@ -92,9 +146,9 @@ namespace conn
 			return std::make_pair(-1, errorMessage);
 		}
 		
-		std::cout << "Opening server listening on port "
-				  << this->port
-				  << " and fd "
+		std::cout << "Opening server listening on "
+			      << this->addressPort
+				  << " with fd "
 				  << this->serverFd
 				  << std::endl;
 		return std::make_pair(this->serverFd, "Ok");
@@ -114,8 +168,8 @@ namespace conn
 		return this->serverFd;
 	}
 
-	unsigned short TcpServer::getPort() const {
-		return this->port;
+	const std::string &TcpServer::getAddressPort() const {
+		return this->addressPort;
 	}
 }
 

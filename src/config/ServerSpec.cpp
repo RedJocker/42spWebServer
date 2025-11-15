@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/14 01:27:04 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 20:13:15 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,11 +14,12 @@
 #include "VirtualServer.hpp"
 #include "VirtualServerSpec.hpp"
 #include "constants.hpp"
+#include "Server.hpp"
 
 namespace config {
 
 	ServerSpec::ServerSpec():
-		port(DEFAULT_PORT),
+		addressPort(DEFAULT_ADDRESS_PORT),
 		docroot(DEFAULT_DOCROOT),
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		listDirectories(DEFAULT_LIST_DIRECTORIES),
@@ -36,7 +37,7 @@ namespace config {
 	{
 		if (this == &other)
 			return *this;
-		this->port = other.port;
+		this->addressPort = other.addressPort;
 		this->docroot = other.docroot;
 		this->maxSizeBody = other.maxSizeBody;
 		this->listDirectories = other.listDirectories;
@@ -56,9 +57,9 @@ namespace config {
 		return this->docroot;
 	}
 
-	const unsigned short &ServerSpec::getPort(void) const
+	const std::string &ServerSpec::getAddressPort(void) const
 	{
-		return this->port;
+		return this->addressPort;
 	}
 
 	ServerSpec &ServerSpec::setDocroot(const std::string &docroot)
@@ -67,9 +68,9 @@ namespace config {
 		return *this;
 	}
 
-	ServerSpec &ServerSpec::setPort(const unsigned short &port)
+	ServerSpec &ServerSpec::setAddressPort(const std::string &addressPort)
 	{
-		this->port = port;
+		this->addressPort = addressPort;
 		return *this;
 	}
 
@@ -120,8 +121,7 @@ namespace config {
 			vservers.push_back(virtualServer);
 		}
 		http::Server server(
-			this->docroot,
-			this->port,
+			*this,
 			vservers);
 		return server;
 	}

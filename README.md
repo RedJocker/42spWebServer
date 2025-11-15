@@ -60,8 +60,8 @@ empty
             - `server` context (equivalent to our `http::VirtualServer`)
             - `location` context (equivalent to our `http::Route`)
   - Configurable server
-    - [ ] Configurable port
-      - configuration may choose a port for server
+    - [X] Configurable address:port
+      - configuration may choose a address:port pair for server
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
         - nginx allows this config only on http context (equivalent to out http::Server)
     - [ ] Configurable max size of body request

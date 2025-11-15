@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:24:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/09/23 19:11:27 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/14 22:03:37 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,6 +15,7 @@
 
 #include <utility>
 #include <string>
+#include <netdb.h>
 
 namespace conn
 {
@@ -22,11 +23,11 @@ namespace conn
 	{
 	protected:
 		int serverFd;
-		unsigned short port;
+		std::string addressPort;
 
 		TcpServer();
 	public:
-		TcpServer(unsigned short port);
+		TcpServer(const std::string &addressPort);
 
 		TcpServer(const TcpServer &other);
 		TcpServer &operator=(const TcpServer &other);
@@ -34,7 +35,7 @@ namespace conn
 
 		std::pair<int, std::string> createAndListen();
 		std::pair<int, std::string> connectToClient();
-		unsigned short getPort() const;
+		const std::string &getAddressPort() const;
 		int getServerFd() const;
 	};
 }
