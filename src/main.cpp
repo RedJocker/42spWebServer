@@ -6,10 +6,12 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/14 22:00:19 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/15 17:47:16 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ApplicationSpec.hpp"
+#include "Application.hpp"
 #include "EventLoop.hpp"
 #include "VirtualServerSpec.hpp"
 #include "ServerSpec.hpp"
@@ -30,7 +32,6 @@ void signalHandler(int sig)
 int main(void)
 {
 	signal(SIGINT, &signalHandler);
-
 
 	config::ServerSpec serverSpec;
 	serverSpec
@@ -85,23 +86,8 @@ int main(void)
 	}
 	serverSpec.addVirtualServer(virtualServer2);
 
-	http::Server server = serverSpec.toServer();
+	config::ApplicationSpec appSpec;
+	appSpec.addServer(serverSpec);
 
-	conn::EventLoop eventLoop;
-
-	std::pair<int, std::string> maybeServerFd = server.createAndListen();
-	if (maybeServerFd.first < 0)
-	{
-		server.shutdown();
-		std::cout << maybeServerFd.second << std::endl;
-		return 11;
-	}
-
-	eventLoop.subscribeHttpServer(&server);
-
-	bool resLoop = eventLoop.loop();
-
-	if (!resLoop)
-		return 22;
-	return 0;
+	return appSpec.toApplication().run();
 }

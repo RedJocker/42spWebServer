@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:36:49 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/14 22:20:38 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/15 17:20:27 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,12 +24,14 @@
 namespace conn
 {
 	TcpServer::TcpServer()
-		: addressPort(DEFAULT_ADDRESS_PORT)
+		: serverFd(-1),
+		  addressPort(DEFAULT_ADDRESS_PORT)
 	{
 	}
 
 	TcpServer::TcpServer(const std::string &addressPort)
-		: addressPort(addressPort)
+		: serverFd(-1),
+		  addressPort(addressPort)
 	{
 
 	}

@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/11/09 11:37:33 by maurodri         ###   ########.fr        #
+#    Updated: 2025/11/15 17:08:55 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,6 +36,7 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Body.cpp \
 					Client.cpp \
 					Response.cpp \
+					Application.cpp \
 					Server.cpp \
 					VirtualServer.cpp \
 					RequestPath.cpp \
@@ -44,7 +45,8 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					RouteStaticFile.cpp \
 					Dispatcher.cpp)
 
-CONFIG_FILES := $(addprefix $(CONFIG_DIR)/, ServerSpec.cpp \
+CONFIG_FILES := $(addprefix $(CONFIG_DIR)/, ApplicationSpec.cpp \
+					ServerSpec.cpp \
 					VirtualServerSpec.cpp \
 					RouteSpec.cpp)
 
