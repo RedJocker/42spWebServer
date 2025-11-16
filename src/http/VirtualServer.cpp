@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/10 01:15:09 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 05:44:18 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -46,10 +46,11 @@ namespace http
 	}
 
 	VirtualServer::VirtualServer(
-		const std::string &hostname,
-		const std::string &docroot,
+		const config::VirtualServerSpec &spec,
 		const std::vector<Route *> &routes)
-		: hostname(hostname), docroot(docroot), routes(routes.begin(), routes.end())
+		: hostname(spec.getHostname()),
+		  docroot(spec.getDocroot()),
+		  routes(routes.begin(), routes.end())
 	{
 		this->docroot = utils::trimCopy(docroot);
 		while (!this->docroot.empty()

@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:12:50 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/09 13:30:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 05:45:48 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -15,6 +15,7 @@
 
 # include "Route.hpp"
 # include "Client.hpp"
+# include "VirtualServerSpec.hpp"
 
 namespace http {
 	class VirtualServer
@@ -29,9 +30,7 @@ namespace http {
 		std::set<Route*, OrderRoutes> routes;
 	public:
 		VirtualServer();
-		VirtualServer(
-			const std::string &hostname,
-			const std::string &docroot,
+		VirtualServer(const config::VirtualServerSpec &spec,
 			const std::vector<Route *> &routes);
 		VirtualServer(const VirtualServer &other);
 

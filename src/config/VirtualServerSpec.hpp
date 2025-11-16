@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/14 07:43:17 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 05:49:16 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,7 +16,12 @@
 # include <string>
 # include <vector>
 # include "RouteSpec.hpp"
-# include "VirtualServer.hpp"
+
+namespace http
+{
+	class VirtualServer;
+}
+
 
 namespace config {
 
@@ -41,6 +46,7 @@ namespace config {
 		virtual ~VirtualServerSpec(void);
 
 		const std::string &getDocroot(void) const;
+		const std::string &getHostname(void) const;
 
 		VirtualServerSpec &setHostname(const std::string &hostname);
 		VirtualServerSpec &setDocroot(const std::string &docroot);

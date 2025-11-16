@@ -6,12 +6,13 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/15 18:10:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 05:48:38 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "VirtualServerSpec.hpp"
 #include "constants.hpp"
+#include "VirtualServer.hpp"
 
 namespace config {
 
@@ -36,7 +37,8 @@ namespace config {
 		*this = other;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::operator=(const VirtualServerSpec &other)
+	VirtualServerSpec &VirtualServerSpec::operator=(
+		const VirtualServerSpec &other)
 	{
 		if (this == &other)
 			return *this;
@@ -63,38 +65,49 @@ namespace config {
 		return this->docroot;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setHostname(const std::string &hostname)
+	const std::string &VirtualServerSpec::getHostname(void) const
+	{
+		return this->hostname;
+	}
+
+	VirtualServerSpec &VirtualServerSpec::setHostname(
+		const std::string &hostname)
 	{
 		this->hostname = hostname;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setDocroot(const std::string &docroot)
+	VirtualServerSpec &VirtualServerSpec::setDocroot(
+		const std::string &docroot)
 	{
 		this->docroot = docroot;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setDocrootIfEmpty(const std::string &docroot)
+	VirtualServerSpec &VirtualServerSpec::setDocrootIfEmpty(
+		const std::string &docroot)
 	{
 		if (this->docroot.empty())
 			this->docroot = docroot;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setUploadFolder(const std::string &uploadFolder)
+	VirtualServerSpec &VirtualServerSpec::setUploadFolder(
+		const std::string &uploadFolder)
 	{
 		this->uploadFolder = uploadFolder;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setMaxSizeBody(const ssize_t &maxSizeBody)
+	VirtualServerSpec &VirtualServerSpec::setMaxSizeBody(
+		const ssize_t &maxSizeBody)
 	{
 		this->maxSizeBody = maxSizeBody;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setMaxSizeBodyIfUnset(const ssize_t &maxSizeBody)
+	VirtualServerSpec &VirtualServerSpec::setMaxSizeBodyIfUnset(
+		const ssize_t &maxSizeBody)
 	{
 		if (this->maxSizeBody < 0)
 			this->maxSizeBody = maxSizeBody;
@@ -108,27 +121,31 @@ namespace config {
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setListDirectories(bool listDirectories)
+	VirtualServerSpec &VirtualServerSpec::setListDirectories(
+		bool listDirectories)
 	{
 		this->listDirectories = listDirectories;
 		this->listDirectoriesWasSet = true;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setListDirectoriesIfUnset(bool listDirectories)
+	VirtualServerSpec &VirtualServerSpec::setListDirectoriesIfUnset(
+		bool listDirectories)
 	{
 		if (this->listDirectoriesWasSet == false)
 			this->setListDirectories(listDirectories);
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setIndexFile(const std::string &indexFile)
+	VirtualServerSpec &VirtualServerSpec::setIndexFile(
+		const std::string &indexFile)
 	{
 		this->indexFile = indexFile;
 		return *this;
 	}
 
-	VirtualServerSpec &VirtualServerSpec::setIndexFileIfEmpty(const std::string &indexFile)
+	VirtualServerSpec &VirtualServerSpec::setIndexFileIfEmpty(
+		const std::string &indexFile)
 	{
 		if (this->indexFile.empty())
 			this->indexFile = indexFile;
@@ -178,10 +195,7 @@ namespace config {
 				.toRoute();
 			_routes.push_back(route);
 		}
-		http::VirtualServer virtualServer(
-			this->hostname,
-			this->docroot,
-			_routes);
+		http::VirtualServer virtualServer(*this,_routes);
 		return virtualServer;
 	}
 }
