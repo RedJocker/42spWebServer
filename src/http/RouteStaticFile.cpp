@@ -6,11 +6,12 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/12 17:37:19 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 06:07:59 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "RouteStaticFile.hpp"
+#include "RouteSpec.hpp"
 #include "Server.hpp"
 #include "Monitor.hpp"
 #include "devUtil.hpp"
@@ -31,13 +32,9 @@ namespace http {
 	{
 	}
 
-	RouteStaticFile::RouteStaticFile(
-		const std::string &pathSpecification,
-		const std::string &uploadFolder,
-		const std::string &docroot,
-		const std::vector<std::string> &methodsAllowed)
-		: Route(pathSpecification, docroot, methodsAllowed),
-		  uploadFolder(uploadFolder)
+	RouteStaticFile::RouteStaticFile(const config::RouteSpec &routeSpec)
+		: Route(routeSpec),
+		  uploadFolder(routeSpec.getUploadFolder())
 	{
 	}
 

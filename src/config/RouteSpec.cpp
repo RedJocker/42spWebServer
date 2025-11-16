@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/14 16:53:01 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 06:09:35 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,7 +14,7 @@
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
 #include "constants.hpp"
-
+#include "Route.hpp"
 
 namespace config
 {
@@ -178,6 +178,16 @@ namespace config
 		return *this;
 	}
 
+	const std::vector<std::string> &RouteSpec::getAllowedMethods(void) const
+	{
+		return this->allowedMethods;
+	}
+
+	const std::string &RouteSpec::getUploadFolder(void) const
+	{
+		return this->uploadFolder;
+	}
+
 	RouteSpec &RouteSpec::addAllowedMethod(const std::string &method)
 	{
 		this->allowedMethods.push_back(method);
@@ -204,18 +214,12 @@ namespace config
 		http::Route *route;
 		if (this->isCgi)
 		{
-			route = new http::RouteCgi(this->pathSpec,
-									   this->docroot,
-									   this->allowedMethods);
+			route = new http::RouteCgi(*this);
 		}
 		else
 		{
-			route = new http::RouteStaticFile(this->pathSpec,
-											  this->uploadFolder,
-											  this->docroot,
-											  this->allowedMethods);
+			route = new http::RouteStaticFile(*this);
 		}
 		return route;
 	}
-
 }

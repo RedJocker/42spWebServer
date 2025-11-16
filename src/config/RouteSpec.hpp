@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/14 07:26:34 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 06:09:55 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,10 +14,16 @@
 #ifndef ROUTESPEC_HPP
 # define ROUTESPEC_HPP
 
-# include "Route.hpp"
 # include <string>
 # include <vector>
 # include <map>
+# include <cstdlib>
+# include <unistd.h>
+
+namespace http
+{
+	class Route;
+}
 
 namespace config
 {
@@ -44,6 +50,8 @@ namespace config
 		const std::string &getDocroot(void) const;
 		bool isCgiRoute(void) const;
 		const std::string &getPathSpec(void) const;
+		const std::vector<std::string> &getAllowedMethods(void) const;
+		const std::string &getUploadFolder(void) const;
 
 		RouteSpec &setCgiRoute(void);
 		RouteSpec &setDocroot(const std::string &docroot);
