@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/14 20:08:25 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 15:08:02 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ namespace http
 		  docroot(spec.getDocroot()),
 		  vservers(virtualServers.begin(), virtualServers.end())
 	{
-		this->docroot = docroot;
 		while (!this->docroot.empty()
 			   && this->docroot[this->docroot.size() - 1] == '/')
 		{
