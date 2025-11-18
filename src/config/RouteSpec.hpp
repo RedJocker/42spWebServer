@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 06:09:55 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/18 07:04:08 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -29,7 +29,7 @@ namespace config
 {
 	class RouteSpec
 	{
-		bool isCgi;
+		std::string cgiBinPath;
 		std::string docroot;
 		std::string pathSpec;
 		std::string uploadFolder;
@@ -49,11 +49,12 @@ namespace config
 
 		const std::string &getDocroot(void) const;
 		bool isCgiRoute(void) const;
+		const std::string &getCgiBinPath(void) const;
 		const std::string &getPathSpec(void) const;
 		const std::vector<std::string> &getAllowedMethods(void) const;
 		const std::string &getUploadFolder(void) const;
 
-		RouteSpec &setCgiRoute(void);
+		RouteSpec &setCgiBinPath(const std::string &cgiBinPath);
 		RouteSpec &setDocroot(const std::string &docroot);
 		RouteSpec &setDocrootIfEmpty(const std::string &docroot);
 		RouteSpec &setPathSpec(const std::string &pathSpec);

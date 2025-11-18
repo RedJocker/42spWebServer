@@ -6,13 +6,14 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:47:25 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/10/27 12:17:09 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/18 08:11:46 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Headers.hpp"
 #include <cctype>
 #include <sstream>
+#include "pathUtils.hpp"
 
 namespace http {
 	bool Headers::CaseInsensitive::operator()(const std::string &s1, const std::string &s2) const
@@ -54,11 +55,7 @@ namespace http {
 		std::string key = line.substr(0, colon);
 		std::string value = line.substr(colon + 1);
 
-		// Trim whitespace
-		while (!value.empty() && std::isspace(value[0]))
-			value.erase(0, 1);
-		while (!value.empty() && std::isspace(value[value.size() - 1]))
-			value.erase(value.size() - 1, 1);
+		utils::trimInPlace(value);
 
 		_headers[key] = value;
 		return true;

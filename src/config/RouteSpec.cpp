@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 06:09:35 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/18 07:07:21 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,7 +19,7 @@
 namespace config
 {
 	RouteSpec::RouteSpec(void):
-		isCgi(false),
+		cgiBinPath(""),
 		docroot(""), // default on ServerSpec
 		pathSpec(DEFAULT_PATH_SPEC),
 		uploadFolder(""), // default on VirtualServerSpec
@@ -43,7 +43,7 @@ namespace config
 	{
 		if (this == &other)
 			return *this;
-		this->isCgi = other.isCgi;
+		this->cgiBinPath = other.cgiBinPath;
 		this->docroot = other.docroot;
 		this->pathSpec = other.pathSpec;
 		this->uploadFolder = other.uploadFolder;
@@ -196,12 +196,17 @@ namespace config
 
 	bool RouteSpec::isCgiRoute(void) const
 	{
-		return this->isCgi;
+		return !this->cgiBinPath.empty();
 	}
 
-	RouteSpec &RouteSpec::setCgiRoute(void)
+	const std::string &RouteSpec::getCgiBinPath(void) const
 	{
-		this->isCgi = true;
+		return this->cgiBinPath;
+	}
+
+	RouteSpec &RouteSpec::setCgiBinPath(const std::string &cgiBinPath)
+	{
+		this->cgiBinPath = cgiBinPath;
 		return *this;
 	}
 
@@ -212,7 +217,7 @@ namespace config
 		// TODO set listDirectories on Routes and implement feature (do not list if false)
 		// TODO set indexFile on Routes and implement feature
 		http::Route *route;
-		if (this->isCgi)
+		if (this->isCgiRoute())
 		{
 			route = new http::RouteCgi(*this);
 		}

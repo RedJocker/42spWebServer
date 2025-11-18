@@ -7,7 +7,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 00:32:07 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/18 20:11:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/18 08:17:43 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -32,7 +32,7 @@ http::Application setup_config_one(std::string &addressPort)
 		config::RouteSpec routeSpec[2];
 		routeSpec[0]
 			.setPathSpec("/**.cgi")
-			.setCgiRoute()
+			.setCgiBinPath("/usr/bin/php-cgi")
 			.addAllowedMethod("POST")
 			.addAllowedMethod("GET");
 
@@ -56,7 +56,7 @@ http::Application setup_config_one(std::string &addressPort)
 		config::RouteSpec routeSpec[2];
 		routeSpec[0]
 			.setPathSpec("/**.cgi")
-			.setCgiRoute()
+			.setCgiBinPath("/usr/bin/php-cgi")
 			.addAllowedMethod("POST")
 			.addAllowedMethod("GET");
 
@@ -79,6 +79,34 @@ http::Application setup_config_one(std::string &addressPort)
 	return appSpec.toApplication();
 }
 
+http::Application setup_config_invalid_cgi_bin(std::string &addressPort)
+{
+	config::ServerSpec serverSpec;
+	serverSpec
+		.setDocroot("./test/www")
+		.setAddressPort(addressPort);
+
+	config::VirtualServerSpec virtualServer1;
+	{
+		config::RouteSpec routeSpec[1];
+		routeSpec[0]
+			.setPathSpec("/**.cgi")
+			.setCgiBinPath("a bin that does not exist")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET");
+
+		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
+		{
+			virtualServer1.addRoute(routeSpec[i]);
+		}
+	}
+	serverSpec.addVirtualServer(virtualServer1);
+	config::ApplicationSpec appSpec;
+	appSpec.addServer(serverSpec);
+
+	return appSpec.toApplication();
+}
+
 void signalHandler(int sig)
 {
 	if (sig == SIGINT)
@@ -94,6 +122,12 @@ int run_server_config_one(std::string addressPort)
 	return app.run();
 }
 
+int run_server_config_invalid_cgi_bin(std::string addressPort)
+{
+	http::Application app  = setup_config_invalid_cgi_bin(addressPort);
+	return app.run();
+}
+
 int main(int argc, char *argv[])
 {
 	if (argc < 2)
@@ -105,5 +139,11 @@ int main(int argc, char *argv[])
 			return 42;
 		return run_server_config_one(std::string(argv[2]));
 	}
+	if ("config_invalid_cgi_bin" == testToRun) {
+		if (argc != 3)
+			return 42;
+		return run_server_config_invalid_cgi_bin(std::string(argv[2]));
+	}
+
 	return 69;
 }

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/12 14:14:35 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/18 08:11:03 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "devUtil.hpp"
 #include <sstream>
 #include <unistd.h>
+#include "pathUtils.hpp"
 
 namespace http {
 	Response::Response(void)
@@ -75,6 +76,7 @@ namespace http {
 			statusCode += (statusStr.at(i) - '0');
 		}
 		this->_statusCode = statusCode;
+		utils::trimInPlace(statusInfo);
 		if (statusInfo != "")
 			this->_statusInfo = statusInfo;
 		else

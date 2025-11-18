@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 22:09:53 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/18 08:16:47 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,16 +19,17 @@
 #include <cstdlib>
 #include <iostream>
 #include <sys/socket.h>
+#include "constants.hpp"
 
 namespace http {
 
-	RouteCgi::RouteCgi() : Route()
+	RouteCgi::RouteCgi() : Route(), cgiBinPath(DEFAULT_CGI_BIN_PATH)
 	{
 		//TODO
 	}
 
 	RouteCgi::RouteCgi(const config::RouteSpec &routeSpec)
-		: Route(routeSpec)
+		: Route(routeSpec), cgiBinPath(routeSpec.getCgiBinPath())
 	{
 	}
 
@@ -83,11 +84,12 @@ namespace http {
 			std::cout << "child" << std::endl;
 
 			//prevent dangling pointer from getFilePath.c_str() after shutdown
+			std::string cgiBinPathCopy = this->cgiBinPath;
 			std::string filePathCopy = reqPath.getFilePath();
 			// PHP-CGI
 
 			const char *args[3];
-			args[0] = "/usr/bin/php-cgi";
+			args[0] = cgiBinPathCopy.c_str();
 			args[1] = filePathCopy.c_str();
 			args[2] = 0;
 
@@ -146,57 +148,52 @@ namespace http {
 		const std::string &operationContent = operation.content;
 		// Parse headers and body from operationContent
 		size_t separatorIndex = operationContent.find("\r\n\r\n");
-		if (separatorIndex == std::string::npos)
-		{
-			// TODO cgi response should always have headers and maybe contain null body
-			// rewrite to interpret missing separator as headers only;
-			// https://www.rfc-editor.org/rfc/rfc3875#section-6
+		separatorIndex = separatorIndex != std::string::npos
+			? separatorIndex
+			: operationContent.size();
 
-			client.getResponse().setOk().setBody(operationContent);
-			client.setMessageToSend(client.getResponse().toString());
+		std::string cgiHeadersStr = operationContent.substr(0, separatorIndex);
+		std::string cgiBodyStr = operationContent.substr(separatorIndex);
+		http::Headers &cgiHeaders = client.getResponse().headers();
+
+		size_t index = 0;
+		while (1)
+		{
+			size_t index_next = cgiHeadersStr.find("\r\n", index);
+			std::string headerLine = (index_next == std::string::npos)
+				? cgiHeadersStr.substr(index)
+				: cgiHeadersStr.substr(index, index_next - index);
+
+			if (!cgiHeaders.parseLine(headerLine))
+			{
+				client.getResponse().setInternalServerError();
+				client.setMessageToSend(client.getResponse().toString());
+			}
+			if (index_next == std::string::npos)
+				break;
+			index = index_next + 2;
 		}
+
+		Response &response = client.getResponse();
+		std::string status = response.getHeader("Status");
+
+		bool statusSet = false;
+		if (status != "")
+		{
+			statusSet = response.setStatusCodeStr(status);
+			if (statusSet && response.getStatusCode() >= 500)
+			{
+				response.addHeader("Connection", "close");
+			}
+		}
+		if (!statusSet)
+			response.setOk();
 		else
-		{
-			std::string cgiHeadersStr = operationContent
-				.substr(0, separatorIndex);
-			http::Headers &cgiHeaders = client.getResponse().headers();
-
-			size_t index = 0;
-			while (1)
-			{
-				size_t index_next = cgiHeadersStr.find("\r\n", index);
-				std::string headerLine = (index_next == std::string::npos)
-					? cgiHeadersStr.substr(index)
-					: cgiHeadersStr.substr(index, index_next - index);
-
-				if (!cgiHeaders.parseLine(headerLine))
-				{
-					client.getResponse().setInternalServerError();
-					client.setMessageToSend(client.getResponse().toString());
-				}
-				if (index_next == std::string::npos)
-					break;
-				index = index_next + 2;
-			}
-
-			Response &response = client.getResponse();
-			std::string status = response.getHeader("Status");
-			bool statusSet = false;
-			if (status != "")
-			{
-				statusSet = response.setStatusCodeStr(status);
-				if (statusSet && response.getStatusCode() >= 500)
-				{
-					response.addHeader("Connection", "close");
-				}
-			}
-			if (!statusSet)
-				response.setOk();
-			else
-				response.headers().eraseHeader("Status");
+			response.headers().eraseHeader("Status");
+		if (!cgiBodyStr.empty())
 			response
-				.setBody(operationContent.substr(separatorIndex + 4));
-			client.setMessageToSend(client.getResponse().toString());
-		}
+				.setBody(cgiBodyStr);
+		client.setMessageToSend(client.getResponse().toString());
 	}
+
 }
