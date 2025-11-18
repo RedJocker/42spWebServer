@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 05:48:38 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 21:59:59 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -175,7 +175,7 @@ namespace config {
 		return *this;
 	}
 
-	http::VirtualServer VirtualServerSpec::toVirtualServer(void)
+	http::VirtualServer *VirtualServerSpec::toVirtualServer(void)
 	{
 		std::vector<http::Route*> _routes;
 
@@ -195,7 +195,7 @@ namespace config {
 				.toRoute();
 			_routes.push_back(route);
 		}
-		http::VirtualServer virtualServer(*this,_routes);
+		http::VirtualServer *virtualServer = new http::VirtualServer(*this,_routes);
 		return virtualServer;
 	}
 }

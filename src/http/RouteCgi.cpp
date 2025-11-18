@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 06:11:41 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:09:53 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -102,13 +102,15 @@ namespace http {
 			if (!envp)
 			{
 				std::cout << "Status: 500 Internal Server Error" << std::endl;
+				monitor.shutdown();
+				delete &monitor;
 				::exit(11);
 			}
 
 			// shutdown EventLoop, careful with dangling pointers and closed fds
 			monitor.shutdown();
+			delete &monitor;
 			// nothing coming from EventLoop is valid anymore
-
 			execve(args[0], const_cast<char **>(args), envp);
 
 			// If execve fails, exit child

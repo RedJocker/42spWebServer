@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/14 20:12:15 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:17:01 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -54,7 +54,7 @@ namespace config {
 
 		ServerSpec &addVirtualServer(VirtualServerSpec &virtualServer);
 
-		http::Server toServer(void);
+		http::Server *toServer(void);
 	};
 }
 

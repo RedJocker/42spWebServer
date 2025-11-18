@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/17 15:08:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:02:58 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ namespace http
 {
 	Server::Server(
 		const config::ServerSpec &spec,
-		std::vector<VirtualServer> &virtualServers)
+		std::vector<VirtualServer*> &virtualServers)
 		: conn::TcpServer(spec.getAddressPort()),
 		  docroot(spec.getDocroot()),
 		  vservers(virtualServers.begin(), virtualServers.end())
@@ -68,7 +68,7 @@ namespace http
 	    if (host.empty())
 	    { // use default virtual server
 			std::cout << "using default virtual server" << std::endl;
-		    vservers.at(0).serve(client, monitor);
+		    vservers.at(0)->serve(client, monitor);
 			return;
 		}
 
@@ -92,29 +92,30 @@ namespace http
 			hostname = host;
 		}
 
-		for (std::vector<VirtualServer>::iterator vserverIt = vservers.begin();
+		for (std::vector<VirtualServer*>::iterator vserverIt = vservers.begin();
 			 vserverIt != this->vservers.end();
 			 ++vserverIt)
 		{
 
-			if (vserverIt->matches(hostname))
+			if ((*vserverIt)->matches(hostname))
 			{
-				vserverIt->serve(client, monitor);
+				(*vserverIt)->serve(client, monitor);
 				return ;
 			}
 		}
 	    // use default virtual server
 		std::cout << "using default virtual server" << std::endl;
-		vservers.at(0).serve(client, monitor);
+		vservers.at(0)->serve(client, monitor);
 	}
 
 	void Server::shutdown(void)
 	{
-		for (std::vector<VirtualServer>::iterator vserverIt = vservers.begin();
+		for (std::vector<VirtualServer*>::iterator vserverIt = vservers.begin();
 			 vserverIt != this->vservers.end();
 			 ++vserverIt)
 		{
-			vserverIt->shutdown();
+			(*vserverIt)->shutdown();
+			delete (*vserverIt);
 		}
 	};
 }

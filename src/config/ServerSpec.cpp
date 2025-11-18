@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/14 20:13:15 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:17:11 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -102,16 +102,16 @@ namespace config {
 		return *this;
 	}
 
-	http::Server ServerSpec::toServer(void)
+	http::Server *ServerSpec::toServer(void)
 	{
-		std::vector<http::VirtualServer> vservers;
+		std::vector<http::VirtualServer *> vservers;
 
 		for (std::vector<VirtualServerSpec>::iterator virtualServerIt
 				 = this->virtualServers.begin();
 			 virtualServerIt != this->virtualServers.end();
 			 ++virtualServerIt)
 		{
-			http::VirtualServer virtualServer = (*virtualServerIt)
+			http::VirtualServer *virtualServer = (*virtualServerIt)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.setListDirectoriesIfUnset(this->listDirectories)
@@ -120,7 +120,7 @@ namespace config {
 				.toVirtualServer();
 			vservers.push_back(virtualServer);
 		}
-		http::Server server(
+		http::Server *server = new http::Server(
 			*this,
 			vservers);
 		return server;

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/15 15:57:48 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/15 17:49:12 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:23:11 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,12 +21,12 @@ namespace http {
 
 	class Application
 	{
-		std::vector<Server> servers;
-		conn::EventLoop eventLoop;
+		std::vector<Server*> *servers;
+		conn::EventLoop *eventLoop;
 
 	public:
 		Application(void);
-		Application(const std::vector<Server> &servers);
+		Application(const std::vector<Server*> &servers);
 		Application(const Application &other);
 		Application &operator=(const Application &other);
 		virtual ~Application(void);

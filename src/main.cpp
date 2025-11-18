@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/15 17:47:16 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 19:23:53 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "EventLoop.hpp"
 #include "VirtualServerSpec.hpp"
 #include "ServerSpec.hpp"
-
 #include <iostream>
 #include <signal.h>
 
@@ -29,10 +28,8 @@ void signalHandler(int sig)
 	}
 }
 
-int main(void)
+http::Application applicationConfig(void)
 {
-	signal(SIGINT, &signalHandler);
-
 	config::ServerSpec serverSpec;
 	serverSpec
 		.setDocroot("./www")
@@ -89,5 +86,13 @@ int main(void)
 	config::ApplicationSpec appSpec;
 	appSpec.addServer(serverSpec);
 
-	return appSpec.toApplication().run();
+	return appSpec.toApplication();
+}
+
+int main(void)
+{
+	signal(SIGINT, &signalHandler);
+
+	http::Application app = applicationConfig();
+	return app.run();
 }

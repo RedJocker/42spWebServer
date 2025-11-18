@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/14 22:03:46 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:18:18 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -542,6 +542,7 @@ namespace conn
 			http::Server *server = serverIt->second;
 			if (server)
 				server->shutdown();
+			delete server;
 		}
 		servers.clear();
 		for (MapClient::iterator clientIt = clients.begin();
