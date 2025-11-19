@@ -58,7 +58,7 @@ test_request() {
     echo 'test_request: ' "$config" "$request"
 
     setup_server "$config"
-    request_output=$(printf "$request" | nc -v -w 2 'localhost' "$port")
+    request_output=$(printf "$request" | nc -v -w 6 'localhost' "$port")
     client_exit_status=$?
     teardown_server
     server_output_logfile=$(echo "$logfile")
@@ -98,31 +98,62 @@ assert_cgi_cwd() {
     # this is like the return of c main function
 }
 
+assert_status() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
 test_connection 'config_one' 'localhost'
 
-#
+# when using config_one request to /cwd.cgi should have cwd=www 
 expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
 expected_working_directory='www'
 test_request \
     assert_cgi_cwd \
     'config_one' \
-    'GET /cwd.cgi HTTP/1.1\r\nHost: localhost\r\n\r\n'
+    'GET /cwd.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #
 
-#
+# when using config_one request to /42/cwd.cgi should have cwd=42
 expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
 expected_working_directory='42'
 test_request \
     assert_cgi_cwd \
     'config_one' \
-    'GET /42/cwd.cgi HTTP/1.1\r\nHost: localhost\r\n\r\n'
+    'GET /42/cwd.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #
 
-#
+# when using config_one request to domain.com/cwd.cgi should have cwd=www2 
 expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
 expected_working_directory='www2'
 test_request \
     assert_cgi_cwd \
     'config_one' \
-    'GET /cwd.cgi HTTP/1.1\r\nHost: domain.com\r\n\r\n'
+    'GET /cwd.cgi HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when cgi crashes then should respond 500
+expected_status_line=$(printf "HTTP/1.1 500  Internal Server Error\r")
+test_request \
+    assert_status \
+    'config_one' \
+    'GET /42/error.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when cgi timesout then should respond 504
+# TODO use config for timeout time to make faster timeout
+expected_status_line=$(printf "HTTP/1.1 504 Gateway Timeout\r")
+test_request \
+    assert_status \
+    'config_one' \
+    'GET /42/sleep.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #
