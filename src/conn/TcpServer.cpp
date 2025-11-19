@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/20 19:36:49 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/15 17:20:27 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/18 21:04:01 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -54,8 +54,8 @@ namespace conn
 	{
 		if (this->serverFd >= 0)
 		{
-			std::cout << "Closing server with port "
-				//<< this->port
+			std::cerr << "Closing server "
+				      << this->addressPort
 					  << " and fd "
 					  << this->serverFd
 					  << std::endl;
