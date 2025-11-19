@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 12:29:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:17:01 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,17 +14,25 @@
 # define SERVERSPEC_HPP
 
 # include "VirtualServerSpec.hpp"
-# include "Server.hpp"
 # include <string>
 # include <vector>
 
+namespace http
+{
+	class Server;
+}
 
 namespace config {
 
 	class ServerSpec
 	{
+		std::string addressPort;
 		std::string docroot;
-		unsigned short port;
+		ssize_t maxSizeBody;
+		bool listDirectories;
+		std::string indexFile;
+		std::map<unsigned short int, std::string> errorPages;
+
 		std::vector<VirtualServerSpec> virtualServers;
 
 	public:
@@ -34,13 +42,19 @@ namespace config {
 		virtual ~ServerSpec(void);
 
 		const std::string &getDocroot(void) const;
-		const unsigned short &getPort(void) const;
+		const std::string &getAddressPort(void) const;
 
 		ServerSpec &setDocroot(const std::string &docroot);
-		ServerSpec &setPort(const unsigned short &port);
+		ServerSpec &setAddressPort(const std::string &addressPort);
+		ServerSpec &setMaxSizeBody(const ssize_t maxSizeBody);
+		ServerSpec &setListDirectories(bool listDirectories);
+		ServerSpec &setIndexFile(const std::string &indexFile);
+		ServerSpec &addErrorPage(
+			unsigned short int status, const std::string &bodyPage);
+
 		ServerSpec &addVirtualServer(VirtualServerSpec &virtualServer);
 
-		http::Server toServer(void);
+		http::Server *toServer(void);
 	};
 }
 

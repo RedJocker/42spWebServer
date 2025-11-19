@@ -52,11 +52,16 @@ empty
           the body of request on webserver log
       - if this is part of a cgi request
         - keep body as is and send to cgi with contentType
-    - [ ] download files to a folder specified by configuration
+    - [X] upload files to a folder specified by configuration
       - [x] may start with a hardcoded folder as temporary implementation
+      - nginx needs an extension module for file uploads
+        - [equivalent nginx extension directive](https://github.com/fdintino/nginx-upload-module?tab=readme-ov-file#upload_pass)
+          - extension module accepts upload folder config on
+            - `server` context (equivalent to our `http::VirtualServer`)
+            - `location` context (equivalent to our `http::Route`)
   - Configurable server
-    - [ ] Configurable port
-      - configuration may choose a port for server
+    - [X] Configurable address:port
+      - configuration may choose a address:port pair for server
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
         - nginx allows this config only on http context (equivalent to out http::Server)
     - [ ] Configurable max size of body request
@@ -69,6 +74,8 @@ empty
           - location context (equivalent to our http::Route)
       - we can also allow this config on all 3 levels and use the most specific
         - route > virtual server > server
+      - [x] allow to declare max size on specs
+      - [ ] implement max body size checking
     - [X] Configurable docroot
       - configuration may choose a root server folder that maps to server file system
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#root)
@@ -87,35 +94,43 @@ empty
          - using /path/* to match any file at /path folder only
          - using /path/specific.html to match only /path/specific.html
       - [ ] configuration for directory files
-        - may have a configurable default file (ex: index.html, index.php, any.xxx)
+        - [ ] configurable "index" file (ex: index.html, index.php, any.xxx)
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
-		  - nginx allows this config on
-            - `http` contenxt (equivalent to our `http::Server`)
-            - `server` context (equivalent to our `http::VirtualServer`)
-            - `location` context (equivalent to our `http::Route`)
-        - may list directory content
+            - nginx allows this config on
+              - `http` contenxt (equivalent to our `http::Server`)
+              - `server` context (equivalent to our `http::VirtualServer`)
+              - `location` context (equivalent to our `http::Route`)
+            - [X] allow to declare index file
+            - [ ] implement checking index file
+        - [ ] configuration for listing directory content
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
             - ngix first tries index file if that is configured
-		  - nginx allows this config on
-            - `http` contenxt (equivalent to our `http::Server`)
-            - `server` context (equivalent to our `http::VirtualServer`)
-            - `location` context (equivalent to our `http::Route`)
-        - may be forbiden access
+              - nginx allows this config on
+                - `http` contenxt (equivalent to our `http::Server`)
+                - `server` context (equivalent to our `http::VirtualServer`)
+                - `location` context (equivalent to our `http::Route`)
+          - [X] allow to declare directory listing
+          - [ ] implement checking directory listing
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
-            - priority based is likely better option something like 'forbiden > index > listing'
+            - priority based is likely better option something like 'index > listing'
       - [ ] configuration for default responses
         - body content of error responses like 404 or 500 may be customized
         - configuration should point to a file that will be used on response
-        - these files may be loaded to memory before starting server so it may be pre-cached
-          during response handling
         - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
-		- nginx allows this config on
+          - nginx allows this config on
             - `http` contenxt (equivalent to our `http::Server`)
             - `server` context (equivalent to our `http::VirtualServer`)
             - `location` context (equivalent to our `http::Route`)
+        - [X] allow to declare errorPages
+        - [ ] implement errorPages feature
       - [ ] configurable redirection
         - a route may be configured to redirect requests to another route
+          should also state what is the status code of redirection response
+        - nginx has two directives related to redirection `return` and `rewrite`
+          - both are allowed on `server` and `location` context
+        - [X] allow to declare redirection
+        - [ ] implement redirection feature
       - [ ] configurable file upload
         - may allow or dissalow file upload (depends on POST method being allowed)
         - may configure a folder to upload files into

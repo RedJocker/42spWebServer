@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/11/09 11:37:33 by maurodri         ###   ########.fr        #
+#    Updated: 2025/11/18 17:24:17 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,6 +36,7 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					Body.cpp \
 					Client.cpp \
 					Response.cpp \
+					Application.cpp \
 					Server.cpp \
 					VirtualServer.cpp \
 					RequestPath.cpp \
@@ -44,7 +45,8 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 					RouteStaticFile.cpp \
 					Dispatcher.cpp)
 
-CONFIG_FILES := $(addprefix $(CONFIG_DIR)/, ServerSpec.cpp \
+CONFIG_FILES := $(addprefix $(CONFIG_DIR)/, ApplicationSpec.cpp \
+					ServerSpec.cpp \
 					VirtualServerSpec.cpp \
 					RouteSpec.cpp)
 
@@ -94,6 +96,9 @@ test_buff_read: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_read.cpp $(TEST_
 
 test_buff_readlineCrlf: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp $(TEST_DIR)/test_bufferedReader_readlineCrlf.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
+
+test_end_to_end: $(MODULE_FILES) $(TEST_DIR)/test_end_to_end.cpp $(TEST_DIR)/test_end_to_end.sh
+	$(CC) $(CFLAGS) $(TEST_DIR)/test_end_to_end.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
 clean:
 	rm -fr $(OBJ_DIR) **/*~ *~ **/.#*

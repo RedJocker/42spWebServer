@@ -6,14 +6,15 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/10 01:25:29 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 19:23:53 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ApplicationSpec.hpp"
+#include "Application.hpp"
 #include "EventLoop.hpp"
 #include "VirtualServerSpec.hpp"
 #include "ServerSpec.hpp"
-
 #include <iostream>
 #include <signal.h>
 
@@ -27,17 +28,16 @@ void signalHandler(int sig)
 	}
 }
 
-int main(void)
+http::Application applicationConfig(void)
 {
-	signal(SIGINT, &signalHandler);
-
-
 	config::ServerSpec serverSpec;
 	serverSpec
 		.setDocroot("./www")
-		.setPort(8080);
+		.setAddressPort("localhost:8080");
 
 	config::VirtualServerSpec virtualServer1;
+	virtualServer1
+		.setUploadFolder("./www/uploads");
 	{
 		config::RouteSpec routeSpec[2];
 		routeSpec[0]
@@ -83,22 +83,16 @@ int main(void)
 	}
 	serverSpec.addVirtualServer(virtualServer2);
 
-	http::Server server = serverSpec.toServer();
+	config::ApplicationSpec appSpec;
+	appSpec.addServer(serverSpec);
 
-	conn::EventLoop eventLoop;
+	return appSpec.toApplication();
+}
 
-	std::pair<int, std::string> maybeServerFd = server.createAndListen();
-	if (maybeServerFd.first < 0)
-	{
-		std::cout << maybeServerFd.second << std::endl;
-		return 11;
-	}
+int main(void)
+{
+	signal(SIGINT, &signalHandler);
 
-	eventLoop.subscribeHttpServer(&server);
-
-	bool resLoop = eventLoop.loop();
-
-	if (!resLoop)
-		return 22;
-	return 0;
+	http::Application app = applicationConfig();
+	return app.run();
 }

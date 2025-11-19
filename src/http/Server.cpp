@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/10 00:26:36 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/17 22:02:58 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,13 @@
 
 namespace http
 {
-	Server::Server(const std::string &docroot,
-				   unsigned short port,
-				   std::vector<VirtualServer> virtualServers)
-		: conn::TcpServer(port), docroot(docroot), vservers(virtualServers)
+	Server::Server(
+		const config::ServerSpec &spec,
+		std::vector<VirtualServer*> &virtualServers)
+		: conn::TcpServer(spec.getAddressPort()),
+		  docroot(spec.getDocroot()),
+		  vservers(virtualServers.begin(), virtualServers.end())
 	{
-		this->docroot = docroot;
 		while (!this->docroot.empty()
 			   && this->docroot[this->docroot.size() - 1] == '/')
 		{
@@ -36,7 +37,8 @@ namespace http
 			DEFAULT_DOCROOT : this->docroot;
 	}
 
-	Server::Server(const Server &other) : conn::TcpServer(other.port)
+	Server::Server(const Server &other)
+		: conn::TcpServer(other.addressPort)
 	{
 		*this = other;
 	}
@@ -46,8 +48,8 @@ namespace http
 		if (this != &other)
 		{
 			this->docroot = other.docroot;
-			this->port = other.port;
 			this->vservers = other.vservers;
+			conn::TcpServer::operator=(other);
 		}
 		return *this;
 	}
@@ -66,7 +68,7 @@ namespace http
 	    if (host.empty())
 	    { // use default virtual server
 			std::cout << "using default virtual server" << std::endl;
-		    vservers.at(0).serve(client, monitor);
+		    vservers.at(0)->serve(client, monitor);
 			return;
 		}
 
@@ -90,29 +92,30 @@ namespace http
 			hostname = host;
 		}
 
-		for (std::vector<VirtualServer>::iterator vserverIt = vservers.begin();
+		for (std::vector<VirtualServer*>::iterator vserverIt = vservers.begin();
 			 vserverIt != this->vservers.end();
 			 ++vserverIt)
 		{
 
-			if (vserverIt->matches(hostname))
+			if ((*vserverIt)->matches(hostname))
 			{
-				vserverIt->serve(client, monitor);
+				(*vserverIt)->serve(client, monitor);
 				return ;
 			}
 		}
 	    // use default virtual server
 		std::cout << "using default virtual server" << std::endl;
-		vservers.at(0).serve(client, monitor);
+		vservers.at(0)->serve(client, monitor);
 	}
 
 	void Server::shutdown(void)
 	{
-		for (std::vector<VirtualServer>::iterator vserverIt = vservers.begin();
+		for (std::vector<VirtualServer*>::iterator vserverIt = vservers.begin();
 			 vserverIt != this->vservers.end();
 			 ++vserverIt)
 		{
-			vserverIt->shutdown();
+			(*vserverIt)->shutdown();
+			delete (*vserverIt);
 		}
 	};
 }

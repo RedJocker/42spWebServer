@@ -6,11 +6,12 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/10 01:26:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 06:11:13 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "Route.hpp"
+#include "RouteSpec.hpp"
 
 namespace http {
 
@@ -21,13 +22,13 @@ namespace http {
 	{
 	}
 
-	Route::Route(const std::string &pathSpecification,
-				 const std::string &docroot,
-				 const std::vector<std::string> methodsAllowed)
+	Route::Route(const config::RouteSpec &routeSpec)
 		: id(Route::idGenerator++),
-		  methodsAllowed(methodsAllowed.begin(), methodsAllowed.end()),
-		  pathSpecification(pathSpecification),
-		  docroot(docroot)
+		  methodsAllowed(
+			  routeSpec.getAllowedMethods().begin(),
+			  routeSpec.getAllowedMethods().end()),
+		  pathSpecification(routeSpec.getPathSpec()),
+		  docroot(routeSpec.getDocroot())
 	{
 	}
 
@@ -36,7 +37,7 @@ namespace http {
 		  methodsAllowed(other.methodsAllowed),
 		  pathSpecification(other.pathSpecification),
 		  docroot(other.docroot)
-	{	
+	{
 	}
 
 	Route &Route::operator=(const Route &other)

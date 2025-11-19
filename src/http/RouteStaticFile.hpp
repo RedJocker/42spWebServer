@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/09 13:13:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 06:08:44 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,6 +17,7 @@
 # include "Route.hpp"
 # include "Client.hpp"
 # include "Operation.hpp"
+#include "RouteSpec.hpp"
 
 namespace http {
 
@@ -43,11 +44,7 @@ namespace http {
 		bool parseMultipartBody(const std::string &boundary, const std::string &body);
 	public:
 
-		RouteStaticFile(
-			const std::string &path,
-			const std::string &uploadFolder,
- 			const std::string &docroot,
-			const std::vector<std::string> &methodsAllowed);
+		RouteStaticFile(const config::RouteSpec &routeSpec);
 		RouteStaticFile(const RouteStaticFile &other);
 		RouteStaticFile &operator=(const RouteStaticFile &other);
 		virtual ~RouteStaticFile();

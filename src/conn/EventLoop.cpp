@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/12 14:09:49 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/17 22:18:18 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,7 @@ namespace conn
 			close(clientFd);
 		} else {
 			std::cout << "connected client " << clientFd
-					  << " on server " << server->getPort() << std::endl;
+					  << " on server " << server->getAddressPort() << std::endl;
 		}
 	}
 
@@ -542,6 +542,7 @@ namespace conn
 			http::Server *server = serverIt->second;
 			if (server)
 				server->shutdown();
+			delete server;
 		}
 		servers.clear();
 		for (MapClient::iterator clientIt = clients.begin();

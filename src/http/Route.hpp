@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/10 01:25:25 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/16 05:53:57 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,6 +15,7 @@
 
 # include "Client.hpp"
 # include "Operation.hpp"
+#include "RouteSpec.hpp"
 # include <set>
 
 namespace conn
@@ -38,9 +39,7 @@ namespace http
 
 	public:
 		Route(void);
-		Route(const std::string &pathSpecification,
-			  const std::string &docroot,
-			  const std::vector<std::string> allowedMethods);
+		Route(const config::RouteSpec &routeSpec);
 		Route(const Route &other);
 		Route &operator=(const Route &other);
 		virtual ~Route(void);
