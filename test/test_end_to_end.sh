@@ -64,16 +64,20 @@ test_request() {
     teardown_server
     server_output_logfile=$(echo "$logfile")
 
-
+    local has_failed='false'
     if (( client_exit_status == 0 )) && $assert_fun; then
         echo "test_request: [OK]";
     else
-        echo 'request output:'
+        echo "test_request: [ERROR]";
+	has_failed='true'
+    fi
+
+    if [[ "$has_fail" == 'true' ]] || [[ "$verbose" ==  'true' ]]; then
+	echo "${BASH_SOURCE[0]}:$test_line:0"
+	echo 'request output:'
         echo "$request_output" | awk '{ print "\t", $0 }'
         echo 'server_output:'
         cat "$server_output_logfile" | awk '{ print "\t", $0 }'
-        echo "test_request: [ERROR]";
-	echo "${BASH_SOURCE[0]}:$test_line:0"
     fi
     echo ""
 }
@@ -113,6 +117,31 @@ assert_status() {
     # return keyword is for "status code" of the function execution with 0 -> ok
     # this is like the return of c main function
 }
+
+assert_method() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local cgi_method=$(echo "$request_output" | tail -1)
+
+    if [[ "$cgi_method" != "$expected_cgi_method" ]]; then
+        echo "expected cgi_method == $expected_cgi_method" | cat -e
+        echo "actual   cgi_method == $cgi_method" | cat -e
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
+verbose='true'
+## START TESTS
 
 test_line=$(( $LINENO + 1 ))
 test_connection 'config_one' 'localhost'
@@ -174,3 +203,24 @@ test_request \
     'config_invalid_cgi_bin' \
     'GET /cwd.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #
+
+# when request method GET on cgiRoute cgi should receive GET as REQUEST_METHOD
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_method="GET"
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_method \
+    'config_one' \
+    'GET /method.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when request method POST on cgiRoute cgi should receive POST as REQUEST_METHOD
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_method="POST"
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_method \
+    'config_one' \
+    'POST /method.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
