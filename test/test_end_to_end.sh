@@ -69,7 +69,7 @@ test_request() {
         echo "test_request: [OK]";
     else
         echo "test_request: [ERROR]";
-	has_failed='true'
+	has_fail='true'
     fi
 
     if [[ "$has_fail" == 'true' ]] || [[ "$verbose" ==  'true' ]]; then
@@ -140,7 +140,30 @@ assert_method() {
     # this is like the return of c main function
 }
 
-verbose='true'
+assert_query() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local cgi_query=$(basename $(echo "$request_output" | tail -1))
+
+    if [[ "$cgi_query" != "$expected_cgi_query" ]]; then
+        echo "expected cgi_query == $expected_cgi_query" | cat -e
+        echo "actual   cgi_query == $cgi_query" | cat -e
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
+
+verbose='false'
 ## START TESTS
 
 test_line=$(( $LINENO + 1 ))
@@ -224,3 +247,24 @@ test_request \
     'POST /method.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #
 
+# when GET request with query-string on cgiRoute
+# cgi should receive query-string as QUERY_STRING
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_query='hello=there&abc=def'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_query \
+    'config_one' \
+    'GET /query.cgi?hello=there&abc=def HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when POST request with query-string on cgiRoute
+# cgi should receive query-string as QUERY_STRING
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_query='hello=there&abc=def'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_query \
+    'config_one' \
+    'POST /query.cgi?hello=there&abc=def HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
