@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/18 07:04:08 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 09:37:44 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,7 @@
 #ifndef ROUTESPEC_HPP
 # define ROUTESPEC_HPP
 
+# include "pathUtils.hpp"
 # include <string>
 # include <vector>
 # include <map>
@@ -38,7 +39,7 @@ namespace config
 		bool listDirectoriesWasSet;
 		std::string indexFile;
 		std::pair<unsigned short int, std::string> redirection;
-		std::map<unsigned short int, std::string> errorPages;
+		MapErrorPages errorPages;
 		std::vector<std::string> allowedMethods;
 
 	public:
@@ -53,6 +54,7 @@ namespace config
 		const std::string &getPathSpec(void) const;
 		const std::vector<std::string> &getAllowedMethods(void) const;
 		const std::string &getUploadFolder(void) const;
+		const MapErrorPages &getErrorPages(void) const;
 
 		RouteSpec &setCgiBinPath(const std::string &cgiBinPath);
 		RouteSpec &setDocroot(const std::string &docroot);

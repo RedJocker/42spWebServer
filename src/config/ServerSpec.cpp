@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 22:17:11 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 08:46:06 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -60,6 +60,11 @@ namespace config {
 	const std::string &ServerSpec::getAddressPort(void) const
 	{
 		return this->addressPort;
+	}
+
+	const MapErrorPages &ServerSpec::getErrorPages(void) const
+	{
+		return this->errorPages;
 	}
 
 	ServerSpec &ServerSpec::setDocroot(const std::string &docroot)

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 05:53:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 09:41:24 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,7 +15,8 @@
 
 # include "Client.hpp"
 # include "Operation.hpp"
-#include "RouteSpec.hpp"
+# include "RouteSpec.hpp"
+# include "RequestPath.hpp"
 # include <set>
 
 namespace conn
@@ -25,6 +26,7 @@ namespace conn
 
 namespace http
 {
+
 	class Client;
 
 	class Route
@@ -32,6 +34,7 @@ namespace http
 		static int idGenerator;
 		int id;
 		std::set<std::string> methodsAllowed;
+		MapErrorPages errorPages;
 
 	protected:
 		std::string pathSpecification;
@@ -49,9 +52,10 @@ namespace http
 		bool isMethodAllowed(const std::string &maybeMethodAllowed) const;
 		void onServerError(http::Client &client) const;
 		int getId(void) const;
+		const std::string &getPathSpecification(void) const;
 		const std::string &getDocroot(void) const;
+		const MapErrorPages &getErrorPages(void) const;
 	};
 }
-
 
 #endif

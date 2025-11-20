@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/18 08:16:47 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 09:41:59 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -60,7 +60,7 @@ namespace http {
 		if (!reqPath.isFile())
 		{ // if file does not exist or is directory
 			client.getResponse().setNotFound();
-			client.setMessageToSend(client.getResponse().toString());
+			client.writeResponse();
 			return;
 		}
 
@@ -151,9 +151,11 @@ namespace http {
 		separatorIndex = separatorIndex != std::string::npos
 			? separatorIndex
 			: operationContent.size();
-
+		size_t bodyStart = separatorIndex + 4 >= operationContent.size()
+			? operationContent.size()
+			: separatorIndex + 4;
 		std::string cgiHeadersStr = operationContent.substr(0, separatorIndex);
-		std::string cgiBodyStr = operationContent.substr(separatorIndex);
+		std::string cgiBodyStr = operationContent.substr(bodyStart);
 		http::Headers &cgiHeaders = client.getResponse().headers();
 
 		size_t index = 0;
@@ -167,7 +169,7 @@ namespace http {
 			if (!cgiHeaders.parseLine(headerLine))
 			{
 				client.getResponse().setInternalServerError();
-				client.setMessageToSend(client.getResponse().toString());
+				client.writeResponse();
 			}
 			if (index_next == std::string::npos)
 				break;
@@ -193,7 +195,7 @@ namespace http {
 		if (!cgiBodyStr.empty())
 			response
 				.setBody(cgiBodyStr);
-		client.setMessageToSend(client.getResponse().toString());
+		client.writeResponse();
 	}
 
 }

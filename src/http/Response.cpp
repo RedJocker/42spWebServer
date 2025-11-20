@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/18 08:11:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 09:40:20 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,5 +283,10 @@ namespace http {
 		case 511: return "Network Authentication Required";
 		default: return "Unspecified";
 		}
+	}
+
+	bool Response::isBodyEmpty(void) const
+	{
+		return this->_body.size() == 0;
 	}
 }
