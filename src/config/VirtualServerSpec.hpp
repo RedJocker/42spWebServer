@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 22:00:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 09:38:17 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,6 +16,7 @@
 # include <string>
 # include <vector>
 # include "RouteSpec.hpp"
+# include "pathUtils.hpp"
 
 namespace http
 {
@@ -36,7 +37,7 @@ namespace config {
 		std::string indexFile;
 		std::pair<unsigned short int, std::string> redirection;
 
-		std::map<unsigned short int, std::string> errorPages;
+		MapErrorPages errorPages;
 		std::vector<RouteSpec> routes;
 
 	public:
@@ -47,6 +48,7 @@ namespace config {
 
 		const std::string &getDocroot(void) const;
 		const std::string &getHostname(void) const;
+		const MapErrorPages &getErrorPages(void) const;
 
 		VirtualServerSpec &setHostname(const std::string &hostname);
 		VirtualServerSpec &setDocroot(const std::string &docroot);

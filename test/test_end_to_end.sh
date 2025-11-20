@@ -64,16 +64,20 @@ test_request() {
     teardown_server
     server_output_logfile=$(echo "$logfile")
 
-
+    local has_failed='false'
     if (( client_exit_status == 0 )) && $assert_fun; then
         echo "test_request: [OK]";
     else
-        echo 'request output:'
+        echo "test_request: [ERROR]";
+	has_fail='true'
+    fi
+
+    if [[ "$has_fail" == 'true' ]] || [[ "$verbose" ==  'true' ]]; then
+	echo "${BASH_SOURCE[0]}:$test_line:0"
+	echo 'request output:'
         echo "$request_output" | awk '{ print "\t", $0 }'
         echo 'server_output:'
         cat "$server_output_logfile" | awk '{ print "\t", $0 }'
-        echo "test_request: [ERROR]";
-	echo "${BASH_SOURCE[0]}:$test_line:0"
     fi
     echo ""
 }
@@ -113,6 +117,75 @@ assert_status() {
     # return keyword is for "status code" of the function execution with 0 -> ok
     # this is like the return of c main function
 }
+
+assert_method() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local cgi_method=$(echo "$request_output" | tail -1)
+
+    if [[ "$cgi_method" != "$expected_cgi_method" ]]; then
+        echo "expected cgi_method == $expected_cgi_method" | cat -e
+        echo "actual   cgi_method == $cgi_method" | cat -e
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
+assert_query() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local cgi_query=$(basename $(echo "$request_output" | tail -1))
+
+    if [[ "$cgi_query" != "$expected_cgi_query" ]]; then
+        echo "expected cgi_query == $expected_cgi_query" | cat -e
+        echo "actual   cgi_query == $cgi_query" | cat -e
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
+assert_error_pages() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local error_page=$(echo "$request_output" | tail -1)
+
+    if [[ "$error_page" != "$expected_error_page" ]]; then
+        echo "expected error_page == $expected_error_page" | cat -e
+        echo "actual   error_page == $error_page" | cat -e
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
+verbose='false'
+## START TESTS
 
 test_line=$(( $LINENO + 1 ))
 test_connection 'config_one' 'localhost'
@@ -173,4 +246,156 @@ test_request \
     assert_status \
     'config_invalid_cgi_bin' \
     'GET /cwd.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when request method GET on cgiRoute cgi should receive GET as REQUEST_METHOD
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_method="GET"
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_method \
+    'config_one' \
+    'GET /method.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when request method POST on cgiRoute cgi should receive POST as REQUEST_METHOD
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_method="POST"
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_method \
+    'config_one' \
+    'POST /method.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when GET request with query-string on cgiRoute
+# cgi should receive query-string as QUERY_STRING
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_query='hello=there&abc=def'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_query \
+    'config_one' \
+    'GET /query.cgi?hello=there&abc=def HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when POST request with query-string on cgiRoute
+# cgi should receive query-string as QUERY_STRING
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_cgi_query='hello=there&abc=def'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_query \
+    'config_one' \
+    'POST /query.cgi?hello=there&abc=def HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when last declared cgi route matches and file not found
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+expected_error_page='route /42/*.cgi 404'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /42/not_existing_page.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when last declared cgi route matches and times out
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 504 Gateway Timeout\r")
+expected_error_page='route /42/*.cgi 504'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /42/sleep.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when last declared cgi route matches and crashes
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 500 Internal Server Error\r")
+expected_error_page='route /42/*.cgi 500'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /42/error.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when first declared cgi route matches and file not found
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+expected_error_page='route /**.cgi 404'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /not_existing_page.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when first declares cgi route matches and crashes
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 500 Internal Server Error\r")
+expected_error_page='route /**.cgi 500'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /error.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when last cgi route matches and times out
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 504 Gateway Timeout\r")
+expected_error_page='route /**.cgi 504'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /sleep.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when no route matches and not bad request
+# should respond virtual server error page
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+expected_error_page='virtualServer 404'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /69/not_a_page HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when bad request before match virtual server
+# should respond server error page
+expected_status_line=$(printf "HTTP/1.1 400 Bad Request\r")
+expected_error_page='server 400'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'NOT A HTTP REQUEST'
+#
+
+# when cgi route respond status 418 and error page for 418 only on virtual server
+# should respond virtual server error page
+expected_status_line=$(printf "HTTP/1.1 418 I'm a teapot\r")
+expected_error_page='server 418'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /418.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when cgi route respond status 402 and error page for 402 only on server
+# should respond server error page
+expected_status_line=$(printf "HTTP/1.1 402 Payment Required\r")
+expected_error_page='virtualServer 402'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /402.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #

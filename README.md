@@ -114,7 +114,7 @@ empty
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
             - priority based is likely better option something like 'index > listing'
-      - [ ] configuration for default responses
+      - [X] configuration for default responses
         - body content of error responses like 404 or 500 may be customized
         - configuration should point to a file that will be used on response
         - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
@@ -123,7 +123,7 @@ empty
             - `server` context (equivalent to our `http::VirtualServer`)
             - `location` context (equivalent to our `http::Route`)
         - [X] allow to declare errorPages
-        - [ ] implement errorPages feature
+        - [X] implement errorPages feature
       - [ ] configurable redirection
         - a route may be configured to redirect requests to another route
           should also state what is the status code of redirection response

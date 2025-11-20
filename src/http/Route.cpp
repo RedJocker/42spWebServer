@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 06:11:13 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 09:12:57 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,7 +18,11 @@ namespace http {
 	int Route::idGenerator = 0;
 
 	Route::Route(void)
-		: id(Route::idGenerator++), methodsAllowed(), pathSpecification("/"), docroot("")
+		: id(Route::idGenerator++),
+		  methodsAllowed(),
+		  errorPages(),
+		  pathSpecification("/"),
+		  docroot("")
 	{
 	}
 
@@ -27,6 +31,7 @@ namespace http {
 		  methodsAllowed(
 			  routeSpec.getAllowedMethods().begin(),
 			  routeSpec.getAllowedMethods().end()),
+		  errorPages(routeSpec.getErrorPages()),
 		  pathSpecification(routeSpec.getPathSpec()),
 		  docroot(routeSpec.getDocroot())
 	{
@@ -35,6 +40,7 @@ namespace http {
 	Route::Route(const Route &other)
 		: id(other.id),
 		  methodsAllowed(other.methodsAllowed),
+		  errorPages(other.errorPages),
 		  pathSpecification(other.pathSpecification),
 		  docroot(other.docroot)
 	{
@@ -46,6 +52,7 @@ namespace http {
 			return *this;
 		this->id = other.id;
 		this->methodsAllowed = other.methodsAllowed;
+		this->errorPages = other.errorPages;
 		this->pathSpecification = other.pathSpecification;
 		this->docroot = other.docroot;
 		return *this;
@@ -72,7 +79,7 @@ namespace http {
 	{
 		client.getResponse()
 			.setInternalServerError();
-		client.setMessageToSend(client.getResponse().toString());
+		client.writeResponse();
 	}
 
 	int Route::getId(void) const
@@ -83,5 +90,15 @@ namespace http {
 	const std::string &Route::getDocroot(void) const
 	{
 		return this->docroot;
+	}
+
+	const MapErrorPages &Route::getErrorPages(void) const
+	{
+		return this->errorPages;
+	}
+
+	const std::string &Route::getPathSpecification(void) const
+	{
+		return this->pathSpecification;
 	}
 }

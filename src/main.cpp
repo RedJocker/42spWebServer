@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/17 19:23:53 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 08:25:54 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,12 @@ http::Application applicationConfig(void)
 		config::RouteSpec routeSpec[2];
 		routeSpec[0]
 			.setPathSpec("/**.cgi")
-			.setCgiRoute()
+			.setCgiBinPath("/usr/bin/php-cgi")
 			.addAllowedMethod("POST")
 			.addAllowedMethod("GET");
 
 		routeSpec[1]
-			.setPathSpec("/**")
+			.setPathSpec("/*")
 			.addAllowedMethod("POST")
 			.addAllowedMethod("GET")
 			.addAllowedMethod("DELETE");
@@ -66,7 +66,7 @@ http::Application applicationConfig(void)
 		config::RouteSpec routeSpec[2];
 		routeSpec[0]
 			.setPathSpec("/**.cgi")
-			.setCgiRoute()
+			.setCgiBinPath("/usr/bin/php-cgi")
 			.addAllowedMethod("POST")
 			.addAllowedMethod("GET");
 

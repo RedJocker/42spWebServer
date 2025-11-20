@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:12:50 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/16 05:45:48 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 09:14:56 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -28,6 +28,8 @@ namespace http {
 		std::string hostname;
 		std::string docroot;
 		std::set<Route*, OrderRoutes> routes;
+		MapErrorPages errorPages;
+
 	public:
 		VirtualServer();
 		VirtualServer(const config::VirtualServerSpec &spec,
@@ -39,7 +41,9 @@ namespace http {
 
 		void serve(Client &client, conn::Monitor &monitor);
 		const std::string &getDocroot(void) const;
+		const MapErrorPages &getErrorPages(void) const;
 		bool matches(const std::string &hostname);
+		const std::string &getHostname(void) const;
 		void shutdown(void);
 	};
 }

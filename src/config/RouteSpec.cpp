@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/18 07:07:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 06:33:19 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -150,6 +150,12 @@ namespace config
 		}
 		this->redirection = redirection;
 		return *this;
+	}
+
+	const std::map<unsigned short int, std::string> &RouteSpec::getErrorPages(
+		void) const
+	{
+		return this->errorPages;
 	}
 
 	RouteSpec &RouteSpec::addErrorPage(
