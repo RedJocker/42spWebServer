@@ -184,6 +184,7 @@ assert_error_pages() {
     # this is like the return of c main function
 }
 
+
 verbose='false'
 ## START TESTS
 
@@ -378,7 +379,7 @@ test_request \
     'NOT A HTTP REQUEST'
 #
 
-# when cgi route respond status 418 and error page for 418 only on virtual server
+# when cgi route respond status 418 and error page for 418 only on server
 # should respond virtual server error page
 expected_status_line=$(printf "HTTP/1.1 418 I'm a teapot\r")
 expected_error_page='server 418'
@@ -389,7 +390,7 @@ test_request \
     'GET /418.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #
 
-# when cgi route respond status 402 and error page for 402 only on server
+# when cgi route respond status 402 and error page for 402 only on virtual server
 # should respond server error page
 expected_status_line=$(printf "HTTP/1.1 402 Payment Required\r")
 expected_error_page='virtualServer 402'
@@ -398,4 +399,40 @@ test_request \
     assert_error_pages \
     'config_error_pages' \
     'GET /402.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when cgi route respond status 418
+# and error page for 418 on server and virtual server
+# should respond virtual server error page
+expected_status_line=$(printf "HTTP/1.1 418 I'm a teapot\r")
+expected_error_page='virtualServer 418'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /418.cgi HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when cgi route respond status 402
+# and error page for 402 on virtual server and route
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 402 Payment Required\r")
+expected_error_page='route /42/*.cgi 402'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /42/402.cgi HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when cgi route respond status 418
+# and error page for 418 on server and route
+# should respond route error page
+expected_status_line=$(printf "HTTP/1.1 418 I'm a teapot\r")
+expected_error_page='route /42/*.cgi 418'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_error_pages \
+    'config_error_pages' \
+    'GET /42/418.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #

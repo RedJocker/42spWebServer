@@ -7,7 +7,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 00:32:07 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 09:26:30 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 08:35:40 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -144,6 +144,7 @@ http::Application setup_config_error_pages(std::string &addressPort)
 			.addAllowedMethod("GET")
 			.addErrorPage(400, "route /42/*.cgi 400")
 			.addErrorPage(404, "route /42/*.cgi 404")
+			.addErrorPage(418, "route /42/*.cgi 418")
 			.addErrorPage(500, "route /42/*.cgi 500")
 			.addErrorPage(504, "route /42/*.cgi 504");
 		routeSpec[2]
@@ -162,6 +163,53 @@ http::Application setup_config_error_pages(std::string &addressPort)
 		}
 	}
 	serverSpec.addVirtualServer(virtualServer1);
+
+	config::VirtualServerSpec virtualServer2;
+	virtualServer2
+		.setHostname("domain.com")
+		.addErrorPage(400, "virtualServer 400")
+		.addErrorPage(402, "virtualServer 402")
+		.addErrorPage(404, "virtualServer 404")
+		.addErrorPage(418, "virtualServer 418")
+		.addErrorPage(500, "virtualServer 500")
+		.addErrorPage(504, "virtualServer 504");
+	{
+		config::RouteSpec routeSpec[3];
+		routeSpec[0]
+			.setPathSpec("/**.cgi")
+			.setCgiBinPath("/usr/bin/php-cgi")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			.addErrorPage(400, "route /**.cgi 400")
+			.addErrorPage(404, "route /**.cgi 404")
+			.addErrorPage(500, "route /**.cgi 500")
+			.addErrorPage(504, "route /**.cgi 504");
+		routeSpec[1]
+			.setPathSpec("/42/*.cgi")
+			.setCgiBinPath("/usr/bin/php-cgi")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			.addErrorPage(400, "route /42/*.cgi 400")
+			.addErrorPage(402, "route /42/*.cgi 402")
+			.addErrorPage(404, "route /42/*.cgi 404")
+			.addErrorPage(500, "route /42/*.cgi 500")
+			.addErrorPage(504, "route /42/*.cgi 504");
+		routeSpec[2]
+			.setPathSpec("/*")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			.addAllowedMethod("DELETE")
+			.addErrorPage(400, "route /* 400")
+			.addErrorPage(404, "route /* 404")
+			.addErrorPage(500, "route /* 500")
+			.addErrorPage(504, "route /* 504");
+
+		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
+		{
+			virtualServer2.addRoute(routeSpec[i]);
+		}
+	}
+	serverSpec.addVirtualServer(virtualServer2);
 
 	config::ApplicationSpec appSpec;
 	appSpec.addServer(serverSpec);
