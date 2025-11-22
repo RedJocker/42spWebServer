@@ -76,6 +76,10 @@ empty
         - route > virtual server > server
       - [x] allow to declare max size on specs
       - [ ] implement max body size checking
+        - [ ] start implementing a "dumb" checking
+              that reads body before checking max body size
+        -  [ ] implement a wise check that checks max body size before reading body
+            - demands some flow redesign to make early route matching
     - [X] Configurable docroot
       - configuration may choose a root server folder that maps to server file system
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#root)
