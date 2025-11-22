@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 09:38:17 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/22 08:22:22 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,6 +17,7 @@
 # include <vector>
 # include "RouteSpec.hpp"
 # include "pathUtils.hpp"
+
 
 namespace http
 {
@@ -49,6 +50,8 @@ namespace config {
 		const std::string &getDocroot(void) const;
 		const std::string &getHostname(void) const;
 		const MapErrorPages &getErrorPages(void) const;
+		const std::pair<unsigned short int, std::string>
+			&getRedirection(void) const;
 
 		VirtualServerSpec &setHostname(const std::string &hostname);
 		VirtualServerSpec &setDocroot(const std::string &docroot);

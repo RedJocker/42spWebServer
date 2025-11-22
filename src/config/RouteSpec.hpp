@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/21 23:39:24 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/22 08:05:59 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -56,6 +56,8 @@ namespace config
 		const MapErrorPages &getErrorPages(void) const;
 		const std::string &getIndexFile(void) const;
 		bool getListDirectories(void) const;
+		const std::pair<unsigned short int, std::string>
+			&getRedirection(void) const;
 
 		bool isCgiRoute(void) const;
 

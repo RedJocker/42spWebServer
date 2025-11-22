@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/21 22:41:56 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/22 08:34:45 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -103,6 +103,12 @@ namespace config
 		return this->listDirectories && this->indexFile.empty();
 	}
 
+	const std::pair<unsigned short int, std::string>
+		&RouteSpec::getRedirection(void) const
+	{
+		return this->redirection;
+	}
+
 	bool RouteSpec::isCgiRoute(void) const
 	{
 		return !this->cgiBinPath.empty();
@@ -185,7 +191,7 @@ namespace config
 	RouteSpec &RouteSpec::setRedirectionIfUnset(
 		std::pair<unsigned short int, std::string> &redirection)
 	{
-		if (this->redirection.first == 0)
+		if (this->redirection.first != 0)
 		{
 			return *this;
 		}

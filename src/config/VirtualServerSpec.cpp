@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/21 17:36:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/22 08:05:13 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -73,6 +73,12 @@ namespace config {
 	const MapErrorPages &VirtualServerSpec::getErrorPages(void) const
 	{
 		return this->errorPages;
+	}
+
+	const std::pair<unsigned short int, std::string>
+		&VirtualServerSpec::getRedirection(void) const
+	{
+		return this->redirection;
 	}
 
 	VirtualServerSpec &VirtualServerSpec::setHostname(

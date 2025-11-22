@@ -227,9 +227,31 @@ assert_list_directory() {
     # this is like the return of c main function
 }
 
+assert_redirect() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local expected_location_header="Location: $redirect_location"
+
+    if !(echo "$request_output" | grep "$expected_location_header" > /dev/null); then
+        echo "expected response to contain <$expected_location_header>"
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
+
 
 verbose='false'
-## START TESTS
+### START TESTS
 
 test_line=$(( $LINENO + 1 ))
 test_connection 'config_one' 'localhost'
@@ -254,7 +276,8 @@ test_request \
     'GET /42/cwd.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #
 
-# when using config_one request to domain.com/cwd.cgi should have cwd=www2 
+# when using config_one request to domain.com/cwd.cgi should have cwd=www2
+# and virtual server domain is on /etc/hosts 
 expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
 expected_working_directory='www2'
 test_line=$(( $LINENO + 1 ))
@@ -445,6 +468,7 @@ test_request \
 #
 
 # when cgi route respond status 418
+# and virtual server domain is on /etc/hosts 
 # and error page for 418 on server and virtual server
 # should respond virtual server error page
 expected_status_line=$(printf "HTTP/1.1 418 I'm a teapot\r")
@@ -457,6 +481,7 @@ test_request \
 #
 
 # when cgi route respond status 402
+# and virtual server domain is on /etc/hosts 
 # and error page for 402 on virtual server and route
 # should respond route error page
 expected_status_line=$(printf "HTTP/1.1 402 Payment Required\r")
@@ -536,6 +561,7 @@ test_request \
 #
 
 # when static route has indexFile index.html
+# and virtual server domain is on /etc/hosts 
 # and static route with pathSpec /**
 # and docroot/42/index.html does not exists
 # and request for /42/
@@ -550,6 +576,7 @@ test_request \
 #
 
 # when static route has indexFile index.html
+# and virtual server domain is on /etc/hosts 
 # and static route with pathSpec /**
 # and docroot/77/index.html exists
 # and request for /77/
@@ -564,6 +591,7 @@ test_request \
 #
 
 # when static route has indexFile index.html
+# and virtual server domain is on /etc/hosts 
 # and static route with pathSpec /**
 # and docroot/69/ does not exists
 # and request for /69/
@@ -578,6 +606,7 @@ test_request \
 #
 
 # when static route has indexFile index.html
+# and virtual server domain is on /etc/hosts 
 # and static route with pathSpec /**
 # and docroot/index.html exists
 # and request for /
@@ -589,4 +618,30 @@ test_request \
     assert_index_page \
     'config_directory' \
     'GET / HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when virtual server has 308 redirection to another hostname
+# and virtual server domain is on /etc/hosts 
+# and has route with pathSpec /**
+# then should return 308
+expected_status_line=$(printf "HTTP/1.1 308 Permanent Redirect\r")
+redirect_location="localhost:8080/"
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_redirect \
+    'config_redirection' \
+    'GET / HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when route has 307 redirection to another route
+# and has route with pathSpec /55/**
+# and docroot/55/ does not exist
+# then should return 307
+expected_status_line=$(printf "HTTP/1.1 307 Temporary Redirect\r")
+redirect_location="/42/"
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_redirect \
+    'config_redirection' \
+    'GET /55/ HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
 #

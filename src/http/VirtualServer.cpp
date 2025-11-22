@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/21 23:42:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/22 17:44:06 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -116,6 +116,27 @@ namespace http
 			if (route.matches(reqPath, method))
 			{
 				client.setRoute(&route);
+
+				if (route.hasRedirection())
+				{
+					std::cout << "redirection: "
+							  << route.getRedirectionStatusCode()
+							  << " "
+							  << route.getRedirectionPath()
+							  << std::endl;
+					Response &response = client.getResponse();
+					response.clear();
+					std::string location = route.getRedirectionPath();
+					unsigned short int status =
+						route.getRedirectionStatusCode();
+
+					response.setStatusCode(status);
+					response.setStatusInfo(response.statusInfoInfer(status));
+					response.addHeader("Location", location);
+					response.addHeader("Content-Length", "0");
+					client.writeResponse();
+					return;
+				}
 
 				// Redirect if not '/' for directory listing
 				if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {

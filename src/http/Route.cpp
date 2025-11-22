@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/21 23:40:25 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/22 08:17:00 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,7 +25,8 @@ namespace http {
 		  pathSpecification("/"),
 		  docroot(""),
 		  indexFile(""),
-		  listDirectories(false)
+		  listDirectories(false),
+		  redirection(0, "")
 	{
 	}
 
@@ -38,7 +39,8 @@ namespace http {
 		  pathSpecification(routeSpec.getPathSpec()),
 		  docroot(routeSpec.getDocroot()),
 		  indexFile(routeSpec.getIndexFile()),
-		  listDirectories(routeSpec.getListDirectories())
+		  listDirectories(routeSpec.getListDirectories()),
+		  redirection(routeSpec.getRedirection())
 	{
 	}
 
@@ -49,7 +51,8 @@ namespace http {
 		  pathSpecification(other.pathSpecification),
 		  docroot(other.docroot),
 		  indexFile(other.indexFile),
-		  listDirectories(other.listDirectories)
+		  listDirectories(other.listDirectories),
+		  redirection(other.redirection)
 	{
 	}
 
@@ -64,6 +67,7 @@ namespace http {
 		this->docroot = other.docroot;
 		this->indexFile = other.indexFile;
 		this->listDirectories = other.listDirectories;
+		this->redirection = other.redirection;
 		return *this;
 	}
 
@@ -140,5 +144,22 @@ namespace http {
 	bool Route::getListDirectories(void) const
 	{
 		return this->listDirectories;
+	}
+
+	bool Route::hasRedirection(void) const
+	{
+		return this->redirection.first >= 300
+			&& this->redirection.first < 400
+			&& (!this->redirection.second.empty());
+	}
+
+	unsigned short int Route::getRedirectionStatusCode(void) const
+	{
+		return this->redirection.first;
+	}
+
+	const std::string &Route::getRedirectionPath(void) const
+	{
+		return this->redirection.second;
 	}
 }

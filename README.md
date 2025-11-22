@@ -124,13 +124,13 @@ empty
             - `location` context (equivalent to our `http::Route`)
         - [X] allow to declare errorPages
         - [X] implement errorPages feature
-      - [ ] configurable redirection
+      - [X] configurable redirection
         - a route may be configured to redirect requests to another route
           should also state what is the status code of redirection response
         - nginx has two directives related to redirection `return` and `rewrite`
           - both are allowed on `server` and `location` context
         - [X] allow to declare redirection
-        - [ ] implement redirection feature
+        - [X] implement redirection feature
       - [ ] configurable file upload
         - may allow or dissalow file upload (depends on POST method being allowed)
         - may configure a folder to upload files into
