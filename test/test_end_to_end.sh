@@ -184,6 +184,49 @@ assert_error_pages() {
     # this is like the return of c main function
 }
 
+assert_index_page() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local index_page=$(echo "$request_output" | tail -1)
+
+    if [[ "$index_page" != "$expected_index_page" ]]; then
+        echo "expected index_page == $expected_index_page" | cat -e
+        echo "actual   index_page == $index_page" | cat -e
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
+assert_list_directory() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local to_find="Index of $directory"
+
+    if !(echo "$request_output" | grep "$to_find" > /dev/null); then
+        echo "expected response to contain <$to_find>"
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
 
 verbose='false'
 ## START TESTS
@@ -435,4 +478,115 @@ test_request \
     assert_error_pages \
     'config_error_pages' \
     'GET /42/418.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when cgi route has indexFile index.cgi
+# and with pathSpec /**.cgi
+# and docroot/42/index.cgi exists
+# and request for /42/
+# then should return 200 with /42/index.cgi on body
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_index_page='/42/index.cgi'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_index_page \
+    'config_directory' \
+    'GET /42/ HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+
+# when virtual server has indexFile index.html
+# and static route with pathSpec /77/*
+# and docroot/77/index.html exists
+# and request for /77/
+# then should return 200 with /77/index.html on body
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_index_page='/77/index.html'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_index_page \
+    'config_directory' \
+    'GET /77/ HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when virtual server has indexFile index.html
+# and static route with pathSpec /**
+# and docroot/69/ does not exists
+# and request for /69/
+# then should return 404 with route /** 404 on body
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+expected_index_page='route /** 404'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_index_page \
+    'config_directory' \
+    'GET /69/ HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when static route has list directory
+# and static route with pathSpec /**
+# and docroot/index.html exists
+# and request for /
+# then should return 200 with directory listed
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+directory='/'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_list_directory \
+    'config_directory' \
+    'GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when static route has indexFile index.html
+# and static route with pathSpec /**
+# and docroot/42/index.html does not exists
+# and request for /42/
+# then should return 404 with route /** 404 on body
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+expected_index_page='route /** 404'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_index_page \
+    'config_directory' \
+    'GET /42/ HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when static route has indexFile index.html
+# and static route with pathSpec /**
+# and docroot/77/index.html exists
+# and request for /77/
+# then should return 200 with /77/index.html on body
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_index_page='/77/index.html'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_index_page \
+    'config_directory' \
+    'GET /77/ HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when static route has indexFile index.html
+# and static route with pathSpec /**
+# and docroot/69/ does not exists
+# and request for /69/
+# then should return 404 with route /** 404 on body
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+expected_index_page='route /** 404'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_index_page \
+    'config_directory' \
+    'GET /69/ HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
+#
+
+# when static route has indexFile index.html
+# and static route with pathSpec /**
+# and docroot/index.html exists
+# and request for /
+# then should return 200 with /index.html on body
+expected_status_line=$(printf "HTTP/1.1 200 Ok\r")
+expected_index_page='/index.html'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_index_page \
+    'config_directory' \
+    'GET / HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n\r\n'
 #

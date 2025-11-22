@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 06:30:31 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 23:42:02 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sstream>
+#include <cerrno>
 
 namespace http {
 
@@ -62,9 +63,15 @@ namespace http {
 		std::cout << "RouteStaticFile::handleGetFile " << std::endl;
 
 		RequestPath &reqPath = client.getRequest().getPath();
+		std::cout << "filePath: " << reqPath.getFilePath() << std::endl;
 
 		int fd = open(reqPath.getFilePath().c_str(), O_RDONLY);
 		if (fd < 0) {
+			std::string error = strerror(errno);
+			std::cerr << "failed opening file "
+					  << reqPath.getFilePath()
+					  << ": "
+					  << error <<std::endl;
 			// TODO
 			// we need to check reason failed to open
 			// and give a response based on the reason
@@ -258,12 +265,18 @@ namespace http {
 		const std::string &method = client.getRequest().getMethod();
 		if (method == "GET" && (reqPath.isFile() || reqPath.isDirectory()))
 		{
-			if (reqPath.isDirectory())
+			if (reqPath.isDirectory()
+				&& this->indexFile.empty()
+				&& this->getListDirectories())
+			{
 				handleGetDirectory(client, monitor);
-			else
+				return;
+			}
+			else if (reqPath.isFile()) {
 				handleGetFile(client, monitor);
+				return;
+			}
 
-			return;
 		}
 
 		if (method == "POST")

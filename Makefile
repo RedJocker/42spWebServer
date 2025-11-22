@@ -6,7 +6,7 @@
 #    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/11/18 17:24:17 by maurodri         ###   ########.fr        #
+#    Updated: 2025/11/21 20:57:54 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -88,16 +88,16 @@ $(OBJ_DIR):
 	@mkdir -p $@
 
 
-test_tcp: $(MODULE_FILES) $(TEST_DIR)/test_tcp.cpp $(TEST_DIR)/test_tcp.sh
+test_tcp: $(OBJS) $(TEST_DIR)/test_tcp.cpp $(TEST_DIR)/test_tcp.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_tcp.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
-test_buff_read: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_read.cpp $(TEST_DIR)/test_bufferedReader_read.sh
+test_buff_read: $(OBJS) $(TEST_DIR)/test_bufferedReader_read.cpp $(TEST_DIR)/test_bufferedReader_read.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_bufferedReader_read.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
-test_buff_readlineCrlf: $(MODULE_FILES) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp $(TEST_DIR)/test_bufferedReader_readlineCrlf.sh
+test_buff_readlineCrlf: $(OBJS) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp $(TEST_DIR)/test_bufferedReader_readlineCrlf.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_bufferedReader_readlineCrlf.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
-test_end_to_end: $(MODULE_FILES) $(TEST_DIR)/test_end_to_end.cpp $(TEST_DIR)/test_end_to_end.sh
+test_end_to_end: $(OBJS) $(TEST_DIR)/test_end_to_end.cpp $(TEST_DIR)/test_end_to_end.sh
 	$(CC) $(CFLAGS) $(TEST_DIR)/test_end_to_end.cpp -o $@ $(MODULE_FILES) $(INCLUDES)
 
 clean:

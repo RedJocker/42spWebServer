@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/20 09:15:28 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 23:42:21 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -112,11 +112,11 @@ namespace http
 				continue;
 			Route &route = *(*routeIt);
 			RequestPath &reqPath = client.getRequest().getPath();
+			reqPath.analyzePath(route.getDocroot());
 			if (route.matches(reqPath, method))
 			{
-
 				client.setRoute(&route);
-				reqPath.analyzePath(route.getDocroot());
+
 				// Redirect if not '/' for directory listing
 				if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
 					Response &response = client.getResponse();

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 06:33:19 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 22:41:56 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -65,6 +65,47 @@ namespace config
 	const std::string &RouteSpec::getDocroot(void) const
 	{
 		return this->docroot;
+	}
+
+	const std::string &RouteSpec::getCgiBinPath(void) const
+	{
+		return this->cgiBinPath;
+	}
+
+	const std::string &RouteSpec::getPathSpec(void) const
+	{
+		return this->pathSpec;
+	}
+
+	const std::vector<std::string> &RouteSpec::getAllowedMethods(void) const
+	{
+		return this->allowedMethods;
+	}
+
+	const std::string &RouteSpec::getUploadFolder(void) const
+	{
+		return this->uploadFolder;
+	}
+
+	const std::map<unsigned short int, std::string> &RouteSpec::getErrorPages(
+		void) const
+	{
+		return this->errorPages;
+	}
+
+	const std::string &RouteSpec::getIndexFile(void) const
+	{
+		return this->indexFile;
+	}
+
+	bool RouteSpec::getListDirectories(void) const
+	{
+		return this->listDirectories && this->indexFile.empty();
+	}
+
+	bool RouteSpec::isCgiRoute(void) const
+	{
+		return !this->cgiBinPath.empty();
 	}
 
 	RouteSpec &RouteSpec::setDocroot(const std::string &docroot)
@@ -128,7 +169,7 @@ namespace config
 
 	RouteSpec &RouteSpec::setIndexFileIfEmpty(const std::string &indexFile)
 	{
-		if (this->indexFile.empty())
+		if (this->indexFile.empty() && !this->listDirectoriesWasSet)
 			this->indexFile = indexFile;
 		return *this;
 	}
@@ -152,12 +193,6 @@ namespace config
 		return *this;
 	}
 
-	const std::map<unsigned short int, std::string> &RouteSpec::getErrorPages(
-		void) const
-	{
-		return this->errorPages;
-	}
-
 	RouteSpec &RouteSpec::addErrorPage(
 		unsigned short int status, const std::string &bodyPage)
 	{
@@ -173,41 +208,16 @@ namespace config
 		return *this;
 	}
 
-	const std::string &RouteSpec::getPathSpec(void) const
-	{
-		return this->pathSpec;
-	}
-
 	RouteSpec &RouteSpec::setPathSpec(const std::string &pathSpec)
 	{
 		this->pathSpec = pathSpec;
 		return *this;
 	}
 
-	const std::vector<std::string> &RouteSpec::getAllowedMethods(void) const
-	{
-		return this->allowedMethods;
-	}
-
-	const std::string &RouteSpec::getUploadFolder(void) const
-	{
-		return this->uploadFolder;
-	}
-
 	RouteSpec &RouteSpec::addAllowedMethod(const std::string &method)
 	{
 		this->allowedMethods.push_back(method);
 		return *this;
-	}
-
-	bool RouteSpec::isCgiRoute(void) const
-	{
-		return !this->cgiBinPath.empty();
-	}
-
-	const std::string &RouteSpec::getCgiBinPath(void) const
-	{
-		return this->cgiBinPath;
 	}
 
 	RouteSpec &RouteSpec::setCgiBinPath(const std::string &cgiBinPath)

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 08:46:06 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 17:38:49 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -119,8 +119,8 @@ namespace config {
 			http::VirtualServer *virtualServer = (*virtualServerIt)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
-				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
+				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
 				.toVirtualServer();
 			vservers.push_back(virtualServer);

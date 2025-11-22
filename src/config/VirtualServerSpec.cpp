@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 07:26:51 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 17:36:52 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -152,7 +152,7 @@ namespace config {
 	VirtualServerSpec &VirtualServerSpec::setIndexFileIfEmpty(
 		const std::string &indexFile)
 	{
-		if (this->indexFile.empty())
+		if (this->indexFile.empty() && !this->listDirectoriesWasSet)
 			this->indexFile = indexFile;
 		return *this;
 	}
@@ -193,8 +193,8 @@ namespace config {
 				.setUploadFolderIfEmpty(this->uploadFolder)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
-				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
+				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
 				.setRedirectionIfUnset(this->redirection)
 				.toRoute();

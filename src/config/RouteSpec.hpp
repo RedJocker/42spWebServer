@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 09:37:44 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 23:39:24 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -49,12 +49,15 @@ namespace config
 		virtual ~RouteSpec(void);
 
 		const std::string &getDocroot(void) const;
-		bool isCgiRoute(void) const;
 		const std::string &getCgiBinPath(void) const;
 		const std::string &getPathSpec(void) const;
 		const std::vector<std::string> &getAllowedMethods(void) const;
 		const std::string &getUploadFolder(void) const;
 		const MapErrorPages &getErrorPages(void) const;
+		const std::string &getIndexFile(void) const;
+		bool getListDirectories(void) const;
+
+		bool isCgiRoute(void) const;
 
 		RouteSpec &setCgiBinPath(const std::string &cgiBinPath);
 		RouteSpec &setDocroot(const std::string &docroot);

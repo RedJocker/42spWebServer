@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 09:41:24 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 22:50:58 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -39,6 +39,8 @@ namespace http
 	protected:
 		std::string pathSpecification;
 		std::string docroot;
+		std::string indexFile;
+		bool listDirectories;
 
 	public:
 		Route(void);
@@ -48,13 +50,15 @@ namespace http
 		virtual ~Route(void);
 		virtual void serve(http::Client &client,  conn::Monitor &monitor) = 0;
 		virtual void respond(http::Client &client, const Operation &operation) const = 0;
-		bool matches(const RequestPath &path, const std::string &method) const;
+		// mutates path only if matches indexFile
+		bool matches(RequestPath &path, const std::string &method) const;
 		bool isMethodAllowed(const std::string &maybeMethodAllowed) const;
 		void onServerError(http::Client &client) const;
 		int getId(void) const;
 		const std::string &getPathSpecification(void) const;
 		const std::string &getDocroot(void) const;
 		const MapErrorPages &getErrorPages(void) const;
+		bool getListDirectories(void) const;
 	};
 }
 

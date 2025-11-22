@@ -93,16 +93,16 @@ empty
          - using /path/*.ext to match files that end in .ext at /path folder only
          - using /path/* to match any file at /path folder only
          - using /path/specific.html to match only /path/specific.html
-      - [ ] configuration for directory files
-        - [ ] configurable "index" file (ex: index.html, index.php, any.xxx)
+      - [X] configuration for directory files
+        - [X] configurable "index" file (ex: index.html, index.php, any.xxx)
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
             - nginx allows this config on
               - `http` contenxt (equivalent to our `http::Server`)
               - `server` context (equivalent to our `http::VirtualServer`)
               - `location` context (equivalent to our `http::Route`)
             - [X] allow to declare index file
-            - [ ] implement checking index file
-        - [ ] configuration for listing directory content
+            - [X] implement checking index file
+        - [X] configuration for listing directory content
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
             - ngix first tries index file if that is configured
               - nginx allows this config on
@@ -110,7 +110,7 @@ empty
                 - `server` context (equivalent to our `http::VirtualServer`)
                 - `location` context (equivalent to our `http::Route`)
           - [X] allow to declare directory listing
-          - [ ] implement checking directory listing
+          - [X] implement checking directory listing
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
             - priority based is likely better option something like 'index > listing'
