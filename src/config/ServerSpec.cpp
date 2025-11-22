@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 22:17:11 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 17:38:49 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -62,6 +62,11 @@ namespace config {
 		return this->addressPort;
 	}
 
+	const MapErrorPages &ServerSpec::getErrorPages(void) const
+	{
+		return this->errorPages;
+	}
+
 	ServerSpec &ServerSpec::setDocroot(const std::string &docroot)
 	{
 		this->docroot = docroot;
@@ -114,8 +119,8 @@ namespace config {
 			http::VirtualServer *virtualServer = (*virtualServerIt)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
-				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
+				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
 				.toVirtualServer();
 			vservers.push_back(virtualServer);

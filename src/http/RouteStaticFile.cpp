@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 06:07:59 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 23:42:02 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sstream>
+#include <cerrno>
 
 namespace http {
 
@@ -62,14 +63,20 @@ namespace http {
 		std::cout << "RouteStaticFile::handleGetFile " << std::endl;
 
 		RequestPath &reqPath = client.getRequest().getPath();
+		std::cout << "filePath: " << reqPath.getFilePath() << std::endl;
 
 		int fd = open(reqPath.getFilePath().c_str(), O_RDONLY);
 		if (fd < 0) {
+			std::string error = strerror(errno);
+			std::cerr << "failed opening file "
+					  << reqPath.getFilePath()
+					  << ": "
+					  << error <<std::endl;
 			// TODO
 			// we need to check reason failed to open
 			// and give a response based on the reason
 			client.getResponse().setNotFound();
-			client.setMessageToSend(client.getResponse().toString());
+			client.writeResponse();
 			return;
 		}
 		std::cout << "clientFd = " << client.getFd() << std::endl;
@@ -90,7 +97,7 @@ namespace http {
 		if (!dir)
 		{
 			response.setNotFound();
-			client.setMessageToSend(response.toString());
+			client.writeResponse();
 			return ;
 		}
 
@@ -119,7 +126,7 @@ namespace http {
 		response.setOk()
 			.addHeader("Content-Type", "text/html")
 			.setBody(html.str());
-		client.setMessageToSend(response.toString());
+		client.writeResponse();
 	}
 
 	// at this moment keep body from multipart as a regular body
@@ -187,7 +194,7 @@ namespace http {
 			{
 				this->_multipartParts.clear();
 				client.getResponse().setBadRequest();
-				client.setMessageToSend(client.getResponse().toString());
+				client.writeResponse();
 				return ;
 			}
 		}
@@ -247,7 +254,7 @@ namespace http {
 			response.setNotFound();
 		}
 
-		client.setMessageToSend(response.toString());
+		client.writeResponse();
 	}
 
 	void RouteStaticFile::serve(http::Client &client, conn::Monitor &monitor)
@@ -258,12 +265,18 @@ namespace http {
 		const std::string &method = client.getRequest().getMethod();
 		if (method == "GET" && (reqPath.isFile() || reqPath.isDirectory()))
 		{
-			if (reqPath.isDirectory())
+			if (reqPath.isDirectory()
+				&& this->indexFile.empty()
+				&& this->getListDirectories())
+			{
 				handleGetDirectory(client, monitor);
-			else
+				return;
+			}
+			else if (reqPath.isFile()) {
 				handleGetFile(client, monitor);
+				return;
+			}
 
-			return;
 		}
 
 		if (method == "POST")
@@ -280,7 +293,7 @@ namespace http {
 
 		Response &response = client.getResponse();
 		response.setNotFound();
-		client.setMessageToSend(response.toString());
+		client.writeResponse();
 	}
 
 	void RouteStaticFile::onFileRead(http::Client &client, const std::string &fileContent) const
@@ -293,14 +306,14 @@ namespace http {
 			.addHeader("Content-Type", mimeType)
 			.setOk()
 			.setBody(fileContent);
-		client.setMessageToSend(client.getResponse().toString());
+		client.writeResponse();
 	}
 
 	void RouteStaticFile::onFileWritten(http::Client &client) const
 	{
 		client.getResponse()
 			.setCreated();
-		client.setMessageToSend(client.getResponse().toString());
+		client.writeResponse();
 	}
 
 	void RouteStaticFile::respond(http::Client &client,	 const Operation &operation) const

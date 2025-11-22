@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:58:32 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/09 06:33:21 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 23:39:43 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,45 @@
 #include <iostream>
 #include <sys/stat.h>
 
-RequestPath::RequestPath()
+
+RequestPath::RequestPath() :
+	originalPath(""),
+	originalPathNormalized(""),
+	path(""),
+	queryString(""),
+	filePath(""),
+	extension(""),
+	directory(false),
+	redirectNeeded(false),
+	_isFile(false)
+{
+
+}
+
+RequestPath::RequestPath(const RequestPath &other)
+{
+	*this = other;
+}
+
+RequestPath &RequestPath::operator=(const RequestPath &other)
+{
+	if (this == &other)
+		return *this;
+
+	this->originalPath = other.originalPath;
+	this->originalPathNormalized = other.originalPathNormalized;
+	this->path = other.path;
+	this->queryString = other.queryString;
+	this->filePath = other.filePath;
+	this->extension = other.extension;
+	this->directory = other.directory;
+	this->redirectNeeded = other.redirectNeeded;
+	this->_isFile = other._isFile;
+
+	return *this;
+}
+
+RequestPath::~RequestPath()
 {
 
 }
@@ -76,7 +114,6 @@ bool RequestPath::matchesPathSpecification(
 	size_t path_i = 0;
 
 	bool isMatch = false;
-
 	while (true)
 	{
 		//std::cout << spec_i << ":" << path_i << std::endl;

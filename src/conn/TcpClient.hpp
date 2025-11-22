@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:02 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 17:54:58 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/20 09:06:27 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -33,10 +33,11 @@ class TcpClient
 		virtual ~TcpClient();
 
 		std::string getMessageToSend() const;
+		void setMessageToSend(std::string message);
 
 	public:
 		WriteState getWriterState() const;
-		void setMessageToSend(std::string message);
+
 		std::pair<WriteState, char*> flushMessage();
 		std::pair<WriteState, char*> flushOperation();
 		std::pair<ReadState, char*> read(size_t length);

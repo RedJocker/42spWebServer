@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/17 22:18:18 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 06:24:49 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,7 +319,7 @@ namespace conn
 			std::cerr << "error cgi reading: " << strerror(errno) << std::endl;
 			this->unsubscribeOperation(cgiFd);
 			client.getResponse().setInternalServerError();
-			client.setMessageToSend(client.getResponse().toString());
+			client.writeResponse();
 			return ;
 		}
 
@@ -375,7 +375,7 @@ namespace conn
 				std::cout << "bad request reading" << std::endl;
 
 				client->getResponse().setBadRequest();
-				client->setMessageToSend(client->getResponse().toString());
+				client->writeResponse();
 
 				return;
 			}
@@ -580,7 +580,7 @@ namespace conn
 				{
 					client->getResponse()
 						.setGatewayTimeout();
-					client->setMessageToSend(client->getResponse().toString());
+					client->writeResponse();
 					pid_t cgiPid = opIt->first.cgiPid;
 					kill(cgiPid, SIGKILL);
 				}

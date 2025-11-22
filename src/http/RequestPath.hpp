@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:54:53 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/08 02:17:30 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/21 18:12:31 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@ class RequestPath
 {
 	public:
 		RequestPath();
+		RequestPath(const RequestPath &other);
+		RequestPath &operator=(const RequestPath &other);
+		virtual ~RequestPath();
 
 		const std::string &getOriginalPath() const;
 		const std::string &getQueryString() const;

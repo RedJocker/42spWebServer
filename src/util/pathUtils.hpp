@@ -6,14 +6,17 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/06 18:15:36 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/20 06:45:31 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PATHUTILS_HPP
 # define PATHUTILS_HPP
 
-#include <string>
+# include <string>
+# include <map>
+
+typedef std::map<unsigned short int, std::string> MapErrorPages;
 
 namespace utils {
 	std::string urlDecode(const std::string &url);

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 17:41:30 by maurodri          #+#    #+#             */
-//   Updated: 2025/10/30 21:26:48 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/20 06:30:46 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ namespace http {
 	    {
 			Response &response = client.getResponse();
 			response.setInternalServerError();
-			client.setMessageToSend(response.toString());
+			client.writeResponse();
 			return ;
 		}
 
@@ -79,6 +79,6 @@ namespace http {
 		response
 			.setOk()
 			.setBody(client.getRequest().toString());
-		client.setMessageToSend(response.toString());
+		client.writeResponse();
 	}
 }
