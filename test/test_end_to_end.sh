@@ -59,7 +59,7 @@ test_request() {
     echo 'test_request: ' "$config" "$request"
 
     setup_server "$config"
-    request_output=$(printf "$request" | nc -v -w 6 'localhost' "$port")
+    request_output=$(printf -- "$request" | nc -v -w 6 'localhost' "$port")
     client_exit_status=$?
     teardown_server
     server_output_logfile=$(echo "$logfile")
@@ -69,6 +69,7 @@ test_request() {
         echo "test_request: [OK]";
     else
         echo "test_request: [ERROR]";
+	echo "client_exit_status: $client_exit_status"
 	has_fail='true'
     fi
 
@@ -247,6 +248,33 @@ assert_redirect() {
     # return keyword is for "status code" of the function execution with 0 -> ok
     # this is like the return of c main function
 }
+
+assert_upload() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    if !(ls -A "$folder_to_check" | grep "$expected_filename" > /dev/null); then
+        echo "expected $folder_to_check to contain $expected_filename"
+        return 1
+    fi
+
+    local file_content=$(cat "$folder_to_check/$expected_filename")
+    if [[ "$file_content" !=  "$expected_file_content" ]]; then
+        echo "expected file with content: $(echo $expected_file_content | cat -e)"
+	echo "actual file content: $(echo $file_content | cat -e)"
+        return 1
+    fi
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
+
 
 
 
@@ -644,4 +672,63 @@ test_request \
     assert_redirect \
     'config_redirection' \
     'GET /55/ HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+# when POST multipart file with filename
+# and static route with spec /42/** has uploadFolder
+# then expect file created with content from request after parsing multipart
+# and expect response 201
+upload_folder1=$(mktemp -d)
+upload_folder2=$(mktemp -d)
+folder_to_check="$upload_folder1"
+filename="filename.txt"
+file_content='some file content'
+body='--====-=-=\r
+Content-Disposition: form-data; name="file"; filename="'"$filename"'"\r
+Content-Type: text/plain\r
+\r
+'"$file_content"'
+--====-=-=--\r\n'
+body_len=$(printf -- "$body" | wc -c)
+expected_status_line=$(printf "HTTP/1.1 201 Created\r")
+expected_filename="filename.txt"
+expected_file_content='some file content'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_upload \
+    "config_upload $upload_folder1 $upload_folder2" \
+    'POST /42/ HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n'\
+'Content-Type: multipart/form-data; boundary=====-=-=\r\n'\
+"Content-length: $body_len\r\n\r\n$body"
+#
+
+# when POST multipart file with filename
+# and virtual server domain is on /etc/hosts
+# and virtual server has uploadFolder
+# and static route with spec /**
+# then expect file created with content from request after parsing multipart
+# and expect response 201
+
+upload_folder1=$(mktemp -d)
+upload_folder2=$(mktemp -d)
+folder_to_check="$upload_folder2"
+filename="other_name.txt"
+file_content='a different file content'
+body='--====-=-=\r
+Content-Disposition: form-data; name="file"; filename="'"$filename"'"\r
+Content-Type: text/plain\r
+\r
+'"$file_content"'
+--====-=-=--\r\n'
+body_len=$(printf -- "$body" | wc -c)
+expected_status_line=$(printf "HTTP/1.1 201 Created\r")
+expected_filename="other_name.txt"
+expected_file_content='a different file content'
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_upload \
+    "config_upload $upload_folder1 $upload_folder2" \
+    'POST /42/ HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n'\
+'Content-Type: multipart/form-data; boundary=====-=-=\r\n'\
+"Content-length: $body_len\r\n\r\n$body"
 #

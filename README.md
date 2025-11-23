@@ -135,7 +135,7 @@ empty
           - both are allowed on `server` and `location` context
         - [X] allow to declare redirection
         - [X] implement redirection feature
-      - [ ] configurable file upload
+      - [X] configurable file upload
         - may allow or dissalow file upload (depends on POST method being allowed)
         - may configure a folder to upload files into
       - [x] create a (interface||abstract class) Route that has at least

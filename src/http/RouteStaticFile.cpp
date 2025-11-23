@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/21 23:42:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/23 09:00:26 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -279,7 +279,7 @@ namespace http {
 
 		}
 
-		if (method == "POST")
+		if (method == "POST" && !this->uploadFolder.empty())
 		{
 			handlePost(client, monitor);
 			return ;
