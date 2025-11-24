@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/20 09:43:50 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 16:07:01 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,14 @@
 
 namespace http
 {
+	Server::Server(void)
+		: conn::TcpServer(DEFAULT_PORT),
+		  docroot(DEFAULT_DOCROOT),
+		  vservers(),
+		  errorPages()
+	{
+	}
+
 	Server::Server(
 		const config::ServerSpec &spec,
 		std::vector<VirtualServer*> &virtualServers)
@@ -40,9 +48,11 @@ namespace http
 	}
 
 	Server::Server(const Server &other)
-		: conn::TcpServer(other.addressPort)
+		: conn::TcpServer(other.addressPort),
+		  docroot(other.docroot),
+		  vservers(other.vservers),
+		  errorPages(other.errorPages)
 	{
-		*this = other;
 	}
 
 	Server &Server::operator=(const Server &other)
@@ -51,6 +61,7 @@ namespace http
 		{
 			this->docroot = other.docroot;
 			this->vservers = other.vservers;
+			this->errorPages = other.errorPages;
 			conn::TcpServer::operator=(other);
 		}
 		return *this;

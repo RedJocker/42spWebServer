@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/23 09:00:26 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 16:06:34 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <cerrno>
+#include <cstring>
 
 namespace http {
 

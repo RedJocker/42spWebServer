@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/20 09:37:23 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 16:04:26 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ namespace http {
 
 	void Client::writeResponse(void)
 	{
-		MapErrorPages const *errorPages;
+		MapErrorPages const *errorPages = 0;
 		std::string message;
 		if (this->route) {
 			message = "using route "

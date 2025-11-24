@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:00:29 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/20 09:44:16 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 16:04:12 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ namespace http
 		MapErrorPages errorPages;
 
 	public:
-
+		Server(void);
 		Server(
 			const config::ServerSpec &spec,
 			std::vector<VirtualServer*> &virtualServers);
