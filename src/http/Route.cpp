@@ -6,13 +6,14 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/22 08:17:00 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:57:43 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "Route.hpp"
 #include "RouteSpec.hpp"
 #include <iostream>
+#include "constants.hpp"
 
 namespace http {
 
@@ -25,6 +26,7 @@ namespace http {
 		  pathSpecification("/"),
 		  docroot(""),
 		  indexFile(""),
+		  cgiTimeout(CGI_TIMEOUT_NONE),
 		  listDirectories(false),
 		  redirection(0, "")
 	{
@@ -39,6 +41,7 @@ namespace http {
 		  pathSpecification(routeSpec.getPathSpec()),
 		  docroot(routeSpec.getDocroot()),
 		  indexFile(routeSpec.getIndexFile()),
+		  cgiTimeout(routeSpec.getCgiTimeout()),
 		  listDirectories(routeSpec.getListDirectories()),
 		  redirection(routeSpec.getRedirection())
 	{
@@ -51,6 +54,7 @@ namespace http {
 		  pathSpecification(other.pathSpecification),
 		  docroot(other.docroot),
 		  indexFile(other.indexFile),
+		  cgiTimeout(other.cgiTimeout),
 		  listDirectories(other.listDirectories),
 		  redirection(other.redirection)
 	{
@@ -66,6 +70,7 @@ namespace http {
 		this->pathSpecification = other.pathSpecification;
 		this->docroot = other.docroot;
 		this->indexFile = other.indexFile;
+		this->cgiTimeout = other.cgiTimeout;
 		this->listDirectories = other.listDirectories;
 		this->redirection = other.redirection;
 		return *this;
@@ -129,6 +134,11 @@ namespace http {
 	const std::string &Route::getDocroot(void) const
 	{
 		return this->docroot;
+	}
+
+	time_t Route::getCgiTimeout(void) const
+	{
+		return this->cgiTimeout;
 	}
 
 	const MapErrorPages &Route::getErrorPages(void) const

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/22 08:05:59 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 18:00:39 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -38,6 +38,7 @@ namespace config
 		bool listDirectories;
 		bool listDirectoriesWasSet;
 		std::string indexFile;
+		time_t cgiTimeout;
 		std::pair<unsigned short int, std::string> redirection;
 		MapErrorPages errorPages;
 		std::vector<std::string> allowedMethods;
@@ -58,7 +59,7 @@ namespace config
 		bool getListDirectories(void) const;
 		const std::pair<unsigned short int, std::string>
 			&getRedirection(void) const;
-
+		time_t getCgiTimeout(void) const;
 		bool isCgiRoute(void) const;
 
 		RouteSpec &setCgiBinPath(const std::string &cgiBinPath);
@@ -73,6 +74,8 @@ namespace config
 		RouteSpec &setListDirectoriesIfUnset(bool listDirectories);
 		RouteSpec &setIndexFile(const std::string &indexFile);
 		RouteSpec &setIndexFileIfEmpty(const std::string &indexFile);
+		RouteSpec &setCgiTimeout(time_t cgiTimeout);
+		RouteSpec &setCgiTimeoutIfUnset(time_t cgiTimeout);
 		RouteSpec &setRedirection(
 			unsigned short int statusCode, const std::string &path);
 		RouteSpec &setRedirectionIfUnset(

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/21 17:38:49 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:24:23 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,6 +24,7 @@ namespace config {
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		listDirectories(DEFAULT_LIST_DIRECTORIES),
 		indexFile(""), // no default
+		cgiTimeout(DEFAULT_CGI_TIMEOUT),
 		errorPages()
 	{
 	}
@@ -42,6 +43,7 @@ namespace config {
 		this->maxSizeBody = other.maxSizeBody;
 		this->listDirectories = other.listDirectories;
 		this->indexFile = other.indexFile;
+		this->cgiTimeout = other.cgiTimeout;
 		this->errorPages = other.errorPages;
 		this->virtualServers = other.virtualServers;
 		return *this;
@@ -91,6 +93,18 @@ namespace config {
 		return *this;
 	}
 
+	ServerSpec &ServerSpec::setIndexFile(const std::string &indexFile)
+	{
+		this->indexFile = indexFile;
+		return *this;
+	}
+
+	ServerSpec &ServerSpec::setCgiTimeout(time_t cgiTimeout)
+	{
+		this->cgiTimeout = cgiTimeout;
+		return *this;
+	}
+
 	ServerSpec &ServerSpec::addVirtualServer(VirtualServerSpec &virtualServer)
 	{
 		this->virtualServers.push_back(virtualServer);
@@ -120,6 +134,7 @@ namespace config {
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.setIndexFileIfEmpty(this->indexFile)
+				.setCgiTimeoutIfUnset(this->cgiTimeout)
 				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
 				.toVirtualServer();

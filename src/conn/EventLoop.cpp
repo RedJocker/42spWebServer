@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/20 06:24:49 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 18:14:48 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,13 @@
 #include <cstring>
 #include <cerrno>
 #include <signal.h>
+#include <ctime>
+#include <limits>
 
 namespace conn
 {
 
 	bool EventLoop::shouldExit = false;
-	time_t EventLoop::timeoutLimit = 5;
 
 	EventLoop::EventLoop()
 	{
@@ -160,7 +161,10 @@ namespace conn
 			this->subscribeFds.push_back(event);
 
 			std::pair<Operation, http::Client *> entry =
-				std::make_pair(Operation::declare(Operation::FILE_READ, fileFd, EventLoop::timeoutLimit), client);
+				std::make_pair(Operation::declare(Operation::FILE_READ,
+												  fileFd,
+												  client->getCgiTimeout()),
+							   client);
 			this->operations.insert(entry);
 		}
 	}
@@ -178,7 +182,7 @@ namespace conn
 			event.fd = fileFd;
 			this->subscribeFds.push_back(event);
 			Operation op =
-				Operation::declare(Operation::FILE_WRITE, fileFd, EventLoop::timeoutLimit);
+				Operation::declare(Operation::FILE_WRITE, fileFd, client->getCgiTimeout());
 			op.writer->setMessage(content);
 			this->operations.insert(std::make_pair(op, client));
 		}
@@ -196,7 +200,7 @@ namespace conn
 			event.fd = cgiFd;
 			this->subscribeFds.push_back(event);
 			Operation op =
-				Operation::declare(Operation::CGI, cgiFd, EventLoop::timeoutLimit);
+				Operation::declare(Operation::CGI, cgiFd, client.getCgiTimeout());
 			op.cgiPid = cgiPid;
 			std::string body = client.getRequest().getBody();
 			if (client.getRequest().getMethod() == "POST" && !body.empty())
@@ -565,7 +569,7 @@ namespace conn
 	time_t EventLoop::markExpiredOperations(void)
 	{
 
-		time_t minTimeout = EventLoop::timeoutLimit;
+		time_t minTimeout = std::numeric_limits<time_t>::max();
 		for (MapOperations::iterator opIt = this->operations.begin();
 			 opIt != this->operations.end();)
 		{

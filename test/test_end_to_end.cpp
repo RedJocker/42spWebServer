@@ -7,7 +7,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 00:32:07 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/23 09:01:54 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 18:06:55 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -23,7 +23,8 @@ http::Application setup_config_one(std::string &addressPort)
 	config::ServerSpec serverSpec;
 	serverSpec
 		.setDocroot("./test/www")
-		.setAddressPort(addressPort);
+		.setAddressPort(addressPort)
+		.setCgiTimeout(1);
 
 	config::VirtualServerSpec virtualServer1;
 	virtualServer1
@@ -113,6 +114,7 @@ http::Application setup_config_error_pages(std::string &addressPort)
 	serverSpec
 		.setDocroot("./test/www")
 		.setAddressPort(addressPort)
+		.setCgiTimeout(1)
 		.addErrorPage(400, "server 400")
 		.addErrorPage(418, "server 418")
 		.addErrorPage(404, "server 404")

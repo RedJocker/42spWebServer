@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:34:03 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/20 09:39:56 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:44:38 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "TcpClient.hpp"
 # include "Request.hpp"
 # include "Response.hpp"
-
+# include <ctime>
 
 namespace http
 {
@@ -57,6 +57,7 @@ namespace http
 		void pendingFileWritesIncrement(void);
 		void pendingFileWritesDecrement(void);
 		size_t getPendingFileWrites(void) const;
+		time_t getCgiTimeout(void);
 	};
 }
 

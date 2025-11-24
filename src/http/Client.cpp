@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/24 16:04:26 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:59:33 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,5 +156,13 @@ namespace http {
 	size_t Client::getPendingFileWrites(void) const
 	{
 		return this->pendingFileWrites;
+	}
+
+	time_t Client::getCgiTimeout(void)
+	{
+		if (this->route)
+			return this->route->getCgiTimeout();
+		else // if route is null disconnect
+			return 0;
 	}
 }

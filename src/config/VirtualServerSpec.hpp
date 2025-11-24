@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/22 08:22:22 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:17:28 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -36,8 +36,9 @@ namespace config {
 		bool listDirectories;
 		bool listDirectoriesWasSet;
 		std::string indexFile;
-		std::pair<unsigned short int, std::string> redirection;
+		time_t cgiTimeout;
 
+		std::pair<unsigned short int, std::string> redirection;
 		MapErrorPages errorPages;
 		std::vector<RouteSpec> routes;
 
@@ -63,6 +64,8 @@ namespace config {
 		VirtualServerSpec &setListDirectoriesIfUnset(bool listDirectories);
 		VirtualServerSpec &setIndexFile(const std::string &indexFile);
 		VirtualServerSpec &setIndexFileIfEmpty(const std::string &indexFile);
+		VirtualServerSpec &setCgiTimeout(time_t cgiTimeout);
+		VirtualServerSpec &setCgiTimeoutIfUnset(time_t cgiTimeout);
 		VirtualServerSpec &setRedirection(
 			unsigned short int statusCode, const std::string &path);
 		VirtualServerSpec &addErrorPage(

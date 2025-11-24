@@ -343,7 +343,6 @@ test_request \
 #
 
 # when cgi timesout then should respond 504
-# TODO use config for timeout time to make faster timeout
 expected_status_line=$(printf "HTTP/1.1 504 Gateway Timeout\r")
 test_line=$(( $LINENO + 1 ))
 test_request \

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/22 08:34:45 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 18:01:44 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,6 +27,7 @@ namespace config
 		listDirectories(false), // default on ServerSpec
 		listDirectoriesWasSet(false),
 		indexFile(""),
+		cgiTimeout(CGI_TIMEOUT_NONE),
 		redirection(std::make_pair(0, "")),
 		errorPages(),
 		allowedMethods()
@@ -51,6 +52,7 @@ namespace config
 		this->listDirectories = other.listDirectories;
 		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
 		this->indexFile = other.indexFile;
+		this->cgiTimeout = other.cgiTimeout;
 		this->redirection = other.redirection;
 		this->errorPages = other.errorPages;
 		this->allowedMethods = other.allowedMethods;
@@ -107,6 +109,11 @@ namespace config
 		&RouteSpec::getRedirection(void) const
 	{
 		return this->redirection;
+	}
+
+	time_t RouteSpec::getCgiTimeout(void) const
+	{
+		return this->cgiTimeout;
 	}
 
 	bool RouteSpec::isCgiRoute(void) const
@@ -177,6 +184,19 @@ namespace config
 	{
 		if (this->indexFile.empty() && !this->listDirectoriesWasSet)
 			this->indexFile = indexFile;
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setCgiTimeout(time_t cgiTimeout)
+	{
+		this->cgiTimeout = cgiTimeout;
+		return *this;
+	}
+
+	RouteSpec &RouteSpec::setCgiTimeoutIfUnset(time_t cgiTimeout)
+	{
+		if (this->cgiTimeout == CGI_TIMEOUT_NONE)
+			this->cgiTimeout = cgiTimeout;
 		return *this;
 	}
 

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/05 20:23:03 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/24 17:33:56 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ namespace conn
 		time_t markExpiredOperations(void);
 	public:
 		static bool shouldExit;
-		static time_t timeoutLimit;
 
 		EventLoop();
 		EventLoop(const EventLoop &other);

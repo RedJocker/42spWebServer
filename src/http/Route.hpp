@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/22 08:15:45 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:58:10 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -40,6 +40,7 @@ namespace http
 		std::string pathSpecification;
 		std::string docroot;
 		std::string indexFile;
+		time_t cgiTimeout;
 		bool listDirectories;
 		std::pair<unsigned short int, std::string> redirection;
 
@@ -58,6 +59,7 @@ namespace http
 		int getId(void) const;
 		const std::string &getPathSpecification(void) const;
 		const std::string &getDocroot(void) const;
+		time_t getCgiTimeout(void) const;
 		const MapErrorPages &getErrorPages(void) const;
 		bool getListDirectories(void) const;
 		bool hasRedirection(void) const;
