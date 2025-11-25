@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 17:43:15 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/24 17:59:33 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 19:29:01 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,8 @@ namespace http {
 				response.setBody(it->second);
 			}
 		}
+		if (this->getRequest().getHeader("Connection") == "close")
+			this->getResponse().addHeader("Connection", "close");
 		this->setMessageToSend(response.toString());
 	}
 

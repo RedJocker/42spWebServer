@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 18:00:39 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 02:42:44 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -20,6 +20,7 @@
 # include <map>
 # include <cstdlib>
 # include <unistd.h>
+# include <ctime>
 
 namespace http
 {

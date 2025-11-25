@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:36:31 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/24 17:55:40 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 18:32:28 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -29,6 +29,6 @@
 # define DEFAULT_CGI_TIMEOUT 5
 
 
-const time_t CGI_TIMEOUT_NONE = std::numeric_limits<time_t>::max();
+const time_t CGI_TIMEOUT_NONE = std::numeric_limits<int>::max() / 1000;
 const ssize_t MAX_SIZE_BODY_UNLIMITED = -1;
 #endif
