@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 17:57:43 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 20:15:52 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -28,6 +28,7 @@ namespace http {
 		  indexFile(""),
 		  cgiTimeout(CGI_TIMEOUT_NONE),
 		  listDirectories(false),
+		  maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		  redirection(0, "")
 	{
 	}
@@ -43,6 +44,7 @@ namespace http {
 		  indexFile(routeSpec.getIndexFile()),
 		  cgiTimeout(routeSpec.getCgiTimeout()),
 		  listDirectories(routeSpec.getListDirectories()),
+		  maxSizeBody(routeSpec.getMaxSizeBody()),
 		  redirection(routeSpec.getRedirection())
 	{
 	}
@@ -56,6 +58,7 @@ namespace http {
 		  indexFile(other.indexFile),
 		  cgiTimeout(other.cgiTimeout),
 		  listDirectories(other.listDirectories),
+		  maxSizeBody(other.maxSizeBody),
 		  redirection(other.redirection)
 	{
 	}
@@ -73,6 +76,7 @@ namespace http {
 		this->cgiTimeout = other.cgiTimeout;
 		this->listDirectories = other.listDirectories;
 		this->redirection = other.redirection;
+		this->maxSizeBody = other.maxSizeBody;
 		return *this;
 	}
 
@@ -161,6 +165,11 @@ namespace http {
 		return this->redirection.first >= 300
 			&& this->redirection.first < 400
 			&& (!this->redirection.second.empty());
+	}
+
+	ssize_t Route::getMaxSizeBody(void) const
+	{
+		return this->maxSizeBody;
 	}
 
 	unsigned short int Route::getRedirectionStatusCode(void) const

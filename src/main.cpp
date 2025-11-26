@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/22 09:27:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 20:40:16 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,8 @@ http::Application applicationConfig(void)
 	serverSpec
 		.setDocroot("./www")
 		.setAddressPort("localhost:8080")
-		.setListDirectories(true);
+		.setListDirectories(true)
+		.setMaxSizeBody(2);
 
 	config::VirtualServerSpec virtualServer1;
 	virtualServer1

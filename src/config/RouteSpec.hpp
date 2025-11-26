@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 02:42:44 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 19:59:21 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -61,6 +61,7 @@ namespace config
 		const std::pair<unsigned short int, std::string>
 			&getRedirection(void) const;
 		time_t getCgiTimeout(void) const;
+		ssize_t getMaxSizeBody(void) const;
 		bool isCgiRoute(void) const;
 
 		RouteSpec &setCgiBinPath(const std::string &cgiBinPath);

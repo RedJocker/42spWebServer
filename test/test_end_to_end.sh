@@ -788,3 +788,55 @@ test_request \
 "Content-length: $body_len\r\n\r\n$body"
 unset expected_other_filename
 #
+
+# when Server has max body size 8
+# and Route has max body size 2
+# and request has body with size 4
+# then should return 413
+expected_status_line=$(printf "HTTP/1.1 413 Request Entity Too Large\r")
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_status \
+    'config_maxsize' \
+    'POST /body_too_long HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n'\
+'Content-Length: 4\r\n\r\nabcd'
+#
+
+# when Server has max body size 8
+# and Route has max body size 2
+# and request has body with size 1
+# then should return 404
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_status \
+    'config_maxsize' \
+    'POST /body_ok HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n'\
+'Content-Length: 1\r\n\r\na'
+#
+
+# when Server has max body size 8
+# and VirtualServer has max body size 10
+# and request has body with size 12
+# then should return 413
+expected_status_line=$(printf "HTTP/1.1 413 Request Entity Too Large\r")
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_status \
+    'config_maxsize' \
+    'POST /body_too_long HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n'\
+'Content-Length: 12\r\n\r\nabcdefghijkl'
+#
+
+# when Server has max body size 8
+# and VirtualServer has max body size 10
+# and request has body with size 9
+# then should return 404
+expected_status_line=$(printf "HTTP/1.1 404 Not Found\r")
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_status \
+    'config_maxsize' \
+    'POST /body_ok HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n'\
+'Content-Length: 9\r\n\r\nabcdefghi'
+#

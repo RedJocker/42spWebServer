@@ -7,7 +7,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 00:32:07 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 18:06:55 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 21:37:56 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -470,6 +470,71 @@ http::Application setup_config_upload(
 	return appSpec.toApplication();
 }
 
+http::Application setup_config_maxsize(std::string &addressPort)
+{
+	config::ServerSpec serverSpec;
+	serverSpec
+		.setDocroot("./test/www")
+		.setAddressPort(addressPort)
+		.setMaxSizeBody(8)
+		;
+
+	config::VirtualServerSpec virtualServer1;
+	{
+		config::RouteSpec routeSpec[1];
+		routeSpec[0]
+			.setPathSpec("/**")
+			.setMaxSizeBody(2)
+			.setCgiBinPath("/usr/bin/php-cgi")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			.addAllowedMethod("DELETE")
+			.addErrorPage(400, "route /** 400")
+			.addErrorPage(404, "route /** 404")
+			.addErrorPage(413, "route /** 413")
+			.addErrorPage(500, "route /** 500")
+			.addErrorPage(504, "route /** 504");
+
+		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
+		{
+			virtualServer1.addRoute(routeSpec[i]);
+		}
+	}
+	serverSpec.addVirtualServer(virtualServer1);
+
+	config::VirtualServerSpec virtualServer2;
+	virtualServer2
+		.setHostname("domain.com")
+		.setMaxSizeBody(10)
+		;
+	{
+		config::RouteSpec routeSpec[1];
+		routeSpec[0]
+			.setPathSpec("/**")
+			.setCgiBinPath("/usr/bin/php-cgi")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			.addAllowedMethod("DELETE")
+			.addErrorPage(400, "route /** 400")
+			.addErrorPage(404, "route /** 404")
+			.addErrorPage(413, "route /** 413")
+			.addErrorPage(500, "route /** 500")
+			.addErrorPage(504, "route /** 504");
+			;
+
+		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
+		{
+			virtualServer2.addRoute(routeSpec[i]);
+		}
+	}
+	serverSpec.addVirtualServer(virtualServer2);
+
+	config::ApplicationSpec appSpec;
+	appSpec.addServer(serverSpec);
+
+	return appSpec.toApplication();
+}
+
 void signalHandler(int sig)
 {
 	if (sig == SIGINT)
@@ -503,7 +568,6 @@ int run_server_config_directory(std::string addressPort)
 	return app.run();
 }
 
-
 int run_server_config_redirection(std::string addressPort)
 {
 	http::Application app  = setup_config_redirection(addressPort);
@@ -520,6 +584,11 @@ int run_server_config_upload(
 	return app.run();
 }
 
+int run_server_config_maxsize(std::string addressPort)
+{
+	http::Application app  = setup_config_maxsize(addressPort);
+	return app.run();
+}
 
 int main(int argc, char *argv[])
 {
@@ -565,6 +634,13 @@ int main(int argc, char *argv[])
 			addressPort,
 			uploadFolder1,
 			uploadFolder2);
+	}
+
+	if ("config_maxsize" == testToRun) {
+		if (argc != 3)
+			return 42;
+		std::string addressPort = std::string(argv[2]);
+		return run_server_config_maxsize(addressPort);
 	}
 
 	return 69;

@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 17:58:10 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 20:15:00 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -42,6 +42,7 @@ namespace http
 		std::string indexFile;
 		time_t cgiTimeout;
 		bool listDirectories;
+		ssize_t maxSizeBody;
 		std::pair<unsigned short int, std::string> redirection;
 
 	public:
@@ -63,6 +64,7 @@ namespace http
 		const MapErrorPages &getErrorPages(void) const;
 		bool getListDirectories(void) const;
 		bool hasRedirection(void) const;
+		ssize_t getMaxSizeBody(void) const;
 		unsigned short int getRedirectionStatusCode(void) const;
 		const std::string &getRedirectionPath(void) const;
 	};

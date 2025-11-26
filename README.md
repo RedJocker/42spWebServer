@@ -64,7 +64,7 @@ empty
       - configuration may choose a address:port pair for server
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
         - nginx allows this config only on http context (equivalent to out http::Server)
-    - [ ] Configurable max size of body request
+    - [X] Configurable max size of body request
       - configuration may choose a limit for body size
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size)
         - nginx responds with 413 Request Entity Too Large
@@ -74,11 +74,11 @@ empty
           - location context (equivalent to our http::Route)
       - we can also allow this config on all 3 levels and use the most specific
         - route > virtual server > server
-      - [x] allow to declare max size on specs
-      - [ ] implement max body size checking
-        - [ ] start implementing a "dumb" checking
+      - [X] allow to declare max size on specs
+      - [X] implement max body size checking
+        - [X] start implementing a "dumb" checking
               that reads body before checking max body size
-        -  [ ] implement a wise check that checks max body size before reading body
+        -  [-] implement a wise check that checks max body size before reading body
             - demands some flow redesign to make early route matching
     - [X] Configurable docroot
       - configuration may choose a root server folder that maps to server file system
@@ -87,7 +87,7 @@ empty
           - `http` contenxt (equivalent to our `http::Server`)
           - `server` context (equivalent to our `http::VirtualServer`)
           - `location` context (equivalent to our `http::Route`)
-    - [ ] Configurable routing system
+    - [X] Configurable routing system
       - part of server configuration (including virtual servers)
       - [X] configurable allowed methods for a specific route
         - a certain route at '/some-route' can define only GET to be allowed, or only GET and POST, etc

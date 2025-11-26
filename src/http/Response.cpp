@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/20 09:40:20 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 20:23:58 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,6 +191,17 @@ namespace http {
 			.setStatusCode(201)
 			.setStatusInfo("Created")
 			.addHeader("Content-Length", "0");
+		return *this;
+	}
+
+	Response &Response::setEntityTooLarge()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(413)
+			.setStatusInfo("Request Entity Too Large")
+			.addHeader("Content-Length", "0")
+			.addHeader("Connection", "close");
 		return *this;
 	}
 

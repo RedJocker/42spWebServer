@@ -6,13 +6,14 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/22 17:44:06 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 21:54:37 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
 #include "VirtualServer.hpp"
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
+#include "constants.hpp"
 #include "pathUtils.hpp"
 #include <iostream>
 #include <sstream>
@@ -116,7 +117,17 @@ namespace http
 			if (route.matches(reqPath, method))
 			{
 				client.setRoute(&route);
+				ssize_t maxSizeAllowed = route.getMaxSizeBody();
+				size_t bodySize = client.getRequest().getBody().size();
+				Response &response = client.getResponse();
 
+				if (maxSizeAllowed != MAX_SIZE_BODY_UNLIMITED
+					&& static_cast<size_t>(maxSizeAllowed) < bodySize)
+				{
+					response.setEntityTooLarge();
+					client.writeResponse();
+					return ;
+				}
 				if (route.hasRedirection())
 				{
 					std::cout << "redirection: "
@@ -124,7 +135,7 @@ namespace http
 							  << " "
 							  << route.getRedirectionPath()
 							  << std::endl;
-					Response &response = client.getResponse();
+
 					response.clear();
 					std::string location = route.getRedirectionPath();
 					unsigned short int status =
@@ -140,7 +151,6 @@ namespace http
 
 				// Redirect if not '/' for directory listing
 				if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
-					Response &response = client.getResponse();
 					std::string location = reqPath.getPath() + "/";
 					response.clear();
 					response.setStatusCode(308);

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 18:01:44 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 21:47:46 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -114,6 +114,11 @@ namespace config
 	time_t RouteSpec::getCgiTimeout(void) const
 	{
 		return this->cgiTimeout;
+	}
+
+	ssize_t RouteSpec::getMaxSizeBody(void) const
+	{
+		return this->maxSizeBody;
 	}
 
 	bool RouteSpec::isCgiRoute(void) const
@@ -254,10 +259,6 @@ namespace config
 
 	http::Route *RouteSpec::toRoute(void)
 	{
-
-		// TODO set maxBodySize on Routes and implement feature
-		// TODO set listDirectories on Routes and implement feature (do not list if false)
-		// TODO set indexFile on Routes and implement feature
 		http::Route *route;
 		if (this->isCgiRoute())
 		{
