@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/26 20:16:38 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/11/26 20:47:56 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,12 @@ http::Application applicationConfig(void)
 int applicationConfigParse(char **av)
 {	
 	config::Scanner scanner;
-	return scanner.readContent(av[1]);
+	scanner.readContent(av[1]);
+	size_t alreadyread = scanner.readDirective(0);
+	std::cout << "Directives read:" << scanner.directives.at(0) << std::endl;
+	alreadyread = scanner.readDirective(alreadyread);
+	std::cout << "Directives read:" << scanner.directives.at(1) << std::endl;
+	return 0;
 }
 
 int main(int ac, char **av)

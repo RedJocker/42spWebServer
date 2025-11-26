@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-/*   Updated: 2025/11/26 20:16:07 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/11/26 20:42:35 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 
 namespace config {
-	Scanner::Scanner(void) : content(NULL)
+	Scanner::Scanner(void) : content()
 	{
 	}
 
@@ -68,9 +68,33 @@ namespace config {
 			std::cerr << "unexpected path: " << result.second << std::endl;
 			return 1;
 		}
-		char *content = result.second;
+		this->content = std::string(result.second);
 		std::cout << "Config file content:\n" << content << std::endl;
-		delete[] content;
+		delete[] result.second;
 		return 0;
 	}
+	
+	int Scanner::readDirective(size_t directiveStart)
+	{
+		while(directiveStart < content.size())
+		{
+			if (std::isspace(this->content[directiveStart]))
+			{
+				++directiveStart;
+				continue;
+			}
+			else
+				break;
+		}
+		size_t directiveEnd = this->content.find(';', directiveStart);
+		if (directiveEnd == std::string::npos)
+		{
+			std::cerr << "Error: directive not terminated with ';'" << std::endl;
+			return -1;
+		}
+		std::string directive = this->content.substr(directiveStart, directiveEnd - directiveStart);
+		this->directives.push_back(directive);
+		return directiveEnd + 1;
+	}
+	
 } // namespace config
