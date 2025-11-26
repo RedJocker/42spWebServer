@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 21:59:59 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:24:42 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,6 +24,7 @@ namespace config {
 		listDirectories(false), // default on ServerSpec
 		listDirectoriesWasSet(false),
 		indexFile(""),
+		cgiTimeout(CGI_TIMEOUT_NONE),
 		redirection(std::make_pair(0, "")),
 		errorPages(),
 		routes()
@@ -50,6 +51,7 @@ namespace config {
 		this->listDirectories = other.listDirectories;
 		this->listDirectoriesWasSet = other.listDirectoriesWasSet;
 		this->indexFile = other.indexFile;
+		this->cgiTimeout = other.cgiTimeout;
 		this->errorPages = other.errorPages;
 		this->redirection = other.redirection;
 		return *this;
@@ -68,6 +70,17 @@ namespace config {
 	const std::string &VirtualServerSpec::getHostname(void) const
 	{
 		return this->hostname;
+	}
+
+	const MapErrorPages &VirtualServerSpec::getErrorPages(void) const
+	{
+		return this->errorPages;
+	}
+
+	const std::pair<unsigned short int, std::string>
+		&VirtualServerSpec::getRedirection(void) const
+	{
+		return this->redirection;
 	}
 
 	VirtualServerSpec &VirtualServerSpec::setHostname(
@@ -147,8 +160,21 @@ namespace config {
 	VirtualServerSpec &VirtualServerSpec::setIndexFileIfEmpty(
 		const std::string &indexFile)
 	{
-		if (this->indexFile.empty())
+		if (this->indexFile.empty() && !this->listDirectoriesWasSet)
 			this->indexFile = indexFile;
+		return *this;
+	}
+
+	VirtualServerSpec &VirtualServerSpec::setCgiTimeout(time_t cgiTimeout)
+	{
+		this->cgiTimeout = cgiTimeout;
+		return *this;
+	}
+
+	VirtualServerSpec &VirtualServerSpec::setCgiTimeoutIfUnset(time_t cgiTimeout)
+	{
+		if (this->cgiTimeout == CGI_TIMEOUT_NONE)
+			this->cgiTimeout = cgiTimeout;
 		return *this;
 	}
 
@@ -188,8 +214,9 @@ namespace config {
 				.setUploadFolderIfEmpty(this->uploadFolder)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
-				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
+				.setCgiTimeoutIfUnset(this->cgiTimeout)
+				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
 				.setRedirectionIfUnset(this->redirection)
 				.toRoute();

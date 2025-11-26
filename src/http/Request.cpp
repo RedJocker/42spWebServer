@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/11 18:53:38 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/25 20:12:55 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -338,6 +338,11 @@ namespace http
 	const std::string &Request::getMultipartBoundary(void) const
 	{
 		return _multipartBoundary;
+	}
+
+	size_t Request::getBodySize(void) const
+	{
+		return this->_body.size();
 	}
 
 	void Request::envpInit(std::vector<std::string> &envp) const

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/11/11 18:53:45 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/25 20:12:00 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ namespace http
 
 		bool hasMultipart(void) const;
 		const std::string &getMultipartBoundary(void) const;
+
+		size_t getBodySize(void) const;
 
 	private:
 		std::string _method;

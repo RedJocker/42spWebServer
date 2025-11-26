@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/18 08:11:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 20:23:58 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,6 +194,17 @@ namespace http {
 		return *this;
 	}
 
+	Response &Response::setEntityTooLarge()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(413)
+			.setStatusInfo("Request Entity Too Large")
+			.addHeader("Content-Length", "0")
+			.addHeader("Connection", "close");
+		return *this;
+	}
+
 	std::string Response::toString(void) const {
 		std::ostringstream responseStream;
 		responseStream << _protocol << " " << _statusCode << " " << _statusInfo << "\r\n";
@@ -283,5 +294,10 @@ namespace http {
 		case 511: return "Network Authentication Required";
 		default: return "Unspecified";
 		}
+	}
+
+	bool Response::isBodyEmpty(void) const
+	{
+		return this->_body.size() == 0;
 	}
 }

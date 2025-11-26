@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 13:05:25 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/17 22:02:58 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 16:07:01 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,27 @@
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
 #include "constants.hpp"
+#include "pathUtils.hpp"
 #include <iostream>
 #include <sstream>
 
 namespace http
 {
+	Server::Server(void)
+		: conn::TcpServer(DEFAULT_PORT),
+		  docroot(DEFAULT_DOCROOT),
+		  vservers(),
+		  errorPages()
+	{
+	}
+
 	Server::Server(
 		const config::ServerSpec &spec,
 		std::vector<VirtualServer*> &virtualServers)
 		: conn::TcpServer(spec.getAddressPort()),
 		  docroot(spec.getDocroot()),
-		  vservers(virtualServers.begin(), virtualServers.end())
+		  vservers(virtualServers.begin(), virtualServers.end()),
+		  errorPages(spec.getErrorPages())
 	{
 		while (!this->docroot.empty()
 			   && this->docroot[this->docroot.size() - 1] == '/')
@@ -38,9 +48,11 @@ namespace http
 	}
 
 	Server::Server(const Server &other)
-		: conn::TcpServer(other.addressPort)
+		: conn::TcpServer(other.addressPort),
+		  docroot(other.docroot),
+		  vservers(other.vservers),
+		  errorPages(other.errorPages)
 	{
-		*this = other;
 	}
 
 	Server &Server::operator=(const Server &other)
@@ -49,6 +61,7 @@ namespace http
 		{
 			this->docroot = other.docroot;
 			this->vservers = other.vservers;
+			this->errorPages = other.errorPages;
 			conn::TcpServer::operator=(other);
 		}
 		return *this;
@@ -61,6 +74,11 @@ namespace http
 		return this->docroot;
 	}
 
+	const MapErrorPages &Server::getErrorPages(void) const
+	{
+		return this->errorPages;
+	}
+
 	void Server::serve(Client &client, conn::Monitor &monitor)
 	{
 	    const std::string &host = client.getRequest().getHeader("Host");
@@ -68,6 +86,7 @@ namespace http
 	    if (host.empty())
 	    { // use default virtual server
 			std::cout << "using default virtual server" << std::endl;
+			client.setVirtualServer(vservers.at(0));
 		    vservers.at(0)->serve(client, monitor);
 			return;
 		}
@@ -83,7 +102,8 @@ namespace http
 			if (ss.fail() || !ss.eof())
 			{
 				client.getResponse().setBadRequest();
-				client.setMessageToSend(client.getResponse().toString());
+				client.writeResponse();
+
 				return;
 			}
 		}
@@ -97,14 +117,16 @@ namespace http
 			 ++vserverIt)
 		{
 
-			if ((*vserverIt)->matches(hostname))
+			if ((*vserverIt) && (*vserverIt)->matches(hostname))
 			{
+				client.setVirtualServer((*vserverIt));
 				(*vserverIt)->serve(client, monitor);
 				return ;
 			}
 		}
 	    // use default virtual server
 		std::cout << "using default virtual server" << std::endl;
+		client.setVirtualServer(vservers.at(0));
 		vservers.at(0)->serve(client, monitor);
 	}
 

@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 22:17:11 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:24:23 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,6 +24,7 @@ namespace config {
 		maxSizeBody(MAX_SIZE_BODY_UNLIMITED),
 		listDirectories(DEFAULT_LIST_DIRECTORIES),
 		indexFile(""), // no default
+		cgiTimeout(DEFAULT_CGI_TIMEOUT),
 		errorPages()
 	{
 	}
@@ -42,6 +43,7 @@ namespace config {
 		this->maxSizeBody = other.maxSizeBody;
 		this->listDirectories = other.listDirectories;
 		this->indexFile = other.indexFile;
+		this->cgiTimeout = other.cgiTimeout;
 		this->errorPages = other.errorPages;
 		this->virtualServers = other.virtualServers;
 		return *this;
@@ -60,6 +62,11 @@ namespace config {
 	const std::string &ServerSpec::getAddressPort(void) const
 	{
 		return this->addressPort;
+	}
+
+	const MapErrorPages &ServerSpec::getErrorPages(void) const
+	{
+		return this->errorPages;
 	}
 
 	ServerSpec &ServerSpec::setDocroot(const std::string &docroot)
@@ -83,6 +90,18 @@ namespace config {
 	ServerSpec &ServerSpec::setListDirectories(bool listDirectory)
 	{
 		this->listDirectories = listDirectory;
+		return *this;
+	}
+
+	ServerSpec &ServerSpec::setIndexFile(const std::string &indexFile)
+	{
+		this->indexFile = indexFile;
+		return *this;
+	}
+
+	ServerSpec &ServerSpec::setCgiTimeout(time_t cgiTimeout)
+	{
+		this->cgiTimeout = cgiTimeout;
 		return *this;
 	}
 
@@ -114,8 +133,9 @@ namespace config {
 			http::VirtualServer *virtualServer = (*virtualServerIt)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
-				.setListDirectoriesIfUnset(this->listDirectories)
 				.setIndexFileIfEmpty(this->indexFile)
+				.setCgiTimeoutIfUnset(this->cgiTimeout)
+				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
 				.toVirtualServer();
 			vservers.push_back(virtualServer);

@@ -64,7 +64,7 @@ empty
       - configuration may choose a address:port pair for server
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
         - nginx allows this config only on http context (equivalent to out http::Server)
-    - [ ] Configurable max size of body request
+    - [X] Configurable max size of body request
       - configuration may choose a limit for body size
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size)
         - nginx responds with 413 Request Entity Too Large
@@ -74,8 +74,12 @@ empty
           - location context (equivalent to our http::Route)
       - we can also allow this config on all 3 levels and use the most specific
         - route > virtual server > server
-      - [x] allow to declare max size on specs
-      - [ ] implement max body size checking
+      - [X] allow to declare max size on specs
+      - [X] implement max body size checking
+        - [X] start implementing a "dumb" checking
+              that reads body before checking max body size
+        -  [-] implement a wise check that checks max body size before reading body
+            - demands some flow redesign to make early route matching
     - [X] Configurable docroot
       - configuration may choose a root server folder that maps to server file system
       - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#root)
@@ -83,7 +87,7 @@ empty
           - `http` contenxt (equivalent to our `http::Server`)
           - `server` context (equivalent to our `http::VirtualServer`)
           - `location` context (equivalent to our `http::Route`)
-    - [ ] Configurable routing system
+    - [X] Configurable routing system
       - part of server configuration (including virtual servers)
       - [X] configurable allowed methods for a specific route
         - a certain route at '/some-route' can define only GET to be allowed, or only GET and POST, etc
@@ -93,16 +97,16 @@ empty
          - using /path/*.ext to match files that end in .ext at /path folder only
          - using /path/* to match any file at /path folder only
          - using /path/specific.html to match only /path/specific.html
-      - [ ] configuration for directory files
-        - [ ] configurable "index" file (ex: index.html, index.php, any.xxx)
+      - [X] configuration for directory files
+        - [X] configurable "index" file (ex: index.html, index.php, any.xxx)
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)
             - nginx allows this config on
               - `http` contenxt (equivalent to our `http::Server`)
               - `server` context (equivalent to our `http::VirtualServer`)
               - `location` context (equivalent to our `http::Route`)
             - [X] allow to declare index file
-            - [ ] implement checking index file
-        - [ ] configuration for listing directory content
+            - [X] implement checking index file
+        - [X] configuration for listing directory content
           - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html#autoindex)
             - ngix first tries index file if that is configured
               - nginx allows this config on
@@ -110,11 +114,11 @@ empty
                 - `server` context (equivalent to our `http::VirtualServer`)
                 - `location` context (equivalent to our `http::Route`)
           - [X] allow to declare directory listing
-          - [ ] implement checking directory listing
+          - [X] implement checking directory listing
         - can only have one of these behaviour at a time
           - must define behaviour if configuration file has more than one active
             - priority based is likely better option something like 'index > listing'
-      - [ ] configuration for default responses
+      - [X] configuration for default responses
         - body content of error responses like 404 or 500 may be customized
         - configuration should point to a file that will be used on response
         - [nginx similar config](https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page)
@@ -123,15 +127,15 @@ empty
             - `server` context (equivalent to our `http::VirtualServer`)
             - `location` context (equivalent to our `http::Route`)
         - [X] allow to declare errorPages
-        - [ ] implement errorPages feature
-      - [ ] configurable redirection
+        - [X] implement errorPages feature
+      - [X] configurable redirection
         - a route may be configured to redirect requests to another route
           should also state what is the status code of redirection response
         - nginx has two directives related to redirection `return` and `rewrite`
           - both are allowed on `server` and `location` context
         - [X] allow to declare redirection
-        - [ ] implement redirection feature
-      - [ ] configurable file upload
+        - [X] implement redirection feature
+      - [X] configurable file upload
         - may allow or dissalow file upload (depends on POST method being allowed)
         - may configure a folder to upload files into
       - [x] create a (interface||abstract class) Route that has at least

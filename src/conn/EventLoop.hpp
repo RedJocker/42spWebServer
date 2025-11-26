@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 16:57:28 by maurodri          #+#    #+#             */
-/*   Updated: 2025/11/05 20:23:03 by maurodri         ###   ########.fr       */
+//   Updated: 2025/11/24 19:51:02 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,13 @@ namespace conn
 		void handleCgiRead(const Operation &op, http::Client &client);
 
 		void handleFdEvent(ListEvents::iterator &monitoredIt);
+		void handleFdEventOut(ListEvents::iterator &monitoredIt);
+		void handleFdEventIn(ListEvents::iterator &monitoredIt);
 		void unsubscribeFd(int fd);
 		void unsubscribeOperation(int operationFd);
 		time_t markExpiredOperations(void);
 	public:
 		static bool shouldExit;
-		static time_t timeoutLimit;
 
 		EventLoop();
 		EventLoop(const EventLoop &other);

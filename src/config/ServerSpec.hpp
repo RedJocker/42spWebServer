@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 22:17:01 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:20:19 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,7 @@
 # define SERVERSPEC_HPP
 
 # include "VirtualServerSpec.hpp"
+# include "pathUtils.hpp"
 # include <string>
 # include <vector>
 
@@ -31,8 +32,8 @@ namespace config {
 		ssize_t maxSizeBody;
 		bool listDirectories;
 		std::string indexFile;
-		std::map<unsigned short int, std::string> errorPages;
-
+		time_t cgiTimeout;
+		MapErrorPages errorPages;
 		std::vector<VirtualServerSpec> virtualServers;
 
 	public:
@@ -43,12 +44,14 @@ namespace config {
 
 		const std::string &getDocroot(void) const;
 		const std::string &getAddressPort(void) const;
+		const MapErrorPages &getErrorPages(void) const;
 
 		ServerSpec &setDocroot(const std::string &docroot);
 		ServerSpec &setAddressPort(const std::string &addressPort);
 		ServerSpec &setMaxSizeBody(const ssize_t maxSizeBody);
 		ServerSpec &setListDirectories(bool listDirectories);
 		ServerSpec &setIndexFile(const std::string &indexFile);
+		ServerSpec &setCgiTimeout(time_t cgiTimeout);
 		ServerSpec &addErrorPage(
 			unsigned short int status, const std::string &bodyPage);
 

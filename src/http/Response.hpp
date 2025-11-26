@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/10/29 00:00:28 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 21:48:18 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,19 +50,13 @@ namespace http {
 			Response &setBadRequest();
 			Response &setInternalServerError();
 			Response &setGatewayTimeout();
+			Response &setEntityTooLarge();
 
 			void clear(void);
 
 			std::string toString(void) const;
-
-			Response &setFileBody(int fd);
-			bool isStreaming(void) const;
-			int getFileFd(void) const;
-			size_t getBytesSent(void) const;
-			void addBytesSent(size_t n);
-			void closeFile(void);
 			const std::string statusInfoInfer(int statusCode) const;
-
+			bool isBodyEmpty(void) const;
 		private:
 			std::string _protocol;
 			int _statusCode;

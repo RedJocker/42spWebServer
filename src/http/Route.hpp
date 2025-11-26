@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/16 05:53:57 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 20:15:00 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,7 +15,8 @@
 
 # include "Client.hpp"
 # include "Operation.hpp"
-#include "RouteSpec.hpp"
+# include "RouteSpec.hpp"
+# include "RequestPath.hpp"
 # include <set>
 
 namespace conn
@@ -25,6 +26,7 @@ namespace conn
 
 namespace http
 {
+
 	class Client;
 
 	class Route
@@ -32,10 +34,16 @@ namespace http
 		static int idGenerator;
 		int id;
 		std::set<std::string> methodsAllowed;
+		MapErrorPages errorPages;
 
 	protected:
 		std::string pathSpecification;
 		std::string docroot;
+		std::string indexFile;
+		time_t cgiTimeout;
+		bool listDirectories;
+		ssize_t maxSizeBody;
+		std::pair<unsigned short int, std::string> redirection;
 
 	public:
 		Route(void);
@@ -45,13 +53,21 @@ namespace http
 		virtual ~Route(void);
 		virtual void serve(http::Client &client,  conn::Monitor &monitor) = 0;
 		virtual void respond(http::Client &client, const Operation &operation) const = 0;
-		bool matches(const RequestPath &path, const std::string &method) const;
+		// mutates path only if matches indexFile
+		bool matches(RequestPath &path, const std::string &method) const;
 		bool isMethodAllowed(const std::string &maybeMethodAllowed) const;
 		void onServerError(http::Client &client) const;
 		int getId(void) const;
+		const std::string &getPathSpecification(void) const;
 		const std::string &getDocroot(void) const;
+		time_t getCgiTimeout(void) const;
+		const MapErrorPages &getErrorPages(void) const;
+		bool getListDirectories(void) const;
+		bool hasRedirection(void) const;
+		ssize_t getMaxSizeBody(void) const;
+		unsigned short int getRedirectionStatusCode(void) const;
+		const std::string &getRedirectionPath(void) const;
 	};
 }
-
 
 #endif

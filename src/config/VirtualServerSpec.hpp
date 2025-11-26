@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/17 22:00:02 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/24 17:17:28 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,6 +16,8 @@
 # include <string>
 # include <vector>
 # include "RouteSpec.hpp"
+# include "pathUtils.hpp"
+
 
 namespace http
 {
@@ -34,9 +36,10 @@ namespace config {
 		bool listDirectories;
 		bool listDirectoriesWasSet;
 		std::string indexFile;
-		std::pair<unsigned short int, std::string> redirection;
+		time_t cgiTimeout;
 
-		std::map<unsigned short int, std::string> errorPages;
+		std::pair<unsigned short int, std::string> redirection;
+		MapErrorPages errorPages;
 		std::vector<RouteSpec> routes;
 
 	public:
@@ -47,6 +50,9 @@ namespace config {
 
 		const std::string &getDocroot(void) const;
 		const std::string &getHostname(void) const;
+		const MapErrorPages &getErrorPages(void) const;
+		const std::pair<unsigned short int, std::string>
+			&getRedirection(void) const;
 
 		VirtualServerSpec &setHostname(const std::string &hostname);
 		VirtualServerSpec &setDocroot(const std::string &docroot);
@@ -58,6 +64,8 @@ namespace config {
 		VirtualServerSpec &setListDirectoriesIfUnset(bool listDirectories);
 		VirtualServerSpec &setIndexFile(const std::string &indexFile);
 		VirtualServerSpec &setIndexFileIfEmpty(const std::string &indexFile);
+		VirtualServerSpec &setCgiTimeout(time_t cgiTimeout);
+		VirtualServerSpec &setCgiTimeoutIfUnset(time_t cgiTimeout);
 		VirtualServerSpec &setRedirection(
 			unsigned short int statusCode, const std::string &path);
 		VirtualServerSpec &addErrorPage(

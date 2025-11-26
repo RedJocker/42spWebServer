@@ -6,13 +6,14 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/16 05:44:18 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 21:54:37 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
 #include "VirtualServer.hpp"
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
+#include "constants.hpp"
 #include "pathUtils.hpp"
 #include <iostream>
 #include <sstream>
@@ -50,7 +51,8 @@ namespace http
 		const std::vector<Route *> &routes)
 		: hostname(spec.getHostname()),
 		  docroot(spec.getDocroot()),
-		  routes(routes.begin(), routes.end())
+		  routes(routes.begin(), routes.end()),
+		  errorPages(spec.getErrorPages())
 	{
 		this->docroot = utils::trimCopy(docroot);
 		while (!this->docroot.empty()
@@ -74,6 +76,7 @@ namespace http
 			this->hostname = other.hostname;
 			this->docroot = other.docroot;
 			this->routes = other.routes;
+			this->errorPages = other.errorPages;
 		}
 		return *this;
 	}
@@ -83,6 +86,11 @@ namespace http
 	const std::string &VirtualServer::getDocroot() const
 	{
 		return this->docroot;
+	}
+
+	const MapErrorPages &VirtualServer::getErrorPages(void) const
+	{
+		return this->errorPages;
 	}
 
 	bool VirtualServer::matches(const std::string &hostname)
@@ -105,23 +113,53 @@ namespace http
 				continue;
 			Route &route = *(*routeIt);
 			RequestPath &reqPath = client.getRequest().getPath();
+			reqPath.analyzePath(route.getDocroot());
 			if (route.matches(reqPath, method))
 			{
+				client.setRoute(&route);
+				ssize_t maxSizeAllowed = route.getMaxSizeBody();
+				size_t bodySize = client.getRequest().getBody().size();
+				Response &response = client.getResponse();
 
-				reqPath.analyzePath(route.getDocroot());
+				if (maxSizeAllowed != MAX_SIZE_BODY_UNLIMITED
+					&& static_cast<size_t>(maxSizeAllowed) < bodySize)
+				{
+					response.setEntityTooLarge();
+					client.writeResponse();
+					return ;
+				}
+				if (route.hasRedirection())
+				{
+					std::cout << "redirection: "
+							  << route.getRedirectionStatusCode()
+							  << " "
+							  << route.getRedirectionPath()
+							  << std::endl;
+
+					response.clear();
+					std::string location = route.getRedirectionPath();
+					unsigned short int status =
+						route.getRedirectionStatusCode();
+
+					response.setStatusCode(status);
+					response.setStatusInfo(response.statusInfoInfer(status));
+					response.addHeader("Location", location);
+					response.addHeader("Content-Length", "0");
+					client.writeResponse();
+					return;
+				}
+
 				// Redirect if not '/' for directory listing
 				if (reqPath.isDirectory() && reqPath.needsTrailingSlashRedirect()) {
-					Response &response = client.getResponse();
 					std::string location = reqPath.getPath() + "/";
 					response.clear();
 					response.setStatusCode(308);
 					response.setStatusInfo("Permanent Redirect");
 					response.addHeader("Location", location);
 					response.addHeader("Content-Length", "0");
-					client.setMessageToSend(response.toString());
+					client.writeResponse();
 					return;
 				}
-				client.setRoute(&route);
 				route.serve(client, monitor);
 				return ;
 			}
@@ -129,7 +167,12 @@ namespace http
 		Response &response = client.getResponse();
 		response.clear();
 		response.setNotFound();
-		client.setMessageToSend(response.toString());
+		client.writeResponse();
+	}
+
+	const std::string &VirtualServer::getHostname(void) const
+	{
+		return this->hostname;
 	}
 
 	void VirtualServer::shutdown(void)

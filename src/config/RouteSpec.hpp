@@ -6,7 +6,7 @@
 //   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/18 07:04:08 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/25 19:59:21 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,11 +14,13 @@
 #ifndef ROUTESPEC_HPP
 # define ROUTESPEC_HPP
 
+# include "pathUtils.hpp"
 # include <string>
 # include <vector>
 # include <map>
 # include <cstdlib>
 # include <unistd.h>
+# include <ctime>
 
 namespace http
 {
@@ -37,8 +39,9 @@ namespace config
 		bool listDirectories;
 		bool listDirectoriesWasSet;
 		std::string indexFile;
+		time_t cgiTimeout;
 		std::pair<unsigned short int, std::string> redirection;
-		std::map<unsigned short int, std::string> errorPages;
+		MapErrorPages errorPages;
 		std::vector<std::string> allowedMethods;
 
 	public:
@@ -48,11 +51,18 @@ namespace config
 		virtual ~RouteSpec(void);
 
 		const std::string &getDocroot(void) const;
-		bool isCgiRoute(void) const;
 		const std::string &getCgiBinPath(void) const;
 		const std::string &getPathSpec(void) const;
 		const std::vector<std::string> &getAllowedMethods(void) const;
 		const std::string &getUploadFolder(void) const;
+		const MapErrorPages &getErrorPages(void) const;
+		const std::string &getIndexFile(void) const;
+		bool getListDirectories(void) const;
+		const std::pair<unsigned short int, std::string>
+			&getRedirection(void) const;
+		time_t getCgiTimeout(void) const;
+		ssize_t getMaxSizeBody(void) const;
+		bool isCgiRoute(void) const;
 
 		RouteSpec &setCgiBinPath(const std::string &cgiBinPath);
 		RouteSpec &setDocroot(const std::string &docroot);
@@ -66,6 +76,8 @@ namespace config
 		RouteSpec &setListDirectoriesIfUnset(bool listDirectories);
 		RouteSpec &setIndexFile(const std::string &indexFile);
 		RouteSpec &setIndexFileIfEmpty(const std::string &indexFile);
+		RouteSpec &setCgiTimeout(time_t cgiTimeout);
+		RouteSpec &setCgiTimeoutIfUnset(time_t cgiTimeout);
 		RouteSpec &setRedirection(
 			unsigned short int statusCode, const std::string &path);
 		RouteSpec &setRedirectionIfUnset(
