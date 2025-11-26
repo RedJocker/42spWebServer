@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 21:17:55 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/25 20:15:00 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/26 00:27:10 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -54,7 +54,7 @@ namespace http
 		virtual void serve(http::Client &client,  conn::Monitor &monitor) = 0;
 		virtual void respond(http::Client &client, const Operation &operation) const = 0;
 		// mutates path only if matches indexFile
-		bool matches(RequestPath &path, const std::string &method) const;
+		bool matches(RequestPath &path) const;
 		bool isMethodAllowed(const std::string &maybeMethodAllowed) const;
 		void onServerError(http::Client &client) const;
 		int getId(void) const;
@@ -67,6 +67,7 @@ namespace http
 		ssize_t getMaxSizeBody(void) const;
 		unsigned short int getRedirectionStatusCode(void) const;
 		const std::string &getRedirectionPath(void) const;
+		std::string methodsAllowedAsHeaderLine(void) const;
 	};
 }
 

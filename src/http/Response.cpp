@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/25 20:23:58 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/26 01:01:52 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,6 +202,18 @@ namespace http {
 			.setStatusInfo("Request Entity Too Large")
 			.addHeader("Content-Length", "0")
 			.addHeader("Connection", "close");
+		return *this;
+	}
+
+	Response &Response::setMethodNotAllowed(const std::string &allowedAsString)
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(405)
+			.setStatusInfo("Method Not Allowed")
+			.addHeader("Content-Length", "0")
+			.addHeader("Allow", allowedAsString)
+			;
 		return *this;
 	}
 

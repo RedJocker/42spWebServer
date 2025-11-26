@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/25 20:15:52 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/26 01:11:24 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,7 @@
 #include "RouteSpec.hpp"
 #include <iostream>
 #include "constants.hpp"
+#include <sstream>
 
 namespace http {
 
@@ -84,10 +85,8 @@ namespace http {
 	{
 	}
 
-	bool Route::matches(RequestPath &path, const std::string &method) const
+	bool Route::matches(RequestPath &path) const
 	{
-		if (!this->isMethodAllowed(method))
-			return false;
 		bool matches = false;
 		bool shouldTryIndex = path.isDirectory()
 			&& (!this->indexFile.empty());
@@ -180,5 +179,19 @@ namespace http {
 	const std::string &Route::getRedirectionPath(void) const
 	{
 		return this->redirection.second;
+	}
+
+	std::string Route::methodsAllowedAsHeaderLine(void) const
+	{
+		std::stringstream ss;
+		size_t i = 0;
+		size_t len = this->methodsAllowed.size();
+		std::set<std::string>::iterator methodIt = this->methodsAllowed.begin();
+		for (; i < len - 1; ++i, ++methodIt)
+		{
+			ss << *methodIt << ", ";
+		}
+		ss << *methodIt;
+		return ss.str();
 	}
 }
