@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/25 20:40:16 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/11/26 20:16:38 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "EventLoop.hpp"
 #include "VirtualServerSpec.hpp"
 #include "ServerSpec.hpp"
+#include "Scanner.hpp"
 #include <iostream>
 #include <signal.h>
 
@@ -117,10 +118,18 @@ http::Application applicationConfig(void)
 	return appSpec.toApplication();
 }
 
-int main(void)
+int applicationConfigParse(char **av)
+{	
+	config::Scanner scanner;
+	return scanner.readContent(av[1]);
+}
+
+int main(int ac, char **av)
 {
 	signal(SIGINT, &signalHandler);
 
+	if (ac > 1)
+		return applicationConfigParse(av);
 	http::Application app = applicationConfig();
 	return app.run();
 }

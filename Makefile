@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+         #
+#    By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/11/21 20:57:54 by maurodri         ###   ########.fr        #
+#    Updated: 2025/11/26 20:15:10 by bnespoli         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,6 +48,7 @@ HTTP_FILES := $(addprefix $(HTTP_DIR)/, Request.cpp \
 CONFIG_FILES := $(addprefix $(CONFIG_DIR)/, ApplicationSpec.cpp \
 					ServerSpec.cpp \
 					VirtualServerSpec.cpp \
+					Scanner.cpp \
 					RouteSpec.cpp)
 
 MODULE_FILES := $(CONN_FILES) \
