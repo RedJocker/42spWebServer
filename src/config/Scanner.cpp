@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-/*   Updated: 2025/11/26 20:42:35 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/11/26 21:33:28 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,21 @@ namespace config {
 	{
 	}
 
-	int Scanner::readContent(std::string filename)
+	size_t Scanner::skipSpaces(const std::string &source, size_t initialPoint)
+	{
+		while(initialPoint < content.size())
+		{
+			if (std::isspace(source[initialPoint]))
+			{
+				++initialPoint;
+			}
+			else
+				return initialPoint;
+		}
+		return initialPoint;
+	}
+
+	int Scanner::readContent(const std::string &filename)
 	{
 		int fd = ::open(filename.c_str(), O_RDONLY, 0666);
 
@@ -74,25 +88,18 @@ namespace config {
 		return 0;
 	}
 	
-	int Scanner::readDirective(size_t directiveStart)
+	int Scanner::readDirective(const std::string &source, size_t directiveStart)
 	{
-		while(directiveStart < content.size())
-		{
-			if (std::isspace(this->content[directiveStart]))
-			{
-				++directiveStart;
-				continue;
-			}
-			else
-				break;
-		}
-		size_t directiveEnd = this->content.find(';', directiveStart);
+		// TODO dar suporte para diretivas simples e compostas
+
+		directiveStart = this->skipSpaces(source, directiveStart);
+		size_t directiveEnd = source.find(';', directiveStart);
 		if (directiveEnd == std::string::npos)
 		{
 			std::cerr << "Error: directive not terminated with ';'" << std::endl;
 			return -1;
 		}
-		std::string directive = this->content.substr(directiveStart, directiveEnd - directiveStart);
+		std::string directive = source.substr(directiveStart, directiveEnd - directiveStart);
 		this->directives.push_back(directive);
 		return directiveEnd + 1;
 	}
