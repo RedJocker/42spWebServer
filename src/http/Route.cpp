@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/26 01:11:24 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/01 17:18:59 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -186,12 +186,16 @@ namespace http {
 		std::stringstream ss;
 		size_t i = 0;
 		size_t len = this->methodsAllowed.size();
+		// assume HEAD is always a valid method
+		// avoids issue with empty Allow header
+		if (len == 0)
+			return "HEAD";
 		std::set<std::string>::iterator methodIt = this->methodsAllowed.begin();
-		for (; i < len - 1; ++i, ++methodIt)
+		for (; i < len; ++i, ++methodIt)
 		{
 			ss << *methodIt << ", ";
 		}
-		ss << *methodIt;
+		ss << "HEAD";
 		return ss.str();
 	}
 }
