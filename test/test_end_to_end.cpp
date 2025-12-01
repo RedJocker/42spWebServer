@@ -7,7 +7,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/26 00:32:07 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/25 21:37:56 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/01 17:12:39 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -424,17 +424,17 @@ http::Application setup_config_upload(
 
 	config::VirtualServerSpec virtualServer1;
 	{
-		config::RouteSpec routeSpec[2];
+		config::RouteSpec routeSpec[1];
 		routeSpec[0]
 			.setPathSpec("/42/**")
 			.setUploadFolder(uploadFolder1)
 			.addAllowedMethod("POST")
 			.addAllowedMethod("GET")
 			.addAllowedMethod("DELETE")
-			.addErrorPage(400, "route /** 400")
-			.addErrorPage(404, "route /** 404")
-			.addErrorPage(500, "route /** 500")
-			.addErrorPage(504, "route /** 504");
+			.addErrorPage(400, "route /42/** 400")
+			.addErrorPage(404, "route /42/** 404")
+			.addErrorPage(500, "route /42/** 500")
+			.addErrorPage(504, "route /42/** 504");
 
 		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
 		{
