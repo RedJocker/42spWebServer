@@ -6,7 +6,7 @@
 /*   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 17:28:13 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/25 21:54:37 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/26 01:10:28 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /******************************************************************************/
 
@@ -114,9 +114,17 @@ namespace http
 			Route &route = *(*routeIt);
 			RequestPath &reqPath = client.getRequest().getPath();
 			reqPath.analyzePath(route.getDocroot());
-			if (route.matches(reqPath, method))
+			if (route.matches(reqPath))
 			{
 				client.setRoute(&route);
+				if (!route.isMethodAllowed(method))
+				{
+					client.getResponse()
+						.setMethodNotAllowed(route.methodsAllowedAsHeaderLine())
+						;
+					client.writeResponse();
+					return ;
+				}
 				ssize_t maxSizeAllowed = route.getMaxSizeBody();
 				size_t bodySize = client.getRequest().getBody().size();
 				Response &response = client.getResponse();

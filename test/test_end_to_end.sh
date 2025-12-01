@@ -293,6 +293,36 @@ assert_upload() {
     # this is like the return of c main function
 }
 
+assert_allowed() {
+    local status_line=$(echo "$request_output" | head -1)
+
+    if [[ "$status_line" != "$expected_status_line" ]]; then
+        echo "expected status_line == $expected_status_line" | cat -e
+        echo "actual   status_line == $status_line" | cat -e
+        return 1
+    fi
+
+    local allow_header=$(echo "$request_output" | grep 'Allow:')
+    local allow_header_lines=$(echo "$allow_header" | wc -l)
+    if (( $allow_header_lines != 1 )); then
+	echo "expected exactly one header with key 'Allow'"
+	echo "found $allow_header_lines:"
+	echo "$allow_header" | awk '{ print "\t- ", $0 }'
+	return 1
+    fi
+
+    for expected_method in "${expected_allowed[@]}"; do
+	if !(echo "$allow_header" | grep -E "\b$expected_method\b" > /dev/null); then
+	    echo "expected Allow header to contain method $expected_method"
+	    echo "found $allow_header"
+	    return 1
+	fi
+    done
+
+    return 0
+    # return keyword is for "status code" of the function execution with 0 -> ok
+    # this is like the return of c main function
+}
 
 
 
@@ -840,3 +870,31 @@ test_request \
     'POST /body_ok HTTP/1.1\r\nHost: domain.com\r\nConnection: close\r\n'\
 'Content-Length: 9\r\n\r\nabcdefghi'
 #
+
+# when request matches route
+# route allows DELETE GET POST
+# and request method is not allowed
+# then expect 405 and allow header
+expected_status_line=$(printf "HTTP/1.1 405 Method Not Allowed\r")
+expected_allowed=("DELETE" "GET" "POST")
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_allowed \
+    'config_one' \
+    'PUT /index.html HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+
+
+# when request matches route
+# route allows GET POST
+# and request method is not allowed
+# then expect 405 and allow header
+expected_status_line=$(printf "HTTP/1.1 405 Method Not Allowed\r")
+expected_allowed=("GET" "POST")
+test_line=$(( $LINENO + 1 ))
+test_request \
+    assert_allowed \
+    'config_one' \
+    'PATCH /42/index.cgi HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+#
+

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/25 21:48:18 by maurodri         ###   ########.fr       //
+//   Updated: 2025/11/26 00:31:31 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ namespace http {
 			Response &setInternalServerError();
 			Response &setGatewayTimeout();
 			Response &setEntityTooLarge();
+			Response &setMethodNotAllowed(const std::string &allowedAsString);
 
 			void clear(void);
 
