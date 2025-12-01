@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/11/24 20:49:21 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/01 16:02:37 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,7 +301,6 @@ namespace conn
 		if (flushResult.first == BufferedWriter::ERROR)
 		{
 			std::cerr << "error cgi writing: " << strerror(errno) << std::endl;
-			TODO("handle error writing to cgi process");
 			http::Route *route = client.getRoute();
 			if (route)
 				route->onServerError(client);
@@ -400,7 +399,6 @@ namespace conn
 			case http::Request::READ_ERROR: {
 				std::cout << "error reading request" << std::endl;
 				unsubscribeHttpClient(eventIt);
-				throw std::domain_error("TODO read ERROR");
 			}
 
 			default:

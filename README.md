@@ -36,7 +36,18 @@
 
 ## To fix
 
-empty
+multipart upload test cases
+
+# Sprint 2
+
+- tests
+	- multiplos servidores com portas diferentes
+	- operaçoes de arquivo sem permissao de acesso ao arquivo
+	- test siege com pagina em branco
+
+ - resolver todo
+	- falha de leitura no read
+	- olhar os construtores e destrutores e verificar inicialização de variaveis
 
 ## Sprint 1
 
@@ -186,13 +197,14 @@ empty
           so reading status from cgi response contemplates this item
 
 - Connection
-  - [ ] timeout system for clients
+  - [-] timeout system for clients
     - client may be unresponsive after a keep-alive response
+		- close
     - client may be too slow sending the whole request
-    - send response with 408 Request Timeout
+    	- send response with 408 Request Timeout
 
 - Tests
-  - make end-to-end tests to test that implementation behaviour is following requirements 
+  - make end-to-end tests to test that implementation behaviour is following requirements
     - testing on 'high level', no implementation details, blackbox testing
     - set up stage enviroment so that changing dev enviroment (like ./www folder)
       does not change test results
