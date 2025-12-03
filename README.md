@@ -52,7 +52,7 @@ multipart upload test cases
 - diretivas
   - http (ServerSpec)
     - simple directives
-      - [ ] listen (addressPort string)
+      - [X] listen (addressPort string)
       - [ ] docroot (docroot string)
       - [ ] client_max_body_size (maxSizeBody ssize_t)
       - [ ] autoindex (listDirectories bool)

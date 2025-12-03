@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/03 16:46:15 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/03 20:02:36 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ namespace config {
 
 		std::vector<std::string> directives;
 
+		void interpretDirective(const std::string &directive);
+
 	public:
 		ServerSpec();
 		ServerSpec(const ServerSpec &other);
@@ -64,7 +66,6 @@ namespace config {
 		http::Server *toServer(void);
 
 		int serverConfigParse(const std::string &directive, Scanner &scanner);
-		ssize_t isIndexDirective(const std::string &directive);
 	};
 }
 

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/03 16:59:28 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/03 20:02:49 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,11 +164,27 @@ namespace utils {
 		{
 			for (size_t j = 0; j < charsToFind.size(); ++j)
 			{
-				std::cout << "Comparing " << toSearch.at(i) << " with " << charsToFind.at(j) << std::endl;
 				if (toSearch.at(i) == charsToFind.at(j))
 					return static_cast<ssize_t>(i);
 			}
 		}
 		return -1;	
+	}
+
+	bool isDirectiveSimple(
+		const std::string &prefix,
+		const std::string &directive,
+		ssize_t &out_end,
+		ssize_t &out_prefixSize)
+	{
+		if (!utils::startsWith(prefix, directive))
+		{
+			return false;
+		}
+		out_prefixSize = prefix.size();
+		out_end = utils::findOneOf(directive, out_prefixSize, ";");
+		return out_end != -1
+			&& out_prefixSize != -1
+			&& out_end > out_prefixSize;
 	}
 }

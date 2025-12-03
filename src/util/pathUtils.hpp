@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/03 14:53:51 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/03 19:47:08 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,11 @@ namespace utils {
 		const std::string &toSearch,
 		size_t startPos,
 		const std::string &charsToFind);
+	bool isDirectiveSimple(
+		const std::string &prefix,
+		const std::string &directive,
+		ssize_t &out_end,
+		ssize_t &out_prefixSize);
 }
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/03 13:56:26 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/12/03 19:08:40 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -399,6 +399,7 @@ namespace conn
 			case http::Request::READ_ERROR: {
 				std::cout << "error reading request" << std::endl;
 				unsubscribeHttpClient(eventIt);
+				return;
 			}
 
 			default:

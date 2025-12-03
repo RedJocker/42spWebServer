@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/03 17:09:44 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/03 20:02:21 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,22 +147,39 @@ namespace config {
 		return server;
 	}
 
-	ssize_t ServerSpec::isIndexDirective(const std::string &directive)
+	void ServerSpec::interpretDirective(const std::string &directive)
 	{
-		if (!utils::startsWith("index", directive))
+		ssize_t end;
+		ssize_t prefixSize;
+
+		if (utils::isDirectiveSimple("listen", directive, end, prefixSize))
 		{
-			return -1;
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting addressPort to: " << value << std::endl;
+			this->setAddressPort(value);
+			return;
 		}
-		return utils::findOneOf(directive, 5, ";");
+
+		if (utils::isDirectiveSimple("index", directive, end, prefixSize))
+		{
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting index file to: " << value << std::endl;
+			this->setIndexFile(value);
+			return;
+		}
 	}
 
-	int ServerSpec::serverConfigParse(const std::string &directive, Scanner &scanner)
+	int ServerSpec::serverConfigParse(
+		const std::string &directive, Scanner &scanner)
 	{
 		ssize_t alreadyread = 0;
 		std::cout << "Parsing server directive: " << directive << std::endl;
 		while (alreadyread <static_cast<ssize_t>(directive.size()))
 		{
-			alreadyread = scanner.readDirective(directive, alreadyread, this->directives);
+			alreadyread = scanner
+				.readDirective(directive, alreadyread, this->directives);
 			if (alreadyread < 0)
 			{
 				std::cerr << "Error parsing directive" << std::endl;
@@ -172,15 +189,9 @@ namespace config {
 		
 		for (size_t i = 0; i < this->directives.size(); ++i)
 		{
-			std::cout << "Directive " << i << ": " << this->directives[i] << std::endl;
-			ssize_t end = this->isIndexDirective(this->directives[i]);
-			if (end > 5)
-			{
-				std::cout << "Found index directive" << end << std::endl;
-				std::string value = utils::trimCopy(this->directives[i].substr(5, end - 5));
-				std::cout << "Setting index file to: " << value << std::endl;
-				this->setIndexFile(value);
-			}
+			std::cout << "Directive " << i << ": "
+					  << this->directives[i] << std::endl;
+			this->interpretDirective(this->directives[i]);
 		}
 		return 0;
 	}
