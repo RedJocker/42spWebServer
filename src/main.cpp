@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/03 14:09:45 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/03 14:22:13 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,8 @@ int fileConfigApplication(char **av)
 	config::ApplicationSpec appSpec;
 	// TODO checar os casos de erros
 	appSpec.applicationConfigParse(av);
-	return appSpec.toApplication().run();
+	//return appSpec.toApplication().run();
+	return 0;
 }
 
 int main(int ac, char **av)
