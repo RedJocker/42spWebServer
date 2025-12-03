@@ -41,22 +41,51 @@ multipart upload test cases
 # Sprint 2
 
 - tests
-	- multiplos servidores com portas diferentes
-	- operaçoes de arquivo sem permissao de acesso ao arquivo
-	- test siege com pagina em branco
+  - multiplos servidores com portas diferentes
+  - operaçoes de arquivo sem permissao de acesso ao arquivo
+  - test siege com pagina em branco
 
- - resolver todo
-	- falha de leitura no read
-	- olhar os construtores e destrutores e verificar inicialização de variaveis
+  - resolver TODOS
+    - falha de leitura no read
+    - olhar os construtores e destrutores e verificar inicialização de variaveis
 
 - diretivas
-	- http (ServerSpec)
-		- [ ] addressPort;
-		- [ ] docroot (docroot);
-		- [ ] maxSizeBody;
-		- [ ] listDirectories;
-		- [X] (index) indexFile;
-		- [ ] cgiTimeout;
+  - http (ServerSpec)
+    - simple directives
+      - [ ] listen (addressPort string)
+      - [ ] docroot (docroot string)
+      - [ ] client_max_body_size (maxSizeBody ssize_t)
+      - [ ] autoindex (listDirectories bool)
+      - [X] index (indexFile string)
+      - [ ] fastcgi_read_timeout (cgiTimeout, numero >= 0)
+      - [ ] error_page (errorPages numero, string)
+    - compound directives
+      - [ ] server (virtualServers VirtualServerSpec)
+  - server (VirtualServerSpec)
+    - simple directives
+      - [ ] hostname (hostname string)
+      - [ ] docroot (docroot string)
+      - [ ] upload_pass (uploadFolder string)
+      - [ ] client_max_body_size (maxSizeBody ssize_t)
+      - [ ] autoindex (listDirectories bool)
+      - [X] index (indexFile string)
+      - [ ] fastcgi_read_timeout (cgiTimeout numero >= 0)
+      - [ ] return (redirection numero, string)
+      - [ ] error_page (errorPages numero, string)
+    - compound directives
+      - [ ] location (routes string, RouteSpec)
+  - location (RouteSpec)
+    - simple directives
+      - [ ] cgi_bin (cgiBinPath, ) // custom
+      - [ ] docroot (docroot string)
+      - [ ] upload_pass (uploadFolder string)
+      - [ ] client_max_body_size (maxSizeBody ssize_t)
+      - [ ] autoindex (listDirectories bool)
+      - [X] index (indexFile string)
+      - [ ] cgi_read_timeout (cgiTimeout numero >= 0) // custom
+      - [ ] return (redirection numero, string)
+      - [ ] error_page (errorPages numero, string)
+      - [ ] allow (allowedMethods string) // custom
 
 ## Sprint 1
 
