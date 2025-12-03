@@ -49,6 +49,15 @@ multipart upload test cases
 	- falha de leitura no read
 	- olhar os construtores e destrutores e verificar inicialização de variaveis
 
+- diretivas
+	- http (ServerSpec)
+		- [ ] addressPort;
+		- [ ] docroot (docroot);
+		- [ ] maxSizeBody;
+		- [ ] listDirectories;
+		- [X] (index) indexFile;
+		- [ ] cgiTimeout;
+
 ## Sprint 1
 
 - Http

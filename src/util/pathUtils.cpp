@@ -6,13 +6,14 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/03 14:43:37 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/03 16:59:28 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pathUtils.hpp"
 #include <cctype>
 #include <sstream>
+#include <iostream>
 
 
 namespace utils {
@@ -163,6 +164,7 @@ namespace utils {
 		{
 			for (size_t j = 0; j < charsToFind.size(); ++j)
 			{
+				std::cout << "Comparing " << toSearch.at(i) << " with " << charsToFind.at(j) << std::endl;
 				if (toSearch.at(i) == charsToFind.at(j))
 					return static_cast<ssize_t>(i);
 			}
