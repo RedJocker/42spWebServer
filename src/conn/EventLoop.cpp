@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/01 16:02:37 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/12/03 13:56:26 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -420,7 +420,9 @@ namespace conn
 
 		if (flushResult.first == BufferedWriter::ERROR) {
 			// TODO Handle write errors
-			throw std::domain_error("write ERROR");
+			std::cout << "error writing response "
+					  << flushResult.second << std::endl;
+			unsubscribeHttpClient(eventIt);
 			client->clear();
 		}
 
