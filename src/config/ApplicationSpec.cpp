@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 16:24:53 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/03 14:30:13 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/03 14:57:41 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,11 +70,11 @@ namespace config
 		// TODO checar os casos de erros
 		scanner.readContent(av[1]);
 		std::string filecontent = scanner.getContent();
-		size_t alreadyread = 0;
-		alreadyread = scanner.readDirective(filecontent, alreadyread, this->directives);
-		while (alreadyread < filecontent.size())
+		ssize_t alreadyread = 0;
+		while (alreadyread < static_cast<ssize_t>(filecontent.size()))
 		{
 			alreadyread = scanner.readDirective(filecontent, alreadyread, this->directives);
+			std::cout << "Already read: " << alreadyread << std::endl;
 			if (alreadyread < 0)
 			{
 				std::cerr << "Error parsing directive" << std::endl;

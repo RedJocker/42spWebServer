@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:03:16 by bnespoli          #+#    #+#             */
-/*   Updated: 2025/12/03 14:16:26 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/03 14:39:25 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ namespace config
 
 		size_t skipSpaces(const std::string &source, size_t initialPoint);
 		int readContent(const std::string &filename);
-		int readDirective(const std::string &source, size_t directiveStart, std::vector<std::string> &directives);
+		ssize_t readDirective(const std::string &source, size_t directiveStart, std::vector<std::string> &directives);
 		const std::string &getContent(void) const;
 	};
 }

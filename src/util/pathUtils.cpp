@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pathUtils.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/12 17:11:32 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/03 14:43:37 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,5 +154,19 @@ namespace utils {
 		}
 		return toSearch.at(toSearchLen) == toFind ?
 			toSearchLen : std::string::npos;
+	}
+
+	ssize_t findOneOf (
+		const std::string &toSearch, size_t startPos, const std::string &charsToFind)
+	{
+		for (size_t i = startPos; i < toSearch.size(); ++i)
+		{
+			for (size_t j = 0; j < charsToFind.size(); ++j)
+			{
+				if (toSearch.at(i) == charsToFind.at(j))
+					return static_cast<ssize_t>(i);
+			}
+		}
+		return -1;	
 	}
 }

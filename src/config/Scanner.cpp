@@ -6,13 +6,14 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-/*   Updated: 2025/12/03 14:15:58 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/03 14:56:38 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Scanner.hpp"
 #include "BufferedReader.hpp"
 #include <iostream>
+#include "pathUtils.hpp"
 
 
 namespace config {
@@ -88,7 +89,7 @@ namespace config {
 		return 0;
 	}
 	
-	int Scanner::readDirective(const std::string &source, size_t directiveStart, std::vector<std::string> &directives)
+	ssize_t Scanner::readDirective(const std::string &source, size_t directiveStart, std::vector<std::string> &directives)
 	{
 		// TODO dar suporte para diretivas simples e compostas
 
@@ -101,15 +102,32 @@ namespace config {
 		{
 			return -1;
 		}
-		size_t directiveEnd = source.find(';', directiveStart);
-		if (directiveEnd == std::string::npos)
+		ssize_t directiveEnd = utils::findOneOf(source, directiveStart, ";{}");
+		if (directiveEnd == -1)
 		{
-			std::cerr << "Error: directive not terminated with ';'" << std::endl;
+			std::cerr << "Error: unexpected end of file." << std::endl;
 			return -1;
 		}
-		std::string directive = source.substr(directiveStart, directiveEnd - directiveStart);
-		directives.push_back(directive);
-		return directiveEnd + 1;
+		char firstChar = source[directiveEnd];
+		if (firstChar == ';')
+		{
+			std::string directive = source.substr(directiveStart, directiveEnd - directiveStart);
+			directives.push_back(directive);
+			return directiveEnd + 1;
+		}
+		if (firstChar == '{')
+		{
+			directiveEnd = utils::findOneOf(source, directiveEnd + 1, "}");
+			std::string directive = source.substr(directiveStart, directiveEnd - directiveStart);
+			directives.push_back(directive);
+			return directiveEnd + 1;
+		}
+		if (firstChar == '}')
+		{
+			std::cerr << "Error: unexpected format no starting brace" << std::endl;
+			return -1;
+		}
+		return -1;
 	}
 
 	const std::string &Scanner::getContent(void) const
