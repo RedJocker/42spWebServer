@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-/*   Updated: 2025/12/03 14:56:38 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/03 15:35:46 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,8 +88,53 @@ namespace config {
 		delete[] result.second;
 		return 0;
 	}
+
+	size_t Scanner::finishReadSimpleDirective(
+		const std::string &source,
+		size_t directiveStart,
+		size_t directiveEnd,
+		std::vector<std::string> &directives)
+	{
+		std::string directive = source.substr(directiveStart, directiveEnd - directiveStart + 1);
+		directives.push_back(directive);
+		return directiveEnd + 1;
+	}
+
+	ssize_t Scanner::finishReadCompoundDirective(
+		const std::string &source,
+		size_t directiveStart,
+		size_t directiveCurrent,
+		std::vector<std::string> &directives)
+	{
+		if (source.at(directiveCurrent) != '{')
+			throw std::domain_error("compound directive should start with ;");
+		int openBrackets = 1;
+		size_t current = directiveCurrent + 1;
+		while (openBrackets != 0 && current < source.size())
+		{
+			if (source.at(current) == '{')
+				++openBrackets;
+			else if (source.at(current) == '}')
+				--openBrackets;
+			current++;
+		}
+
+		if (openBrackets != 0)
+		{
+			std::cerr << "Error: unexpected end of file while reading compound directive"
+					  << std::endl;
+			return -1;
+		} else
+		{
+			size_t directiveEnd = current;
+			std::string directive = source.substr(directiveStart, directiveEnd - directiveStart + 1);
+			directives.push_back(directive);
+			return directiveEnd + 1;
+		}
+	}
 	
-	ssize_t Scanner::readDirective(const std::string &source, size_t directiveStart, std::vector<std::string> &directives)
+	ssize_t Scanner::readDirective(
+		const std::string &source, size_t directiveStart, std::vector<std::string> &directives)
 	{
 		// TODO dar suporte para diretivas simples e compostas
 
@@ -111,16 +156,13 @@ namespace config {
 		char firstChar = source[directiveEnd];
 		if (firstChar == ';')
 		{
-			std::string directive = source.substr(directiveStart, directiveEnd - directiveStart);
-			directives.push_back(directive);
-			return directiveEnd + 1;
+			return this->finishReadSimpleDirective(
+				source, directiveStart, directiveEnd, directives);
 		}
 		if (firstChar == '{')
 		{
-			directiveEnd = utils::findOneOf(source, directiveEnd + 1, "}");
-			std::string directive = source.substr(directiveStart, directiveEnd - directiveStart);
-			directives.push_back(directive);
-			return directiveEnd + 1;
+			return this->finishReadCompoundDirective(
+				source, directiveStart, directiveEnd, directives);
 		}
 		if (firstChar == '}')
 		{
