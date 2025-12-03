@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   RouteCgi.cpp                                       :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/20 09:41:59 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RouteCgi.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/03 13:50:10 by vcarrara         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "RouteCgi.hpp"
 #include "Monitor.hpp"
@@ -25,7 +25,6 @@ namespace http {
 
 	RouteCgi::RouteCgi() : Route(), cgiBinPath(DEFAULT_CGI_BIN_PATH)
 	{
-		//TODO
 	}
 
 	RouteCgi::RouteCgi(const config::RouteSpec &routeSpec)
@@ -48,7 +47,6 @@ namespace http {
 
 	RouteCgi::~RouteCgi()
 	{
-		//TODO
 	}
 
 	void RouteCgi::serve(http::Client &client, conn::Monitor &monitor)

@@ -46,8 +46,8 @@ multipart upload test cases
 	- test siege com pagina em branco
 
  - resolver todo
-	- falha de leitura no read
-	- olhar os construtores e destrutores e verificar inicialização de variaveis
+	- [x] falha de leitura no read
+	- [x] olhar os construtores e destrutores e verificar inicialização de variaveis
 
 ## Sprint 1
 
