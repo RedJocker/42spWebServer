@@ -47,7 +47,7 @@ multipart upload test cases
 
  - resolver todo
 	- falha de leitura no read
-	- olhar os construtores e destrutores e verificar inicialização de variaveis
+	- [x] olhar os construtores e destrutores e verificar inicialização de variaveis
 
 ## Sprint 1
 
