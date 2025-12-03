@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-//   Updated: 2025/11/26 21:33:28 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/03 14:15:58 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,11 +88,19 @@ namespace config {
 		return 0;
 	}
 	
-	int Scanner::readDirective(const std::string &source, size_t directiveStart)
+	int Scanner::readDirective(const std::string &source, size_t directiveStart, std::vector<std::string> &directives)
 	{
 		// TODO dar suporte para diretivas simples e compostas
 
 		directiveStart = this->skipSpaces(source, directiveStart);
+		if (directiveStart >= source.size())
+		{
+			return directiveStart;
+		}
+		if(!std::isalpha(source[directiveStart]))
+		{
+			return -1;
+		}
 		size_t directiveEnd = source.find(';', directiveStart);
 		if (directiveEnd == std::string::npos)
 		{
@@ -100,8 +108,13 @@ namespace config {
 			return -1;
 		}
 		std::string directive = source.substr(directiveStart, directiveEnd - directiveStart);
-		this->directives.push_back(directive);
+		directives.push_back(directive);
 		return directiveEnd + 1;
+	}
+
+	const std::string &Scanner::getContent(void) const
+	{
+		return this->content;
 	}
 	
 } // namespace config

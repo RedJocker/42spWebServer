@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   ApplicationSpec.hpp                                :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/11/15 16:20:44 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/15 17:07:22 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ApplicationSpec.hpp                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/15 16:20:44 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/03 14:05:21 by bnespoli         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef APPLICATIONSPEC_HPP
 # define APPLICATIONSPEC_HPP
@@ -25,6 +25,8 @@ namespace config
 	class ApplicationSpec
 	{
 		std::vector<ServerSpec> servers;
+		std::vector<std::string> directives;
+		
 	public:
 		ApplicationSpec(void);
 		ApplicationSpec(const ApplicationSpec &other);
@@ -32,6 +34,10 @@ namespace config
 		virtual ~ApplicationSpec();
 		void addServer(const ServerSpec &serverSpec);
 		http::Application toApplication(void);
+
+		int applicationConfigParse(char **av);
+
+	
 	};
 }
 
