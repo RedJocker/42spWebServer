@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pathUtils.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/20 06:45:31 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/03 14:53:51 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <string>
 # include <map>
+# include <cstdlib>
 
 typedef std::map<unsigned short int, std::string> MapErrorPages;
 
@@ -29,6 +30,10 @@ namespace utils {
 		const std::string &prefix, const std::string &maybeHasPrefix);
 	std::string &trimInPlace(std::string &maybeHasLeadAndTrailingSpaces);
 	std::string trimCopy(const std::string &maybeHasLeadAndTrailingSpaces);
+	ssize_t findOneOf (
+		const std::string &toSearch,
+		size_t startPos,
+		const std::string &charsToFind);
 }
 
 #endif

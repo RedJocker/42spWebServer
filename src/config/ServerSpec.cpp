@@ -1,20 +1,21 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   ServerSpec.cpp                                     :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 17:24:23 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ServerSpec.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/03 17:09:44 by bnespoli         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "ServerSpec.hpp"
 #include "VirtualServer.hpp"
 #include "VirtualServerSpec.hpp"
 #include "constants.hpp"
 #include "Server.hpp"
+#include <iostream>
 
 namespace config {
 
@@ -145,4 +146,44 @@ namespace config {
 			vservers);
 		return server;
 	}
+
+	ssize_t ServerSpec::isIndexDirective(const std::string &directive)
+	{
+		if (!utils::startsWith("index", directive))
+		{
+			return -1;
+		}
+		return utils::findOneOf(directive, 5, ";");
+	}
+
+	int ServerSpec::serverConfigParse(const std::string &directive, Scanner &scanner)
+	{
+		ssize_t alreadyread = 0;
+		std::cout << "Parsing server directive: " << directive << std::endl;
+		while (alreadyread <static_cast<ssize_t>(directive.size()))
+		{
+			alreadyread = scanner.readDirective(directive, alreadyread, this->directives);
+			if (alreadyread < 0)
+			{
+				std::cerr << "Error parsing directive" << std::endl;
+				return -1;
+			}
+		}
+		
+		for (size_t i = 0; i < this->directives.size(); ++i)
+		{
+			std::cout << "Directive " << i << ": " << this->directives[i] << std::endl;
+			ssize_t end = this->isIndexDirective(this->directives[i]);
+			if (end > 5)
+			{
+				std::cout << "Found index directive" << end << std::endl;
+				std::string value = utils::trimCopy(this->directives[i].substr(5, end - 5));
+				std::cout << "Setting index file to: " << value << std::endl;
+				this->setIndexFile(value);
+			}
+		}
+		return 0;
+	}
+
+	
 }

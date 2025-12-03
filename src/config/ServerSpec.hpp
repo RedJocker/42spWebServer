@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   ServerSpec.hpp                                     :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 17:20:19 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ServerSpec.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/03 16:46:15 by bnespoli         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef SERVERSPEC_HPP
 # define SERVERSPEC_HPP
@@ -17,6 +17,7 @@
 # include "pathUtils.hpp"
 # include <string>
 # include <vector>
+# include "Scanner.hpp"
 
 namespace http
 {
@@ -34,7 +35,10 @@ namespace config {
 		std::string indexFile;
 		time_t cgiTimeout;
 		MapErrorPages errorPages;
+		
 		std::vector<VirtualServerSpec> virtualServers;
+
+		std::vector<std::string> directives;
 
 	public:
 		ServerSpec();
@@ -58,6 +62,9 @@ namespace config {
 		ServerSpec &addVirtualServer(VirtualServerSpec &virtualServer);
 
 		http::Server *toServer(void);
+
+		int serverConfigParse(const std::string &directive, Scanner &scanner);
+		ssize_t isIndexDirective(const std::string &directive);
 	};
 }
 
