@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   VirtualServerSpec.hpp                              :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 17:17:28 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   VirtualServerSpec.hpp                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/04 19:50:06 by bnespoli         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef VIRTUALSERVERSPEC_HPP
 # define VIRTUALSERVERSPEC_HPP
@@ -17,6 +17,7 @@
 # include <vector>
 # include "RouteSpec.hpp"
 # include "pathUtils.hpp"
+# include "Scanner.hpp"
 
 
 namespace http
@@ -76,6 +77,7 @@ namespace config {
 		VirtualServerSpec &addRoute(RouteSpec &route);
 
 		http::VirtualServer *toVirtualServer(void);
+		int virtualServerConfigParse(const std::string &directives, Scanner &scanner);
 	};
 }
 

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 16:24:53 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/03 16:41:09 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:40:04 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,15 +63,6 @@ namespace config
 
 		return http::Application(_servers);
 	}
-
-	ssize_t ApplicationSpec::isHttpDirective(const std::string &directive)
-	{
-		if (!utils::startsWith("http", directive))
-		{
-			return -1;
-		}
-		return utils::findOneOf(directive, 4, "{");
-	}
 	
 	int ApplicationSpec::applicationConfigParse(char **av)
 	{
@@ -80,6 +71,7 @@ namespace config
 		scanner.readContent(av[1]);
 		std::string filecontent = scanner.getContent();
 		ssize_t alreadyread = 0;
+		int counter = 0;
 		while (alreadyread < static_cast<ssize_t>(filecontent.size()))
 		{
 			alreadyread = scanner.readDirective(filecontent, alreadyread, this->directives);
@@ -88,17 +80,35 @@ namespace config
 				std::cerr << "Error parsing directive" << std::endl;
 				return -1;
 			}
+			std::cout << "Directive " << counter << ": " << this->directives[counter] << std::endl;
+			++counter;
 		}
+		// for (size_t i = 0; i < this->directives.size(); ++i)
+		// {
+		// 	ssize_t startBrace = this->isHttpDirective(this->directives[i]);
+		// 	std::cout << "Directive " << i << ": " << this->directives[i] << std::endl;
+		// 	if (startBrace > 4)
+		// 	{
+		// 		ServerSpec serverSpec;
+		// 		std::string insideBrace = this->directives[i].substr(startBrace + 1, 
+		// 			this->directives[i].size() - (startBrace + 2));  // TODO melhorar isso
+		// 		if (serverSpec.serverConfigParse(insideBrace, scanner) != 0)
+		// 		{
+		// 			std::cerr << "Error parsing server directive" << std::endl;
+		// 			return -1;
+		// 		}
+		// 		this->addServer(serverSpec);
+		// 	}
+		// }
 		for (size_t i = 0; i < this->directives.size(); ++i)
 		{
-			ssize_t startBrace = this->isHttpDirective(this->directives[i]);
-			std::cout << "Directive " << i << ": " << this->directives[i] << std::endl;
-			if (startBrace > 4)
+			
+			std::string param;
+			std::string innerDirectives;
+			if (utils::isDirectiveCompound("http", this->directives[i], param, innerDirectives))
 			{
 				ServerSpec serverSpec;
-				std::string insideBrace = this->directives[i].substr(startBrace + 1, 
-					this->directives[i].size() - (startBrace + 2));  // TODO melhorar isso
-				if (serverSpec.serverConfigParse(insideBrace, scanner) != 0)
+				if (serverSpec.serverConfigParse(innerDirectives, scanner) != 0)
 				{
 					std::cerr << "Error parsing server directive" << std::endl;
 					return -1;

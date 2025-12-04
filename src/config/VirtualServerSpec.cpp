@@ -1,18 +1,20 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   VirtualServerSpec.cpp                              :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 17:24:42 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   VirtualServerSpec.cpp                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/04 19:53:45 by bnespoli         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "VirtualServerSpec.hpp"
 #include "constants.hpp"
 #include "VirtualServer.hpp"
+#include <iostream>
+#include "Scanner.hpp"
 
 namespace config {
 
@@ -224,5 +226,13 @@ namespace config {
 		}
 		http::VirtualServer *virtualServer = new http::VirtualServer(*this,_routes);
 		return virtualServer;
+	}
+
+	int VirtualServerSpec::virtualServerConfigParse(
+		const std::string &directives, Scanner &scanner)
+	{
+		std::cout << "Parsing virtual server directive: " << directives << std::endl;
+		(void)scanner;
+		return 0;
 	}
 }

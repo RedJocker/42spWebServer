@@ -53,14 +53,14 @@ multipart upload test cases
   - http (ServerSpec)
     - simple directives
       - [X] listen (addressPort string)
-      - [ ] docroot (docroot string)
-      - [ ] client_max_body_size (maxSizeBody ssize_t)
-      - [ ] autoindex (listDirectories bool)
+      - [X] docroot (docroot string)
+      - [X] client_max_body_size (maxSizeBody ssize_t)
+      - [X] autoindex (listDirectories bool)
       - [X] index (indexFile string)
-      - [ ] fastcgi_read_timeout (cgiTimeout, numero >= 0)
-      - [ ] error_page (errorPages numero, string)
+      - [X] fastcgi_read_timeout (cgiTimeout, numero >= 0)
+      - [X] error_page (errorPages numero, string)
     - compound directives
-      - [ ] server (virtualServers VirtualServerSpec)
+      - [x] server (virtualServers VirtualServerSpec)
   - server (VirtualServerSpec)
     - simple directives
       - [ ] hostname (hostname string)
@@ -68,7 +68,7 @@ multipart upload test cases
       - [ ] upload_pass (uploadFolder string)
       - [ ] client_max_body_size (maxSizeBody ssize_t)
       - [ ] autoindex (listDirectories bool)
-      - [X] index (indexFile string)
+      - [ ] index (indexFile string)
       - [ ] fastcgi_read_timeout (cgiTimeout numero >= 0)
       - [ ] return (redirection numero, string)
       - [ ] error_page (errorPages numero, string)
@@ -81,7 +81,7 @@ multipart upload test cases
       - [ ] upload_pass (uploadFolder string)
       - [ ] client_max_body_size (maxSizeBody ssize_t)
       - [ ] autoindex (listDirectories bool)
-      - [X] index (indexFile string)
+      - [ ] index (indexFile string)
       - [ ] cgi_read_timeout (cgiTimeout numero >= 0) // custom
       - [ ] return (redirection numero, string)
       - [ ] error_page (errorPages numero, string)

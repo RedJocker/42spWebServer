@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/03 20:02:21 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/04 19:52:39 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "constants.hpp"
 #include "Server.hpp"
 #include <iostream>
+#include <sstream>
 
 namespace config {
 
@@ -147,8 +148,8 @@ namespace config {
 		return server;
 	}
 
-	void ServerSpec::interpretDirective(const std::string &directive)
-	{
+	int ServerSpec::interpretDirective(const std::string &directive, Scanner &scanner)
+	{ // TODO handle errors
 		ssize_t end;
 		ssize_t prefixSize;
 
@@ -158,17 +159,83 @@ namespace config {
 				directive.substr(prefixSize, end - prefixSize));
 			std::cout << "Setting addressPort to: " << value << std::endl;
 			this->setAddressPort(value);
-			return;
+			return 0;
 		}
-
+		if (utils::isDirectiveSimple("root", directive, end, prefixSize))
+		{
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting docroot to: " << value << std::endl;
+			this->setDocroot(value);
+			return 0;
+		}
 		if (utils::isDirectiveSimple("index", directive, end, prefixSize))
 		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::cout << "Setting index file to: " << value << std::endl;
 			this->setIndexFile(value);
-			return;
+			return 0;
 		}
+		if (utils::isDirectiveSimple("client_max_body_size", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			ssize_t value;
+			ss >> value;
+			std::cout << "Setting Max body size to: " << value << std::endl;
+			this->setMaxSizeBody(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("autoindex", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			bool value = (valueStr == "on" || valueStr == "true");
+			std::cout << "Setting list directories to: " << value << std::endl;
+			this->setListDirectories(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("fastcgi_read_timeout", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			size_t value;
+			ss >> value;
+			std::cout << "Setting cgiTimeout to: " << value << std::endl;
+			this->setCgiTimeout(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("error_page", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			std::string path;
+			size_t status;
+			ss >> status >> path;
+			std::cout << "Setting error pages to: " << status << ", " 
+				<< path << std::endl;
+			// TODO read file and send content to addErrorPage
+			this->addErrorPage(status, path);
+			return 0;
+		}
+		std::string param;
+		std::string innerDirectives;
+		if (utils::isDirectiveCompound("server", directive, param, innerDirectives))
+		{
+			VirtualServerSpec vserverSpec;
+			if (vserverSpec.virtualServerConfigParse(innerDirectives, scanner) != 0)
+			{
+				std::cerr << "Error parsing virtual server directive" << std::endl;
+				return -1;
+			}
+			this->addVirtualServer(vserverSpec);
+			return 0;
+		}
+		return 0;
 	}
 
 	int ServerSpec::serverConfigParse(
@@ -191,7 +258,7 @@ namespace config {
 		{
 			std::cout << "Directive " << i << ": "
 					  << this->directives[i] << std::endl;
-			this->interpretDirective(this->directives[i]);
+			this->interpretDirective(this->directives[i], scanner);
 		}
 		return 0;
 	}

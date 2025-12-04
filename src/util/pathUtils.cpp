@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/12/03 20:02:49 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/04 19:36:05 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,5 +186,30 @@ namespace utils {
 		return out_end != -1
 			&& out_prefixSize != -1
 			&& out_end > out_prefixSize;
+	}
+
+	bool isDirectiveCompound(
+		const std::string &prefix,
+		const std::string &directive,
+		std::string &out_param,
+		std::string &out_directives)
+	{
+		if (!utils::startsWith(prefix, directive))
+		{
+			return false;
+		}
+		ssize_t openBracket = utils::findOneOf(directive, prefix.size(), "{");
+		ssize_t closeBracket = utils::findLastFromEnd('}', directive, openBracket);
+		if (openBracket == -1 || closeBracket == -1)
+		{
+			return false;
+		}
+		out_param = utils::trimCopy(
+			directive.substr(prefix.size(), openBracket - prefix.size()));
+		
+		out_directives = utils::trimCopy(
+			directive.substr(openBracket + 1, closeBracket - (openBracket + 1)));
+		
+		return true;
 	}
 }
