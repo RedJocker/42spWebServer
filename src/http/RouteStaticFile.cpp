@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 17:37:02 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:30:39 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,6 @@ namespace http {
 					  << reqPath.getFilePath()
 					  << ": "
 					  << error <<std::endl;
-			// TODO
-			// we need to check reason failed to open
-			// and give a response based on the reason
 			if (err == EACCES) {
 				client.getResponse().setForbidden();
 				client.writeResponse();
@@ -231,6 +228,7 @@ namespace http {
 			{
 				std::cout << "Failed to open file for writing: " << path << std::endl;
 				int err = errno;
+				std::cerr << "Errno: " << err << std::endl;
 				if (err == EACCES) {
 					std::cerr << "No permission to create file: " << path << std::endl;
 					client.getResponse().setForbidden();
@@ -241,9 +239,6 @@ namespace http {
 					client.getResponse().setNotFound();
 					client.writeResponse();
 				} else {
-					// TODO
-					// we need to check reason failed to open
-					// and give a response based on the reason
 					std::cerr << "Failed to open file: " << path << std::endl;
 					this->onServerError(client);
 				}
@@ -258,7 +253,7 @@ namespace http {
 	void RouteStaticFile::handleDelete(http::Client &client, conn::Monitor &monitor) const
 	{
 		// TODO
-		// what to do if file is directory? delete folder ? error ?
+		// If file is a dir (check with stat?), use rmdir if empty, 409/recursive? if not, instead unlink
 
 		(void) monitor;
 
@@ -267,12 +262,16 @@ namespace http {
 		Response &response = client.getResponse();
 
 		int result = unlink(filePath.c_str());
+		std::cout << "handleDelete unlink result: " << result << std::endl;
 		if (result == 0)
 		{
 			response.clear();
 			response.setStatusCode(204);
 			response.setStatusInfo("No Content");
 		} else {
+			int err = errno;
+			std::string error = strerror(err);
+			std::cout << "handleGetFile error " << err << " " << error << std::endl;
 			// TODO
 			// we need to check reason failed to unlink
 			// and give a response based on the reason

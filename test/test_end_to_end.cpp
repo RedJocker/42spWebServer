@@ -534,6 +534,59 @@ http::Application setup_config_maxsize(std::string &addressPort)
 
 	return appSpec.toApplication();
 }
+http::Application setup_config_delete(std::string &addressPort, std::string &docroot)
+{
+	config::ServerSpec serverSpec;
+	serverSpec
+		.setDocroot(docroot)
+		.setAddressPort(addressPort)
+		.setCgiTimeout(1);
+
+	config::VirtualServerSpec virtualServer1;
+	{
+		config::RouteSpec routeSpec[1];
+		routeSpec[0]
+			.setPathSpec("/**")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			.addAllowedMethod("DELETE");
+
+		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
+		{
+			virtualServer1.addRoute(routeSpec[i]);
+		}
+	}
+	serverSpec.addVirtualServer(virtualServer1);
+
+	config::VirtualServerSpec virtualServer2;
+	virtualServer2.setDocroot(docroot)
+		.setHostname("domain.com");
+	{
+		config::RouteSpec routeSpec[2];
+		routeSpec[0]
+			.setPathSpec("/**.cgi")
+			.setCgiBinPath("/usr/bin/php-cgi")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET");
+
+		routeSpec[1]
+			.setPathSpec("/**")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			.addAllowedMethod("DELETE");
+
+		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
+		{
+			virtualServer2.addRoute(routeSpec[i]);
+		}
+	}
+	serverSpec.addVirtualServer(virtualServer2);
+
+	config::ApplicationSpec appSpec;
+	appSpec.addServer(serverSpec);
+
+	return appSpec.toApplication();
+}
 
 void signalHandler(int sig)
 {
@@ -574,6 +627,12 @@ int run_server_config_redirection(std::string addressPort)
 	return app.run();
 }
 
+int run_server_config_delete(std::string addressPort, std::string docroot)
+{
+	http::Application app  = setup_config_delete(addressPort, docroot);
+	return app.run();
+}
+
 int run_server_config_upload(
 	std::string addressPort,
 	std::string uploadFolder1,
@@ -589,6 +648,7 @@ int run_server_config_maxsize(std::string addressPort)
 	http::Application app  = setup_config_maxsize(addressPort);
 	return app.run();
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -643,10 +703,15 @@ int main(int argc, char *argv[])
 		return run_server_config_maxsize(addressPort);
 	}
 
+	if ("config_delete" == testToRun) {
+		if (argc != 4)
+			return 42;
+		std::string docroot = std::string(argv[2]);
+		std::string addressPort = std::string(argv[3]);
+		return run_server_config_delete(
+			addressPort,
+			docroot
+		);
+	}
 	return 69;
 }
-
-
-
-
-
