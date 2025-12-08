@@ -1,20 +1,22 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   RouteSpec.cpp                                      :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/25 21:47:46 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RouteSpec.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/08 17:10:09 by bnespoli         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "RouteSpec.hpp"
 #include "RouteCgi.hpp"
 #include "RouteStaticFile.hpp"
 #include "constants.hpp"
 #include "Route.hpp"
+#include <iostream>
+#include <sstream>
 
 namespace config
 {
@@ -208,7 +210,6 @@ namespace config
 	RouteSpec &RouteSpec::setRedirection(
 		unsigned short int statusCode, const std::string &path)
 	{
-		// TODO validate arguments
 		this->redirection = std::make_pair(statusCode, path);
 		return *this;
 	}
@@ -269,5 +270,149 @@ namespace config
 			route = new http::RouteStaticFile(*this);
 		}
 		return route;
+	}
+
+	int RouteSpec::interpretDirective(const std::string &directive, Scanner &scanner)
+	{ // TODO handle errors
+		ssize_t end;
+		ssize_t prefixSize;
+
+		if (utils::isDirectiveSimple("cgi_bin", directive, end, prefixSize))
+		{ // TODO verify file exists
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting cgiBinPath to: " << value << std::endl;
+			this->setCgiBinPath(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("root", directive, end, prefixSize))
+		{// TODO verify file exists
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting docroot to: " << value << std::endl;
+			this->setDocroot(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("upload_pass", directive, end, prefixSize))
+		{// TODO verify file exists
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting uploadFolder to: " << value << std::endl;
+			this->setUploadFolder(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("index", directive, end, prefixSize))
+		{// TODO verify file exists
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting index file to: " << value << std::endl;
+			this->setIndexFile(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("client_max_body_size", directive, end, prefixSize))
+		{ // TODO verify number > 0 && no error on conversion 
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			ssize_t value;
+			ss >> value;
+			std::cout << "Setting Max body size to: " << value << std::endl;
+			this->setMaxSizeBody(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("autoindex", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			if (!(valueStr == "on" || valueStr == "true" || valueStr == "off" || valueStr == "false")) 
+			{
+				std::cerr << "Invalid value for autoindex directive: " << valueStr << std::endl;
+				return -1;
+			}
+			bool value = (valueStr == "on" || valueStr == "true");
+			std::cout << "Setting list directories to: " << value << std::endl;
+			this->setListDirectories(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("fastcgi_read_timeout", directive, end, prefixSize))
+		{// TODO verify number > 0 && no error on conversion 
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			size_t value;
+			ss >> value;
+			std::cout << "Setting cgiTimeout to: " << value << std::endl;
+			this->setCgiTimeout(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("return", directive, end, prefixSize))
+		{ // TODO verify status 300..399 && no error on conversion 
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			std::string path;
+			unsigned short status;
+			ss >> status >> path;
+			std::cout << "Setting redirection to: " << status << ", " 
+				<< path << std::endl;
+			this->setRedirection(status, path);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("error_page", directive, end, prefixSize))
+		{ // TODO verify status 400..599 && no error on conversion
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			std::string path;
+			size_t status;
+			ss >> status >> path;
+			std::string content;
+			if(utils::readErrorPage(path, content) != 0)
+			{
+				std::cerr << "Error reading error page file: " << path << std::endl;
+				return -1;
+			}
+			std::cout << "Setting error pages to: " << status << ", " 
+				<< content << std::endl;
+			this->addErrorPage(status, content);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("allow", directive, end, prefixSize))
+		{ // POST GET DELETE
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Adding allowedMethod: " << value << std::endl;
+			this->addAllowedMethod(value);
+			return 0;
+		}
+		std::string param;
+		std::string innerDirectives;
+		(void)scanner;
+		return 0;
+	}
+	
+	int RouteSpec::routeConfigParse(
+		const std::string &directivesStr, Scanner &scanner)
+	{
+		(void)scanner;
+		ssize_t alreadyread = 0;
+		while (alreadyread <static_cast<ssize_t>(directivesStr.size()))
+		{
+			alreadyread = scanner
+				.readDirective(directivesStr, alreadyread, this->directives);
+			if (alreadyread < 0)
+			{
+				std::cerr << "Error parsing directive" << std::endl;
+				return -1;
+			}
+		}
+		
+		for (size_t i = 0; i < this->directives.size(); ++i)
+		{
+			std::cout << "Directive " << i << ": "
+					  << this->directives[i] << std::endl;
+			this->interpretDirective(this->directives[i], scanner);
+		}
+		return 0;
 	}
 }

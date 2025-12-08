@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/03 20:02:36 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/04 19:51:25 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ namespace config {
 
 		std::vector<std::string> directives;
 
-		void interpretDirective(const std::string &directive);
+		int interpretDirective(const std::string &directive, Scanner &scanner);
 
 	public:
 		ServerSpec();

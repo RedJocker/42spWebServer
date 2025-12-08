@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-//   Updated: 2025/12/03 19:47:08 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/08 16:27:35 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,13 @@ namespace utils {
 		const std::string &directive,
 		ssize_t &out_end,
 		ssize_t &out_prefixSize);
+	bool isDirectiveCompound(
+		const std::string &prefix,
+		const std::string &directive,
+		std::string &out_param,
+		std::string &out_directives);
+	
+	int readErrorPage(const std::string &path, std::string &out_content);
 }
 
 #endif
