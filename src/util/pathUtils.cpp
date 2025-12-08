@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/08 16:10:24 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 16:26:32 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 #include <cctype>
 #include <sstream>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "BufferedReader.hpp"
 
 
 namespace utils {
@@ -212,8 +216,39 @@ namespace utils {
 		
 		return true;
 	}
-	std::string readErrorPage(const std::string &path)
+	
+	int readErrorPage(const std::string &path, std::string &out_content)
 	{
-		return "Hello " + path + "\n";
+		int fd = ::open(path.c_str(), O_RDONLY, 0666);
+
+		if (fd == -1)
+		{
+			std::cerr << "Error opening file: " << path << std::endl;
+			return 1;
+		}
+		BufferedReader reader(fd);
+		std::cout << "Reading file: " << path << std::endl;
+		std::pair<ReadState, char *> result;
+		while (true)
+		{
+			result = reader.readAll();
+			if (result.first == BufferedReader::ERROR)
+			{
+				std::cerr << "Error reading config file: " << result.second << std::endl;
+				return 1;
+			}
+			else if (result.first == BufferedReader::NO_CONTENT || result.first == BufferedReader::DONE)
+				break;
+		}
+
+		if (result.first == BufferedReader::DONE)
+		{
+			std::cerr << "unexpected path: " << result.second << std::endl;
+			return 1;
+		}
+		out_content = std::string(result.second);
+		std::cout << "File content:\n" << out_content << std::endl;
+		delete[] result.second;
+		return 0;
 	}
 }

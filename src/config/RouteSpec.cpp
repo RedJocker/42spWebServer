@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 16:12:18 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 16:50:11 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,7 +362,12 @@ namespace config
 			std::string path;
 			size_t status;
 			ss >> status >> path;
-			std::string content = utils::readErrorPage(path);
+			std::string content;
+			if(utils::readErrorPage(path, content) != 0)
+			{
+				std::cerr << "Error reading error page file: " << path << std::endl;
+				return -1;
+			}
 			std::cout << "Setting error pages to: " << status << ", " 
 				<< content << std::endl;
 			this->addErrorPage(status, content);
@@ -385,8 +390,7 @@ namespace config
 	int RouteSpec::routeConfigParse(
 		const std::string &directivesStr, Scanner &scanner)
 	{
-		(void)scanner;	
-		std::cout << "Parsing Route Spec directive: " << directivesStr << std::endl;
+		(void)scanner;
 		ssize_t alreadyread = 0;
 		while (alreadyread <static_cast<ssize_t>(directivesStr.size()))
 		{

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-/*   Updated: 2025/12/03 15:45:28 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 16:53:08 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,6 @@ namespace config {
 			return 1;
 		}
 		this->content = std::string(result.second);
-		std::cout << "Config file content:\n" << content << std::endl;
 		delete[] result.second;
 		return 0;
 	}
