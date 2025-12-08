@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/08 16:26:32 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 18:48:05 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,5 +250,34 @@ namespace utils {
 		std::cout << "File content:\n" << out_content << std::endl;
 		delete[] result.second;
 		return 0;
+	}
+	
+	bool filepathExists(const std::string &path)
+	{
+		struct stat buffer;
+		return (stat (path.c_str(), &buffer) == 0);
+	}
+
+	bool fileisRegular(const std::string &path)
+	{
+		struct stat buffer;
+		
+		if (stat (path.c_str(), &buffer) != 0)
+			return false;
+		return (S_ISREG(buffer.st_mode));
+	}
+
+	bool fileisDirectory(const std::string &path)
+	{
+		struct stat buffer;
+		
+		if (stat (path.c_str(), &buffer) != 0)
+			return false;
+		return (S_ISDIR(buffer.st_mode));
+	}
+
+	bool fileisExecutable(const std::string &path)
+	{
+		return (fileisRegular(path) && access(path.c_str(), X_OK) == 0);
 	}
 }

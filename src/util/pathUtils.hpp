@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/08 16:27:35 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 18:44:56 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,10 @@ namespace utils {
 		std::string &out_param,
 		std::string &out_directives);
 	
+	bool filepathExists(const std::string &path);
+	bool fileisRegular(const std::string &path);
+	bool fileisDirectory(const std::string &path);
+	bool fileisExecutable(const std::string &path);
 	int readErrorPage(const std::string &path, std::string &out_content);
 }
 
