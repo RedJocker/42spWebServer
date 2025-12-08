@@ -53,7 +53,7 @@ multipart upload test cases
   - http (ServerSpec)
     - simple directives
       - [X] listen (addressPort string)
-      - [X] docroot (docroot string)
+      - [X] root (docroot string)
       - [X] client_max_body_size (maxSizeBody ssize_t)
       - [X] autoindex (listDirectories bool)
       - [X] index (indexFile string)
@@ -63,29 +63,29 @@ multipart upload test cases
       - [x] server (virtualServers VirtualServerSpec)
   - server (VirtualServerSpec)
     - simple directives
-      - [ ] hostname (hostname string)
-      - [ ] docroot (docroot string)
-      - [ ] upload_pass (uploadFolder string)
-      - [ ] client_max_body_size (maxSizeBody ssize_t)
-      - [ ] autoindex (listDirectories bool)
-      - [ ] index (indexFile string)
-      - [ ] fastcgi_read_timeout (cgiTimeout numero >= 0)
-      - [ ] return (redirection numero, string)
-      - [ ] error_page (errorPages numero, string)
+      - [X] server_name (hostname string)
+      - [X] root (docroot string)
+      - [X] upload_pass (uploadFolder string)
+      - [X] client_max_body_size (maxSizeBody ssize_t)
+      - [X] autoindex (listDirectories bool)
+      - [X] index (indexFile string)
+      - [X] fastcgi_read_timeout (cgiTimeout numero >= 0)
+      - [X] return (redirection numero, string)
+      - [X] error_page (errorPages numero, string)
     - compound directives
-      - [ ] location (routes string, RouteSpec)
+      - [X] location (routes string, RouteSpec)
   - location (RouteSpec)
     - simple directives
-      - [ ] cgi_bin (cgiBinPath, ) // custom
-      - [ ] docroot (docroot string)
-      - [ ] upload_pass (uploadFolder string)
-      - [ ] client_max_body_size (maxSizeBody ssize_t)
-      - [ ] autoindex (listDirectories bool)
-      - [ ] index (indexFile string)
-      - [ ] cgi_read_timeout (cgiTimeout numero >= 0) // custom
-      - [ ] return (redirection numero, string)
-      - [ ] error_page (errorPages numero, string)
-      - [ ] allow (allowedMethods string) // custom
+      - [X] cgi_bin (cgiBinPath string) // custom
+      - [X] root (docroot string)
+      - [X] upload_pass (uploadFolder string)
+      - [X] client_max_body_size (maxSizeBody ssize_t)
+      - [X] autoindex (listDirectories bool)
+      - [X] index (indexFile string)
+      - [X] fastcgi_read_timeout (cgiTimeout numero >= 0) // custom
+      - [X] return (redirection numero, string)
+      - [X] error_page (errorPages numero, string)
+      - [X] allow (allowedMethods string) // custom
 
 ## Sprint 1
 

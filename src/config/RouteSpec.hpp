@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   RouteSpec.hpp                                      :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri </var/mail/maurodri>              +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/25 19:59:21 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RouteSpec.hpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/08 16:01:07 by bnespoli         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 
 #ifndef ROUTESPEC_HPP
@@ -21,6 +21,8 @@
 # include <cstdlib>
 # include <unistd.h>
 # include <ctime>
+# include "Scanner.hpp"
+
 
 namespace http
 {
@@ -43,6 +45,8 @@ namespace config
 		std::pair<unsigned short int, std::string> redirection;
 		MapErrorPages errorPages;
 		std::vector<std::string> allowedMethods;
+
+		std::vector<std::string> directives;
 
 	public:
 		RouteSpec(void);
@@ -89,6 +93,9 @@ namespace config
 			const std::map<unsigned short int, std::string> pages);
 
 		http::Route *toRoute(void);
+		int interpretDirective(const std::string &directive, Scanner &scanner);
+		int routeConfigParse(
+			const std::string &directivesStr, Scanner &scanner);
 	};
 }
 

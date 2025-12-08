@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/04 19:36:05 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 16:10:24 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,5 +211,9 @@ namespace utils {
 			directive.substr(openBracket + 1, closeBracket - (openBracket + 1)));
 		
 		return true;
+	}
+	std::string readErrorPage(const std::string &path)
+	{
+		return "Hello " + path + "\n";
 	}
 }

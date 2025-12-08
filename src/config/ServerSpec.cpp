@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 19:52:39 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 16:12:01 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,10 +216,11 @@ namespace config {
 			std::string path;
 			size_t status;
 			ss >> status >> path;
+			std::string content = utils::readErrorPage(path);
 			std::cout << "Setting error pages to: " << status << ", " 
-				<< path << std::endl;
+				<< content << std::endl;
 			// TODO read file and send content to addErrorPage
-			this->addErrorPage(status, path);
+			this->addErrorPage(status, content);
 			return 0;
 		}
 		std::string param;

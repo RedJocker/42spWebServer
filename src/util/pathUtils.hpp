@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/04 19:27:34 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 16:09:25 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ namespace utils {
 		const std::string &directive,
 		std::string &out_param,
 		std::string &out_directives);
+	
+	std::string readErrorPage(const std::string &path);
 }
 
 #endif

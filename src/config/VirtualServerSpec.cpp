@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 19:53:45 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 16:14:19 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "VirtualServer.hpp"
 #include <iostream>
 #include "Scanner.hpp"
+#include <sstream>
 
 namespace config {
 
@@ -228,11 +229,140 @@ namespace config {
 		return virtualServer;
 	}
 
+	int VirtualServerSpec::interpretDirective(const std::string &directive, Scanner &scanner)
+	{ // TODO handle errors
+		ssize_t end;
+		ssize_t prefixSize;
+
+		if (utils::isDirectiveSimple("server_name", directive, end, prefixSize))
+		{
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting Hostname to: " << value << std::endl;
+			this->setHostname(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("root", directive, end, prefixSize))
+		{
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting docroot to: " << value << std::endl;
+			this->setDocroot(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("upload_pass", directive, end, prefixSize))
+		{
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting uploadFolder to: " << value << std::endl;
+			this->setUploadFolder(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("index", directive, end, prefixSize))
+		{
+			std::string value = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::cout << "Setting index file to: " << value << std::endl;
+			this->setIndexFile(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("client_max_body_size", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			ssize_t value;
+			ss >> value;
+			std::cout << "Setting Max body size to: " << value << std::endl;
+			this->setMaxSizeBody(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("autoindex", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			bool value = (valueStr == "on" || valueStr == "true");
+			std::cout << "Setting list directories to: " << value << std::endl;
+			this->setListDirectories(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("fastcgi_read_timeout", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			size_t value;
+			ss >> value;
+			std::cout << "Setting cgiTimeout to: " << value << std::endl;
+			this->setCgiTimeout(value);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("return", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			std::string path;
+			unsigned short status;
+			ss >> status >> path;
+			std::cout << "Setting redirection to: " << status << ", " 
+				<< path << std::endl;
+			this->setRedirection(status, path);
+			return 0;
+		}
+		if (utils::isDirectiveSimple("error_page", directive, end, prefixSize))
+		{
+			std::string valueStr = utils::trimCopy(
+				directive.substr(prefixSize, end - prefixSize));
+			std::stringstream ss(valueStr);
+			std::string path;
+			size_t status;
+			ss >> status >> path;
+			std::string content = utils::readErrorPage(path);
+			std::cout << "Setting error pages to: " << status << ", " 
+				<< content << std::endl;
+			// TODO read file and send content to addErrorPage
+			this->addErrorPage(status, content);
+			return 0;
+		}
+		std::string param;
+		std::string innerDirectives;
+		if (utils::isDirectiveCompound("location", directive, param, innerDirectives))
+		{
+			RouteSpec routeSpec;
+			if (routeSpec.routeConfigParse(innerDirectives, scanner) != 0)
+			{
+				std::cerr << "Error parsing location directive" << std::endl;
+				return -1;
+			}
+			this->addRoute(routeSpec);
+			return 0;
+		}
+		return 0;
+	}
+
 	int VirtualServerSpec::virtualServerConfigParse(
-		const std::string &directives, Scanner &scanner)
+		const std::string &directivesStr, Scanner &scanner)
 	{
-		std::cout << "Parsing virtual server directive: " << directives << std::endl;
-		(void)scanner;
+		std::cout << "Parsing virtual server directive: " << directivesStr << std::endl;
+		ssize_t alreadyread = 0;
+		while (alreadyread <static_cast<ssize_t>(directivesStr.size()))
+		{
+			alreadyread = scanner
+				.readDirective(directivesStr, alreadyread, this->directives);
+			if (alreadyread < 0)
+			{
+				std::cerr << "Error parsing directive" << std::endl;
+				return -1;
+			}
+		}
+		
+		for (size_t i = 0; i < this->directives.size(); ++i)
+		{
+			std::cout << "Directive " << i << ": "
+					  << this->directives[i] << std::endl;
+			this->interpretDirective(this->directives[i], scanner);
+		}
 		return 0;
 	}
 }

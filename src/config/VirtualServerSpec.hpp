@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 19:50:06 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 15:32:30 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ namespace config {
 		std::pair<unsigned short int, std::string> redirection;
 		MapErrorPages errorPages;
 		std::vector<RouteSpec> routes;
+		
+		std::vector<std::string> directives;
 
 	public:
 		VirtualServerSpec(void);
@@ -78,6 +80,7 @@ namespace config {
 
 		http::VirtualServer *toVirtualServer(void);
 		int virtualServerConfigParse(const std::string &directives, Scanner &scanner);
+		int interpretDirective(const std::string &directive, Scanner &scanner);
 	};
 }
 
