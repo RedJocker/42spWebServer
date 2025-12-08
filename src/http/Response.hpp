@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:22 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/26 00:31:31 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/04 17:11:05 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ namespace http {
 
 			Response &setCreated();
 			Response &setOk();
+			Response &setForbidden();
 			Response &setNotFound();
 			Response &setImTeapot();
 			Response &setBadRequest();

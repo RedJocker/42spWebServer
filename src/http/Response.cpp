@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/02 13:22:28 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/26 01:01:52 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/04 17:10:29 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,16 @@ namespace http {
 		return (*this)
 			.setStatusCode(200)
 			.setStatusInfo("Ok");
+	}
+
+	Response &Response::setForbidden()
+	{
+		this->clear();
+		(*this)
+			.setStatusCode(403)
+			.setStatusInfo("Forbidden")
+			.addHeader("Content-Length", "0");
+		return *this;
 	}
 
 	Response &Response::setNotFound()

@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   RouteStaticFile.cpp                                :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/24 16:06:34 by maurodri         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RouteStaticFile.cpp                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             */
+/*   Updated: 2025/12/04 19:30:39 by vcarrara         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "RouteStaticFile.hpp"
 #include "RouteSpec.hpp"
@@ -68,16 +68,25 @@ namespace http {
 
 		int fd = open(reqPath.getFilePath().c_str(), O_RDONLY);
 		if (fd < 0) {
-			std::string error = strerror(errno);
+			int err = errno;
+			std::string error = strerror(err);
+			std::cout << "handleGetFile error " << err << " " << error << std::endl;
 			std::cerr << "failed opening file "
 					  << reqPath.getFilePath()
 					  << ": "
 					  << error <<std::endl;
-			// TODO
-			// we need to check reason failed to open
-			// and give a response based on the reason
-			client.getResponse().setNotFound();
-			client.writeResponse();
+			if (err == EACCES) {
+				client.getResponse().setForbidden();
+				client.writeResponse();
+				return;
+			}
+			if (err == ENOENT) {
+				client.getResponse().setNotFound();
+				client.writeResponse();
+				return;
+			}
+			std::cerr << "Unhandled error opening file: " << err << std::endl;
+			this->onServerError(client);
 			return;
 		}
 		std::cout << "clientFd = " << client.getFd() << std::endl;
@@ -141,7 +150,7 @@ namespace http {
 		while ((next = body.find(boundary, pos)) != std::string::npos) {
 			std::string partStr = body.substr(pos, next - pos);
 			pos = next + boundary.size();
-			
+
 			if (partStr.empty())
 				return false;
 
@@ -207,7 +216,7 @@ namespace http {
 			_multipartParts.push_back(part);
 		}
 		// at this point _multipartParts has all files that should be written
-		
+
 		for (std::vector<MultipartPart>::iterator it = _multipartParts.begin();
 			 it != _multipartParts.end();
 			 ++it)
@@ -217,15 +226,26 @@ namespace http {
 			int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 			if (fd < 0)
 			{
-				// TODO
-				// we need to check reason failed to open
-				// and give a response based on the reason
-				std::cerr << "Failed to open file: " << path << std::endl;
-				this->onServerError(client);
+				std::cout << "Failed to open file for writing: " << path << std::endl;
+				int err = errno;
+				std::cerr << "Errno: " << err << std::endl;
+				if (err == EACCES) {
+					std::cerr << "No permission to create file: " << path << std::endl;
+					client.getResponse().setForbidden();
+					client.writeResponse();
+				}
+				else if (err == ENOENT) {
+					std::cout << "Directory does not exist for file: " << path << std::endl;
+					client.getResponse().setNotFound();
+					client.writeResponse();
+				} else {
+					std::cerr << "Failed to open file: " << path << std::endl;
+					this->onServerError(client);
+				}
 				_multipartParts.clear();
 				return;
 			}
-			monitor.subscribeFileWrite(fd, client.getFd(), it->body);	
+			monitor.subscribeFileWrite(fd, client.getFd(), it->body);
 		}
 		_multipartParts.clear();
 	}
@@ -233,7 +253,7 @@ namespace http {
 	void RouteStaticFile::handleDelete(http::Client &client, conn::Monitor &monitor) const
 	{
 		// TODO
-		// what to do if file is directory? delete folder ? error ?
+		// If file is a dir (check with stat?), use rmdir if empty, 409/recursive? if not, instead unlink
 
 		(void) monitor;
 
@@ -242,12 +262,16 @@ namespace http {
 		Response &response = client.getResponse();
 
 		int result = unlink(filePath.c_str());
+		std::cout << "handleDelete unlink result: " << result << std::endl;
 		if (result == 0)
 		{
 			response.clear();
 			response.setStatusCode(204);
 			response.setStatusInfo("No Content");
 		} else {
+			int err = errno;
+			std::string error = strerror(err);
+			std::cout << "handleGetFile error " << err << " " << error << std::endl;
 			// TODO
 			// we need to check reason failed to unlink
 			// and give a response based on the reason
