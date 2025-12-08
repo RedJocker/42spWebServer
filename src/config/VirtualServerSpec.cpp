@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 16:49:39 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 17:16:01 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,7 +333,7 @@ namespace config {
 		std::string param;
 		std::string innerDirectives;
 		if (utils::isDirectiveCompound("location", directive, param, innerDirectives))
-		{
+		{ // TODO validate param as path spec on  RequestPath::matchesPathSpecification
 			RouteSpec routeSpec;
 			if (routeSpec.routeConfigParse(innerDirectives, scanner) != 0)
 			{

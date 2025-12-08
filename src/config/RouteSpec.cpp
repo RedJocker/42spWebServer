@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 16:50:11 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 17:10:09 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,7 +210,6 @@ namespace config
 	RouteSpec &RouteSpec::setRedirection(
 		unsigned short int statusCode, const std::string &path)
 	{
-		// TODO validate arguments
 		this->redirection = std::make_pair(statusCode, path);
 		return *this;
 	}
@@ -279,7 +278,7 @@ namespace config
 		ssize_t prefixSize;
 
 		if (utils::isDirectiveSimple("cgi_bin", directive, end, prefixSize))
-		{
+		{ // TODO verify file exists
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::cout << "Setting cgiBinPath to: " << value << std::endl;
@@ -287,7 +286,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("root", directive, end, prefixSize))
-		{
+		{// TODO verify file exists
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::cout << "Setting docroot to: " << value << std::endl;
@@ -295,7 +294,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("upload_pass", directive, end, prefixSize))
-		{
+		{// TODO verify file exists
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::cout << "Setting uploadFolder to: " << value << std::endl;
@@ -303,7 +302,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("index", directive, end, prefixSize))
-		{
+		{// TODO verify file exists
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::cout << "Setting index file to: " << value << std::endl;
@@ -311,7 +310,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("client_max_body_size", directive, end, prefixSize))
-		{
+		{ // TODO verify number > 0 && no error on conversion 
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
@@ -325,13 +324,18 @@ namespace config
 		{
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if (!(valueStr == "on" || valueStr == "true" || valueStr == "off" || valueStr == "false")) 
+			{
+				std::cerr << "Invalid value for autoindex directive: " << valueStr << std::endl;
+				return -1;
+			}
 			bool value = (valueStr == "on" || valueStr == "true");
 			std::cout << "Setting list directories to: " << value << std::endl;
 			this->setListDirectories(value);
 			return 0;
 		}
 		if (utils::isDirectiveSimple("fastcgi_read_timeout", directive, end, prefixSize))
-		{
+		{// TODO verify number > 0 && no error on conversion 
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
@@ -342,7 +346,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("return", directive, end, prefixSize))
-		{
+		{ // TODO verify status 300..399 && no error on conversion 
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
@@ -355,7 +359,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("error_page", directive, end, prefixSize))
-		{
+		{ // TODO verify status 400..599 && no error on conversion
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
@@ -374,7 +378,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("allow", directive, end, prefixSize))
-		{
+		{ // POST GET DELETE
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::cout << "Adding allowedMethod: " << value << std::endl;
