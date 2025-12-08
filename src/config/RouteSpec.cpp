@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 17:10:09 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/08 19:16:24 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,6 @@ namespace config
 	RouteSpec &RouteSpec::addErrorPage(
 		unsigned short int status, const std::string &bodyPage)
 	{
-		// TODO validate arguments
 		this->errorPages.insert(std::make_pair(status, bodyPage));
 		return *this;
 	}
@@ -273,49 +272,79 @@ namespace config
 	}
 
 	int RouteSpec::interpretDirective(const std::string &directive, Scanner &scanner)
-	{ // TODO handle errors
+	{
 		ssize_t end;
 		ssize_t prefixSize;
 
 		if (utils::isDirectiveSimple("cgi_bin", directive, end, prefixSize))
-		{ // TODO verify file exists
+		{ 
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if (!utils::fileisExecutable(value))
+			{
+				std::cerr << "cgi_bin file is not executable: " << value << std::endl;
+				return -1;
+			}
 			std::cout << "Setting cgiBinPath to: " << value << std::endl;
 			this->setCgiBinPath(value);
 			return 0;
 		}
 		if (utils::isDirectiveSimple("root", directive, end, prefixSize))
-		{// TODO verify file exists
+		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if(!utils::fileisDirectory(value))
+			{
+				std::cerr << "root is not Directory: " << value << std::endl;
+				return -1;				
+			}
 			std::cout << "Setting docroot to: " << value << std::endl;
 			this->setDocroot(value);
 			return 0;
 		}
 		if (utils::isDirectiveSimple("upload_pass", directive, end, prefixSize))
-		{// TODO verify file exists
+		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if(!utils::fileisDirectory(value))
+			{
+				std::cerr << "upload_pass is not Directory: " << value << std::endl;
+				return -1;				
+			}
 			std::cout << "Setting uploadFolder to: " << value << std::endl;
 			this->setUploadFolder(value);
 			return 0;
 		}
 		if (utils::isDirectiveSimple("index", directive, end, prefixSize))
-		{// TODO verify file exists
+		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if(!utils::fileisRegular(value))
+			{
+				std::cerr << "index is not regular file: " << value << std::endl;
+				return -1;
+			}
 			std::cout << "Setting index file to: " << value << std::endl;
 			this->setIndexFile(value);
 			return 0;
 		}
 		if (utils::isDirectiveSimple("client_max_body_size", directive, end, prefixSize))
-		{ // TODO verify number > 0 && no error on conversion 
+		{
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
 			ssize_t value;
 			ss >> value;
+			if(ss.fail())
+			{
+				std::cerr << "Failed to parse directive:" << directive << std::endl;
+				return -1;
+			}
+			if(value < 0)
+			{
+				std::cerr << "Failed to parse: client_max_body_size < 0" << std::endl;
+				return -1;
+			}
 			std::cout << "Setting Max body size to: " << value << std::endl;
 			this->setMaxSizeBody(value);
 			return 0;
@@ -335,31 +364,51 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("fastcgi_read_timeout", directive, end, prefixSize))
-		{// TODO verify number > 0 && no error on conversion 
+		{
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
-			size_t value;
+			ssize_t value;
 			ss >> value;
+			if(ss.fail())
+			{
+				std::cerr << "Failed to parse directive:" << directive << std::endl;
+				return -1;
+			}
+			if(value < 0)
+			{
+				std::cerr << "Failed to parse: fastcgi_read_timeout < 0" << std::endl;
+				return -1;
+			}
 			std::cout << "Setting cgiTimeout to: " << value << std::endl;
 			this->setCgiTimeout(value);
 			return 0;
 		}
 		if (utils::isDirectiveSimple("return", directive, end, prefixSize))
-		{ // TODO verify status 300..399 && no error on conversion 
+		{
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
 			std::string path;
 			unsigned short status;
 			ss >> status >> path;
+			if(ss.fail())
+			{
+				std::cerr << "Failed to parse directive:" << directive << std::endl;
+				return -1;
+			}
+			if(status < 300 || status >= 400)
+			{
+				std::cerr << "Failed to parse: return not in range 300..399" << std::endl;
+				return -1;
+			}
 			std::cout << "Setting redirection to: " << status << ", " 
 				<< path << std::endl;
 			this->setRedirection(status, path);
 			return 0;
 		}
 		if (utils::isDirectiveSimple("error_page", directive, end, prefixSize))
-		{ // TODO verify status 400..599 && no error on conversion
+		{
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
@@ -367,6 +416,16 @@ namespace config
 			size_t status;
 			ss >> status >> path;
 			std::string content;
+			if(ss.fail())
+			{
+				std::cerr << "Failed to parse directive:" << directive << std::endl;
+				return -1;
+			}
+			if(status < 400 || status >= 600)
+			{
+				std::cerr << "Failed to parse: error_page not in range 400..599" << std::endl;
+				return -1;
+			}
 			if(utils::readErrorPage(path, content) != 0)
 			{
 				std::cerr << "Error reading error page file: " << path << std::endl;
@@ -381,6 +440,11 @@ namespace config
 		{ // POST GET DELETE
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if(value != "POST" && value != "GET" && value != "DELETE")
+			{
+				std::cerr << "Invalid Method: " << value << std::endl;
+				return -1;
+			}
 			std::cout << "Adding allowedMethod: " << value << std::endl;
 			this->addAllowedMethod(value);
 			return 0;
