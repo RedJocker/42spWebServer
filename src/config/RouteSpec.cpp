@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 17:58:29 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 19:38:47 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,9 +319,9 @@ namespace config
 		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
-			if(!utils::fileisRegular(value))
+			if(utils::isBlank(value))
 			{
-				std::cerr << "index is not regular file: " << value << std::endl;
+				std::cerr << "index is blank: " << value << std::endl;
 				return -1;
 			}
 			std::cout << "Setting index file to: " << value << std::endl;
@@ -475,7 +475,11 @@ namespace config
 		{
 			std::cout << "Directive " << i << ": "
 					  << this->directives[i] << std::endl;
-			this->interpretDirective(this->directives[i], scanner);
+			if(this->interpretDirective(this->directives[i], scanner) != 0)
+			{
+				std::cerr << "Error interpreting directive" << std::endl;
+				return -1;
+			}
 		}
 		return 0;
 	}
