@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 19:16:24 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 17:58:29 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -437,7 +437,7 @@ namespace config
 			return 0;
 		}
 		if (utils::isDirectiveSimple("allow", directive, end, prefixSize))
-		{ // POST GET DELETE
+		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			if(value != "POST" && value != "GET" && value != "DELETE")

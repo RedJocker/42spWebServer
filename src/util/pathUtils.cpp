@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/08 18:48:05 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 18:02:56 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,5 +279,15 @@ namespace utils {
 	bool fileisExecutable(const std::string &path)
 	{
 		return (fileisRegular(path) && access(path.c_str(), X_OK) == 0);
+	}
+
+	bool isBlank(const std::string &str)
+	{
+		for (size_t i = 0; i < str.size(); ++i)
+		{
+			if (!std::isspace(str[i]))
+				return false;
+		}
+		return true;
 	}
 }
