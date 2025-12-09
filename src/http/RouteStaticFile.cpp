@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RouteStaticFile.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 19:30:39 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/12/09 18:35:34 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -300,7 +300,7 @@ namespace http {
 
 		bool empty = true;
 		struct dirent *ent;
-		while ((ent = readdir(dir) != NULL) {
+		while ((ent = readdir(dir)) != NULL) {
 			if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
 				empty = false;
 				break;
@@ -334,6 +334,7 @@ namespace http {
 			}
 
 			client.writeResponse();
+		}
 	}
 
 	void RouteStaticFile::serve(http::Client &client, conn::Monitor &monitor)
