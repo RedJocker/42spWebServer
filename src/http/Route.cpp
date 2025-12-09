@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42sp...>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/10/29 23:51:27 by maurodri          #+#    #+#             //
-//   Updated: 2025/12/01 17:18:59 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/09 14:42:28 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -93,8 +93,9 @@ namespace http {
 													 
 		if (shouldTryIndex)
 		{
-			std::string indexPath = path.getOriginalPath()
-				+ "/" + this->indexFile;
+			std::string indexPath = path.getPath()
+				+ "/" + this->indexFile + "?" + path.getQueryString();
+			std::cout << "trying indexFile with path: " << indexPath << std::endl;
 			RequestPath pathWithIndex;
 
 			pathWithIndex

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/03 14:22:13 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 14:31:19 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ http::Application applicationConfig(void)
 		.setDocroot("./www")
 		.setAddressPort("localhost:8080")
 		.setListDirectories(true)
-		.setMaxSizeBody(2);
+		;
 
 	config::VirtualServerSpec virtualServer1;
 	virtualServer1
@@ -96,16 +96,24 @@ http::Application applicationConfig(void)
 	serverSpec.addVirtualServer(virtualServer2);
 
 	config::VirtualServerSpec virtualServer3;
-	virtualServer3.setHostname("example.org") // need to add to /etc/hosts '127.0.0.1 example.org'
-		.setRedirection(307, "http://localhost:8080")
+	virtualServer3.setHostname("maurodri.42.fr") // need to add to /etc/hosts '127.0.0.1 maurodri.42.fr'
+		.setDocroot("/home/maurodri/data/wordpress_42webServer")
 		;
 	{
-		config::RouteSpec routeSpec[1];
+		config::RouteSpec routeSpec[2];
 		routeSpec[0]
-			.setPathSpec("/**")
+			.setPathSpec("/**.php")
+			.setIndexFile("index.php")
+			.setCgiBinPath("/usr/bin/php-cgi")
 			.addAllowedMethod("POST")
 			.addAllowedMethod("GET")
-			.addAllowedMethod("DELETE");
+			;
+		routeSpec[1]
+			.setPathSpec("/**")
+			.setIndexFile("index.html")
+			.addAllowedMethod("POST")
+			.addAllowedMethod("GET")
+			;
 		for (size_t i = 0; i < sizeof(routeSpec) / sizeof(config::RouteSpec); ++i)
 		{
 			virtualServer3.addRoute(routeSpec[i]);

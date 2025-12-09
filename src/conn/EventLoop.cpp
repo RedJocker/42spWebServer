@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/03 19:08:40 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/09 15:02:20 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -412,7 +412,6 @@ namespace conn
 	{
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			throw std::domain_error("called handleClientWriteResponse without content to write");
-
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
 
 		if (flushResult.first == BufferedWriter::WRITING)
@@ -426,7 +425,7 @@ namespace conn
 			unsubscribeHttpClient(eventIt);
 			client->clear();
 		}
-
+		std::cout << "Finished writing to client " << client->getFd() << std::endl;
 		// Check if client requested connection close
 		bool requestClose = client->getRequest().getHeader("Connection") == "close";
 		bool responseClose = client->getResponse().getHeader("Connection") == "close";
