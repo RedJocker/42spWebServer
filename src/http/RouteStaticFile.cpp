@@ -27,6 +27,7 @@
 #include <sstream>
 #include <cerrno>
 #include <cstring>
+#include <cstdio>
 
 namespace http {
 
@@ -252,34 +253,87 @@ namespace http {
 
 	void RouteStaticFile::handleDelete(http::Client &client, conn::Monitor &monitor) const
 	{
-		// TODO
-		// If file is a dir (check with stat?), use rmdir if empty, 409/recursive? if not, instead unlink
-
 		(void) monitor;
 
 		const std::string &filePath =
 			client.getRequest().getPath().getFilePath();
 		Response &response = client.getResponse();
 
-		int result = unlink(filePath.c_str());
-		std::cout << "handleDelete unlink result: " << result << std::endl;
-		if (result == 0)
-		{
+		// FILE
+		struct stat st;
+		if (stat(filePath.c_str(), &st) < 0) {
+			response.setNotFound();
+			client.writeResponse();
+			return;
+		}
+
+		if (!S_ISDIR(st.st_mode)) {
+			if (std::remove(filePath.c_str()) == 0) {
+				response.clear();
+				response.setStatusCode(204);
+				response.setStatusInfo("No Content");
+			} else {
+				int err = errno;
+				if (err == EACCES || err == EPERM) {
+					response.setStatusCode(403);
+					response.setStatusInfo("Forbidden");
+				} else if (err == ENOENT) {
+					response.setNotFound();
+				} else {
+					response.setStatusCode(500);
+					response.setStatusInfo("Internal Server Error");
+				}
+			}
+
+			client.writeResponse();
+			return;
+		}
+
+		// DIRECTORY
+		DIR *dir = opendir(filePath.c_str());
+		if (!dir) {
+			response.setStatusCode(500);
+			response.setStatusInfo("Internal Server Error");
+			client.writeResponse();
+			return;
+		}
+
+		bool empty = true;
+		struct dirent *ent;
+		while ((ent = readdir(dir) != NULL) {
+			if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
+				empty = false;
+				break;
+			}
+		}
+		closedir(dir);
+
+		// It's a directory, but not empty
+		if (!empty) {
+			response.setStatusCode(409);
+			response.setStatusInfo("Conflict");
+			client.writeResponse();
+			return;
+		}
+
+		// It's a directory and empty
+		if (std::remove(filePath.c_str()) == 0) {
 			response.clear();
 			response.setStatusCode(204);
 			response.setStatusInfo("No Content");
 		} else {
 			int err = errno;
-			std::string error = strerror(err);
-			std::cout << "handleGetFile error " << err << " " << error << std::endl;
-			// TODO
-			// we need to check reason failed to unlink
-			// and give a response based on the reason
-			// it may be not found, permission issue, maybe something else
-			response.setNotFound();
-		}
+			if (err == EACCES || err == EPERM) {
+				response.setStatusCode(403);
+				response.setStatusInfo("Forbidden");
+			} else if (err == ENOENT) {
+				response.setNotFound();
+			} else {
+				response.setStatusCode(500);
+				response.setStatusInfo("Internal Server Error");
+			}
 
-		client.writeResponse();
+			client.writeResponse();
 	}
 
 	void RouteStaticFile::serve(http::Client &client, conn::Monitor &monitor)
