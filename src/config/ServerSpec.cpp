@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 19:14:28 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 19:17:05 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ namespace config {
 	}
 
 	int ServerSpec::interpretDirective(const std::string &directive, Scanner &scanner)
-	{ // TODO handle errors
+	{
 		ssize_t end;
 		ssize_t prefixSize;
 
@@ -157,6 +157,11 @@ namespace config {
 		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if(utils::isBlank(value))
+			{
+				std::cerr << "listen directive is blank" << std::endl;
+				return -1;				
+			}
 			std::cout << "Setting addressPort to: " << value << std::endl;
 			this->setAddressPort(value);
 			return 0;
