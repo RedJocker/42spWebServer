@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/08 18:44:56 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 18:02:40 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ namespace utils {
 	bool fileisDirectory(const std::string &path);
 	bool fileisExecutable(const std::string &path);
 	int readErrorPage(const std::string &path, std::string &out_content);
+	bool isBlank(const std::string &str);
 }
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 16:49:27 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 18:13:31 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,6 +165,11 @@ namespace config {
 		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if(!utils::fileisDirectory(value))
+			{
+				std::cerr << "root is not Directory: " << value << std::endl;
+				return -1;				
+			}
 			std::cout << "Setting docroot to: " << value << std::endl;
 			this->setDocroot(value);
 			return 0;
@@ -173,6 +178,11 @@ namespace config {
 		{
 			std::string value = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if(!utils::fileisRegular(value))
+			{
+				std::cerr << "index is not regular file: " << value << std::endl;
+				return -1;
+			}
 			std::cout << "Setting index file to: " << value << std::endl;
 			this->setIndexFile(value);
 			return 0;
@@ -184,6 +194,16 @@ namespace config {
 			std::stringstream ss(valueStr);
 			ssize_t value;
 			ss >> value;
+			if(ss.fail())
+			{
+				std::cerr << "Failed to parse directive:" << directive << std::endl;
+				return -1;
+			}
+			if(value < 0)
+			{
+				std::cerr << "Failed to parse: client_max_body_size < 0" << std::endl;
+				return -1;
+			}
 			std::cout << "Setting Max body size to: " << value << std::endl;
 			this->setMaxSizeBody(value);
 			return 0;
@@ -192,6 +212,11 @@ namespace config {
 		{
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
+			if (!(valueStr == "on" || valueStr == "true" || valueStr == "off" || valueStr == "false")) 
+			{
+				std::cerr << "Invalid value for autoindex directive: " << valueStr << std::endl;
+				return -1;
+			}
 			bool value = (valueStr == "on" || valueStr == "true");
 			std::cout << "Setting list directories to: " << value << std::endl;
 			this->setListDirectories(value);
@@ -202,8 +227,18 @@ namespace config {
 			std::string valueStr = utils::trimCopy(
 				directive.substr(prefixSize, end - prefixSize));
 			std::stringstream ss(valueStr);
-			size_t value;
+			ssize_t value;
 			ss >> value;
+			if(ss.fail())
+			{
+				std::cerr << "Failed to parse directive:" << directive << std::endl;
+				return -1;
+			}
+			if(value < 0)
+			{
+				std::cerr << "Failed to parse: fastcgi_read_timeout < 0" << std::endl;
+				return -1;
+			}
 			std::cout << "Setting cgiTimeout to: " << value << std::endl;
 			this->setCgiTimeout(value);
 			return 0;
@@ -216,8 +251,17 @@ namespace config {
 			std::string path;
 			size_t status;
 			ss >> status >> path;
-			
 			std::string content;
+			if(ss.fail())
+			{
+				std::cerr << "Failed to parse directive:" << directive << std::endl;
+				return -1;
+			}
+			if(status < 400 || status >= 600)
+			{
+				std::cerr << "Failed to parse: error_page not in range 400..599" << std::endl;
+				return -1;
+			}
 			if(utils::readErrorPage(path, content) != 0)
 			{
 				std::cerr << "Error reading error page file: " << path << std::endl;
@@ -225,7 +269,6 @@ namespace config {
 			}
 			std::cout << "Setting error pages to: " << status << ", " 
 				<< content << std::endl;
-			// TODO read file and send content to addErrorPage
 			this->addErrorPage(status, content);
 			return 0;
 		}
