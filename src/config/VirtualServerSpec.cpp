@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 20:54:05 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 23:05:32 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,6 @@ namespace config {
 	VirtualServerSpec &VirtualServerSpec::addRoute(RouteSpec &route)
 	{
 		this->routes.push_back(route);
-		this->routes.back().setDocrootIfEmpty(this->docroot);
 		return *this;
 	}
 
@@ -436,12 +435,17 @@ namespace config {
 		if (utils::isDirectiveCompound("location", directive, param, innerDirectives))
 		{ // TODO validate param as path spec on  RequestPath::matchesPathSpecification
 			RouteSpec routeSpec;
-			if (routeSpec.routeConfigParse(innerDirectives, scanner) != 0)
+			if (routeSpec.routeConfigParse(param, innerDirectives, scanner) != 0)
 			{
 				std::cerr << "Error parsing location directive" << std::endl;
 				return -1;
 			}
+
 			this->addRoute(routeSpec);
+
+			std::cout << "adding route "  << ": " << routeSpec.toString()
+						  << std::endl
+						  << std::endl; 
 			return 0;
 		}
 		return 0;

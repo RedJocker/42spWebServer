@@ -135,7 +135,8 @@ int fileConfigApplication(char **av)
 		return -1;
 	}
 	std::cout << std::endl << appSpec.toString() << std::endl;
-	return appSpec.toApplication().run();
+	//return appSpec.toApplication().run();
+	return 0;
 }
 
 int main(int ac, char **av)

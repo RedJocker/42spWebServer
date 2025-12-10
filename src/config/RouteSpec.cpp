@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 20:56:38 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 23:04:12 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -486,9 +486,10 @@ namespace config
 	}
 	
 	int RouteSpec::routeConfigParse(
-		const std::string &directivesStr, Scanner &scanner)
+		const std::string &pathSpec,
+		const std::string &directivesStr,
+		Scanner &scanner)
 	{
-		(void)scanner;
 		ssize_t alreadyread = 0;
 		while (alreadyread <static_cast<ssize_t>(directivesStr.size()))
 		{
@@ -511,6 +512,7 @@ namespace config
 				return -1;
 			}
 		}
+		this->setPathSpec(pathSpec);
 		return 0;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 16:24:53 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 20:03:51 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 22:50:55 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,9 @@ namespace config
 					std::cerr << "Error parsing server directive" << std::endl;
 					return -1;
 				}
+				std::cout << "adding serverSpec " << i << ": " << serverSpec.toString()
+						  << std::endl
+						  << std::endl; 
 				this->addServer(serverSpec);
 			}
 		}

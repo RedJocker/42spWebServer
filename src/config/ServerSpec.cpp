@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 20:54:11 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 22:54:39 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,6 @@ namespace config {
 	ServerSpec &ServerSpec::addVirtualServer(VirtualServerSpec &virtualServer)
 	{
 		this->virtualServers.push_back(virtualServer);
-		this->virtualServers
-			.back()
-			.setDocrootIfEmpty(this->getDocroot());
 		return *this;
 	}
 
@@ -314,6 +311,9 @@ namespace config {
 				return -1;
 			}
 			this->addVirtualServer(vserverSpec);
+			std::cout << "adding virtualServerSpec " << ": " << vserverSpec.toString()
+						  << std::endl
+						  << std::endl; 
 			return 0;
 		}
 		return 0;
