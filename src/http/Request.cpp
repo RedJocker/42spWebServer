@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/10 16:56:20 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/12/10 16:57:53 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -390,10 +390,6 @@ namespace http
 		{
 			std::string key = it->first;
 			std::string val = it->second;
-
-			// Skip ones manually added
-			if (key == "Content-Type" || key == "Content-Length")
-				continue;
 
 			// Convert HEADER-NAME to HEADER_NAME uppercase
 			for (size_t i = 0; i < key.size(); ++i) {
