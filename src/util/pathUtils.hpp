@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:36:17 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/09 18:02:40 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 22:46:42 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <string>
 # include <map>
 # include <cstdlib>
+# include <sys/types.h>
 
 typedef std::map<unsigned short int, std::string> MapErrorPages;
 

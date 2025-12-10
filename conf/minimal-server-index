@@ -1,0 +1,9 @@
+http {
+    index index.html;
+    server {
+        
+        location / {
+
+        }
+    }
+}

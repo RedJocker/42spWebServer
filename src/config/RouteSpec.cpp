@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:29:09 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 19:38:47 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 23:04:12 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,6 +257,36 @@ namespace config
 		return *this;
 	}
 
+	std::string RouteSpec::toString(void) const
+	{
+		std::stringstream ss;
+
+		ss << "RouteSpec:\n";
+		ss << "CgiBinPath: " << this->cgiBinPath << "\n";
+		ss << "Docroot: " << this->docroot << "\n";
+		ss << "PathSpec: " << this->pathSpec << "\n";
+		ss << "UploadFolder: " << this->uploadFolder << "\n";
+		ss << "MaxSizeBody: " << this->maxSizeBody << "\n";
+		ss << "ListDirectories: " << this->listDirectories << "\n";
+		ss << "ListDirectoriesWasSet: " << this->listDirectoriesWasSet << "\n";
+		ss << "IndexFile: " << this->indexFile << "\n";
+		ss << "CgiTimeout: " << this->cgiTimeout << "\n";
+		ss << "Redirection: "
+		   << this->redirection.first << " -> " << this->redirection.second << "\n";
+		for (std::map<unsigned short int, std::string>::const_iterator it
+				 = this->errorPages.begin();
+			 it != this->errorPages.end();
+			 ++it)
+		{
+			ss << "ErrorPage " << it->first << ": " << it->second << "\n";
+		}
+		for (size_t i = 0; i < this->allowedMethods.size(); ++i)
+		{
+			ss << "AllowedMethod " << i << ": " << this->allowedMethods[i] << "\n";
+		}
+		return ss.str();
+	}
+	
 	http::Route *RouteSpec::toRoute(void)
 	{
 		http::Route *route;
@@ -456,9 +486,10 @@ namespace config
 	}
 	
 	int RouteSpec::routeConfigParse(
-		const std::string &directivesStr, Scanner &scanner)
+		const std::string &pathSpec,
+		const std::string &directivesStr,
+		Scanner &scanner)
 	{
-		(void)scanner;
 		ssize_t alreadyread = 0;
 		while (alreadyread <static_cast<ssize_t>(directivesStr.size()))
 		{
@@ -481,6 +512,7 @@ namespace config
 				return -1;
 			}
 		}
+		this->setPathSpec(pathSpec);
 		return 0;
 	}
 }

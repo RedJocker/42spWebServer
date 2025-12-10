@@ -1,0 +1,9 @@
+http {
+
+    server {
+        fastcgi_read_timeout 3342;
+        location / {
+
+        }
+    }
+}

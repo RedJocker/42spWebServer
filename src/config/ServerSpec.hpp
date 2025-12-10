@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:28:58 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 19:51:25 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 20:04:38 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ namespace config {
 		ServerSpec &addVirtualServer(VirtualServerSpec &virtualServer);
 
 		http::Server *toServer(void);
+
+		std::string toString(void) const;
 
 		int serverConfigParse(const std::string &directive, Scanner &scanner);
 	};

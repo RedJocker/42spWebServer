@@ -1,0 +1,9 @@
+http {
+
+    server {
+        server_name domain.com; 
+        location / {
+
+        }
+    }
+}

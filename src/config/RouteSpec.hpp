@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:24:17 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 16:01:07 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/09 23:03:29 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,15 @@ namespace config
 			unsigned short int status, const std::string &bodyPage);
 		RouteSpec &addErrorPagesIfUnset(
 			const std::map<unsigned short int, std::string> pages);
+		
+		std::string toString(void) const;
 
 		http::Route *toRoute(void);
 		int interpretDirective(const std::string &directive, Scanner &scanner);
 		int routeConfigParse(
-			const std::string &directivesStr, Scanner &scanner);
+			const std::string &pathSpec,
+			const std::string &directivesStr,
+			Scanner &scanner);
 	};
 }
 

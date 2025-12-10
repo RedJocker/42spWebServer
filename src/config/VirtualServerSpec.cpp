@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 19:45:26 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/10 01:25:22 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,6 @@ namespace config {
 	VirtualServerSpec &VirtualServerSpec::addRoute(RouteSpec &route)
 	{
 		this->routes.push_back(route);
-		this->routes.back().setDocrootIfEmpty(this->docroot);
 		return *this;
 	}
 
@@ -191,7 +190,6 @@ namespace config {
 	VirtualServerSpec &VirtualServerSpec::setRedirection(
 		unsigned short int statusCode, const std::string &path)
 	{
-		// TODO validate arguments
 		this->redirection = std::make_pair(statusCode, path);
 		return *this;
 	}
@@ -211,6 +209,36 @@ namespace config {
 		return *this;
 	}
 
+	std::string VirtualServerSpec::toString(void) const
+	{
+		std::stringstream ss;
+
+		ss << "VirtualServerSpec with " << this->routes.size() << " routes.\n";
+		ss << "Hostname: " << this->hostname << "\n";
+		ss << "Docroot: " << this->docroot << "\n";
+		ss << "UploadFolder: " << this->uploadFolder << "\n";
+		ss << "MaxSizeBody: " << this->maxSizeBody << "\n";
+		ss << "ListDirectories: " << this->listDirectories << "\n";
+		ss << "ListDirectoriesWasSet: " << this->listDirectoriesWasSet << "\n";
+		ss << "IndexFile: " << this->indexFile << "\n";
+		ss << "CgiTimeout: " << this->cgiTimeout << "\n";
+		ss << "Redirection: "
+		   << this->redirection.first << " -> " << this->redirection.second << "\n";
+		for (std::map<unsigned short int, std::string>::const_iterator it
+				 = this->errorPages.begin();
+			 it != this->errorPages.end();
+			 ++it)
+		{
+			ss << "ErrorPage " << it->first << ": " << it->second << "\n";
+		}
+		for (size_t i = 0; i < this->routes.size(); ++i)
+		{
+			ss << "Route " << i << ":\n";
+			ss << this->routes[i].toString() << "\n";
+		}
+		return ss.str();
+	}
+
 	http::VirtualServer *VirtualServerSpec::toVirtualServer(void)
 	{
 		std::vector<http::Route*> _routes;
@@ -220,7 +248,7 @@ namespace config {
 			 routeIt != this->routes.end();
 			 ++routeIt)
 		{
-			http::Route *route = (*routeIt)
+			RouteSpec &routeSpec = (*routeIt)
 				.setUploadFolderIfEmpty(this->uploadFolder)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
@@ -228,8 +256,11 @@ namespace config {
 				.setCgiTimeoutIfUnset(this->cgiTimeout)
 				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
-				.setRedirectionIfUnset(this->redirection)
-				.toRoute();
+				.setRedirectionIfUnset(this->redirection);
+
+			http::Route *route = routeSpec.toRoute();
+			std::cout <<  "=CREATING_ROUTE=" << std::endl
+					  << routeSpec.toString() << std::endl;
 			_routes.push_back(route);
 		}
 		http::VirtualServer *virtualServer = new http::VirtualServer(*this,_routes);
@@ -237,7 +268,7 @@ namespace config {
 	}
 
 	int VirtualServerSpec::interpretDirective(const std::string &directive, Scanner &scanner)
-	{ // TODO handle errors
+	{
 		ssize_t end;
 		ssize_t prefixSize;
 
@@ -406,12 +437,17 @@ namespace config {
 		if (utils::isDirectiveCompound("location", directive, param, innerDirectives))
 		{ // TODO validate param as path spec on  RequestPath::matchesPathSpecification
 			RouteSpec routeSpec;
-			if (routeSpec.routeConfigParse(innerDirectives, scanner) != 0)
+			if (routeSpec.routeConfigParse(param, innerDirectives, scanner) != 0)
 			{
 				std::cerr << "Error parsing location directive" << std::endl;
 				return -1;
 			}
+
 			this->addRoute(routeSpec);
+
+			std::cout << "adding route "  << ": " << routeSpec.toString()
+						  << std::endl
+						  << std::endl; 
 			return 0;
 		}
 		return 0;

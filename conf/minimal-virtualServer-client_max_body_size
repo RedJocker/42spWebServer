@@ -1,0 +1,9 @@
+http {
+
+    server {
+    	client_max_body_size 1042;
+	location / {
+
+        }
+    }
+}

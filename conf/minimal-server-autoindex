@@ -1,0 +1,8 @@
+http {
+    autoindex  on;
+    server {
+        location / {
+
+        }
+    }
+}

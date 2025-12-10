@@ -1,0 +1,9 @@
+http {
+
+    server {
+
+        location / {
+            cgi_bin /usr/bin/php-cgi;
+        }
+    }
+}
