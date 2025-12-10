@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/10 16:57:53 by vcarrara         ###   ########.fr       */
+//   Updated: 2025/12/10 17:42:28 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <fstream>
 #include <sys/time.h>
 #include "pathUtils.hpp"
+#include "Headers.hpp"
 
 namespace http
 {
@@ -390,7 +391,17 @@ namespace http
 		{
 			std::string key = it->first;
 			std::string val = it->second;
-
+			Headers::CaseInsensitive lessThan;
+			if (!lessThan(key, "content-length")
+				&& !lessThan("content-length", key))
+			{
+				continue;
+			}
+			if (!lessThan(key, "connection")
+				&& !lessThan("connection", key))
+			{
+				continue;
+			}
 			// Convert HEADER-NAME to HEADER_NAME uppercase
 			for (size_t i = 0; i < key.size(); ++i) {
 				if (key[i] == '-') key[i] = '_';
