@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 19:38:33 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 20:54:11 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,32 @@ namespace config {
 			*this,
 			vservers);
 		return server;
+	}
+
+	std::string ServerSpec::toString(void) const
+	{
+		std::stringstream ss;
+		
+		ss << "ServerSpec with " << this->virtualServers.size() << " virtual servers.\n";
+		ss << "AddressPort: " << this->addressPort << "\n";
+		ss << "Docroot: " << this->docroot << "\n";
+		ss << "MaxSizeBody: " << this->maxSizeBody << "\n";
+		ss << "ListDirectories: " << this->listDirectories << "\n";
+		ss << "IndexFile: " << this->indexFile << "\n";
+		ss << "CgiTimeout: " << this->cgiTimeout << "\n";
+		for (std::map<unsigned short int, std::string>::const_iterator it
+				 = this->errorPages.begin();
+			 it != this->errorPages.end();
+			 ++it)
+		{
+			ss << "ErrorPage " << it->first << ": " << it->second << "\n";
+		}
+		for (size_t i = 0; i < this->virtualServers.size(); ++i)
+		{
+			ss << "Virtual Server " << i << ":\n";
+			ss << this->virtualServers[i].toString() << "\n";
+		}
+		return ss.str();
 	}
 
 	int ServerSpec::interpretDirective(const std::string &directive, Scanner &scanner)

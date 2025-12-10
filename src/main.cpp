@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 17:11:02 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 18:48:10 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 20:57:54 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,7 @@ int fileConfigApplication(char **av)
 		std::cerr << "Error parsing configuration file" << std::endl;
 		return -1;
 	}
+	std::cout << std::endl << appSpec.toString() << std::endl;
 	return appSpec.toApplication().run();
 }
 

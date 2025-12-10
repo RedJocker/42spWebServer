@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 16:20:44 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 19:27:42 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 19:51:35 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ namespace config
 
 		int applicationConfigParse(char **av);
 
-		
+		std::string toString(void) const;
 	};
 }
 

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:46 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/08 15:32:30 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 20:09:09 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,8 @@ namespace config {
 			const std::map<unsigned short int, std::string> pages);
 
 		VirtualServerSpec &addRoute(RouteSpec &route);
+		
+		std::string toString(void) const;
 
 		http::VirtualServer *toVirtualServer(void);
 		int virtualServerConfigParse(const std::string &directives, Scanner &scanner);

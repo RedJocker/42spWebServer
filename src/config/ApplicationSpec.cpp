@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 16:24:53 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/04 19:40:04 by bnespoli         ###   ########.fr       */
+/*   Updated: 2025/12/09 20:03:51 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "Application.hpp"
 #include "Scanner.hpp"
 #include <iostream>
+#include <sstream>
 
 namespace config
 {
@@ -63,11 +64,22 @@ namespace config
 
 		return http::Application(_servers);
 	}
+
+	std::string ApplicationSpec::toString(void) const{
+		std::stringstream ss;
+		
+		ss << "ApplicationSpec with " << this->servers.size() << " servers.\n";
+		for (size_t i = 0; i < this->servers.size(); ++i)
+		{
+			ss << "Server " << i << ":\n";
+			ss << this->servers[i].toString() << "\n";
+		}
+		return ss.str();
+	}
 	
 	int ApplicationSpec::applicationConfigParse(char **av)
 	{
 		config::Scanner scanner;
-		// TODO checar os casos de erros
 		scanner.readContent(av[1]);
 		std::string filecontent = scanner.getContent();
 		ssize_t alreadyread = 0;
@@ -83,23 +95,6 @@ namespace config
 			std::cout << "Directive " << counter << ": " << this->directives[counter] << std::endl;
 			++counter;
 		}
-		// for (size_t i = 0; i < this->directives.size(); ++i)
-		// {
-		// 	ssize_t startBrace = this->isHttpDirective(this->directives[i]);
-		// 	std::cout << "Directive " << i << ": " << this->directives[i] << std::endl;
-		// 	if (startBrace > 4)
-		// 	{
-		// 		ServerSpec serverSpec;
-		// 		std::string insideBrace = this->directives[i].substr(startBrace + 1, 
-		// 			this->directives[i].size() - (startBrace + 2));  // TODO melhorar isso
-		// 		if (serverSpec.serverConfigParse(insideBrace, scanner) != 0)
-		// 		{
-		// 			std::cerr << "Error parsing server directive" << std::endl;
-		// 			return -1;
-		// 		}
-		// 		this->addServer(serverSpec);
-		// 	}
-		// }
 		for (size_t i = 0; i < this->directives.size(); ++i)
 		{
 			
