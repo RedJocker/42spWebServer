@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/10 17:11:00 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/10 17:48:03 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ namespace conn
 	bool EventLoop::subscribeHttpClient(int fd, http::Server *server)
 	{
 		if (EventLoop::shouldExit)
-			return;
+			return false;
 		struct pollfd event;
 
 		event.events = POLLIN|POLLOUT; // subscribe for reads and writes
@@ -440,11 +440,9 @@ namespace conn
 
 
 		if (flushResult.first == BufferedWriter::ERROR) {
-			// TODO Handle write errors
 			std::cout << "error writing response "
 					  << flushResult.second << std::endl;
 			unsubscribeHttpClient(eventIt);
-			client->clear();
 		}
 		std::cout << "Finished writing to client " << client->getFd() << std::endl;
 		// Check if client requested connection close

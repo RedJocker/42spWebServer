@@ -1,0 +1,1 @@
+fazer chmod 000 na paste deste arquivo

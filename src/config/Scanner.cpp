@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-/*   Updated: 2025/12/08 16:53:08 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/10 17:45:19 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,6 @@ namespace config {
 	ssize_t Scanner::readDirective(
 		const std::string &source, size_t directiveStart, std::vector<std::string> &directives)
 	{
-		// TODO dar suporte para diretivas simples e compostas
 
 		directiveStart = this->skipSpaces(source, directiveStart);
 		if (directiveStart >= source.size())

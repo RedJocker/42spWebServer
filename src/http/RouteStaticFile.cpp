@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 22:34:26 by maurodri          #+#    #+#             */
-/*   Updated: 2025/12/09 18:35:34 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/10 18:04:14 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,9 +332,8 @@ namespace http {
 				response.setStatusCode(500);
 				response.setStatusInfo("Internal Server Error");
 			}
-
-			client.writeResponse();
 		}
+		client.writeResponse();
 	}
 
 	void RouteStaticFile::serve(http::Client &client, conn::Monitor &monitor)
