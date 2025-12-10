@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/09 15:02:20 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/10 17:11:00 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,8 @@ namespace conn
 
 	bool EventLoop::subscribeHttpClient(int fd, http::Server *server)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		struct pollfd event;
 
 		event.events = POLLIN|POLLOUT; // subscribe for reads and writes
@@ -133,6 +135,8 @@ namespace conn
 
 	void EventLoop::connectServerToClient(http::Server *server)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		std::pair<int, std::string> connResult = server->connectToClient();
 		int clientFd = connResult.first;
 		if (clientFd < 0)
@@ -155,7 +159,8 @@ namespace conn
 
 	void EventLoop::subscribeFileRead(int fileFd, int clientFd)
 	{
-
+		if (EventLoop::shouldExit)
+			return;
 		http::Client *client = this->clients.at(clientFd);
 		if (client)
 		{
@@ -177,6 +182,8 @@ namespace conn
 	void EventLoop::subscribeFileWrite(
 		int fileFd, int clientFd, std::string content)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		http::Client *client = this->clients.at(clientFd);
 		if (client)
 		{
@@ -195,6 +202,8 @@ namespace conn
 
 	void EventLoop::subscribeCgi(int cgiFd, pid_t cgiPid, int clientFd)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		http::Client *clientPtr = this->clients.at(clientFd);
 		if (clientPtr)
 		{
@@ -219,6 +228,8 @@ namespace conn
 
 	void EventLoop::handleFileWrite(const Operation &op, http::Client &client)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		std::cout << "clientFd = " << client.getFd() << std::endl;
 		std::cout << "handleFileWrite: " << op.fd << std::endl;
 
@@ -261,6 +272,8 @@ namespace conn
 
 	void EventLoop::handleFileReads(const Operation &op, http::Client &client)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		std::cout << "clientFd = " << client.getFd() << std::endl;
 		std::cout << "handleFileReads" << std::endl;
 
@@ -289,6 +302,8 @@ namespace conn
 
 	void EventLoop::handleCgiWrite(const Operation &op, http::Client &client)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		if (op.writer->getState() != BufferedWriter::WRITING)
 			return ;
 		// Write CGI request
@@ -311,6 +326,8 @@ namespace conn
 
 	void EventLoop::handleCgiRead(const Operation &op, http::Client &client)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		if (op.writer->getState() == BufferedWriter::WRITING)
 			return ;
 		int cgiFd = op.fd;
@@ -345,6 +362,8 @@ namespace conn
 	void EventLoop::handleClientRequest(
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		if (client->getWriterState() != BufferedWriter::DONE)
 			return ; // client is already being served
 		http::Request &req = client->readHttpRequest();
@@ -410,6 +429,8 @@ namespace conn
 	void EventLoop::handleClientWriteResponse(
 		http::Client *client, ListEvents::iterator &eventIt)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			throw std::domain_error("called handleClientWriteResponse without content to write");
 		std::pair<WriteState, char*> flushResult = client->flushMessage();
@@ -448,6 +469,8 @@ namespace conn
 
 	void EventLoop::handleFdEventOut(ListEvents::iterator &monitoredIt)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		// std::cout << "out "  << monitoredIt->fd << std::endl;
 		Operation op = Operation::matcher(monitoredIt->fd);
 		MapOperations::iterator operationIt = this->operations.find(op);
@@ -483,6 +506,8 @@ namespace conn
 
 	void EventLoop::handleFdEventIn(ListEvents::iterator &monitoredIt)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		std::cout << "in: " << monitoredIt->fd << std::endl;
 		MapServer::iterator serverIt = this->servers.find(monitoredIt->fd);
 		if (serverIt != this->servers.end())
@@ -521,6 +546,8 @@ namespace conn
 
 	void EventLoop::handleFdEvent(ListEvents::iterator &monitoredIt)
 	{
+		if (EventLoop::shouldExit)
+			return;
 		//std::cout << "monitoredFd  " << monitoredIt->fd << std::endl;
 		if (monitoredIt->revents & (POLLHUP | POLLERR))
 		{ // close
