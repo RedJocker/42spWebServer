@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/10 16:43:34 by vcarrara         ###   ########.fr       */
+/*   Updated: 2025/12/10 16:56:20 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,21 +379,6 @@ namespace http
 
 		// PHP_SELF
 		envp.push_back("PHP_SELF=" + _pathRaw);
-
-		// REQUEST_TIME + FLOAT
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-
-		{
-			std::ostringstream os;
-			os << tv.tv_sec;
-			envp.push_back("REQUEST_TIME=" + os.str());
-		}
-		{
-			std::ostringstream os;
-			os << tv.tv_sec << "." << tv.tv_usec;
-			envp.push_back("REQUEST_TIME_FLOAT=" + os.str());
-		}
 
 		// Export all HTTP headers
 		std::map<std::string, std::string, Headers::CaseInsensitive> all =
