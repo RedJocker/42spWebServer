@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Static Page 2</title>
+</head>
+<body>
+    <h1>Teste de Fetch JSON</h1>
+    <button id="btn">Carregar JSON</button>
+    <pre id="out"></pre>
+
+    <script>
+    document.getElementById("btn").onclick = async () => {
+        const res = await fetch("data.json");
+        const json = await res.json();
+        document.getElementById("out").innerText = JSON.stringify(json, null, 2);
+    };
+    </script>
+</body>
+</html>
