@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/25 20:12:55 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/10 16:43:34 by vcarrara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <cstring>
 #include <string>
 #include <fstream>
+#include <sys/time.h>
 #include "pathUtils.hpp"
 
 namespace http
@@ -347,29 +348,76 @@ namespace http
 
 	void Request::envpInit(std::vector<std::string> &envp) const
 	{
-		const RequestPath &reqPath = _path;
 		envp.clear();
+
+		const RequestPath &reqPath = _path;
+
+		// Base CGI vars
 		envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
 		envp.push_back("SERVER_SOFTWARE=webserv/1.0");
 		envp.push_back("REQUEST_METHOD=" + _method);
 		envp.push_back("SERVER_PROTOCOL=" + (_protocol.empty() ? "HTTP/1.1" : _protocol));
 		envp.push_back("REDIRECT_STATUS=0");
 		envp.push_back("SCRIPT_FILENAME=" + reqPath.getFilePath());
+		envp.push_back("HTTP_USER_AGENT=curl/8.0");
 
-		if (this->_method == "POST") {
-			std::stringstream contentLengthStream;
-			contentLengthStream << _body.size();
-			std::string contentLength = contentLengthStream.str();
-			if (!contentLength.empty()) {
-				envp.push_back(std::string("CONTENT_LENGTH=") + contentLength);
-				std::string contentType = _headers.getHeader("Content-Type");
-				if (contentType.empty())
-					contentType = "application/x-www-form-urlencoded";
-				envp.push_back("CONTENT_TYPE=" + contentType);
-			}
+		// POST specifics
+		if (_method == "POST") {
+			std::ostringstream lenstream;
+			lenstream << _body.size();
+			envp.push_back("CONTENT_LENGTH=" + lenstream.str());
+
+			std::string ctype = _headers.getHeader("Content-Type");
+			if (ctype.empty())
+				ctype = "application/x-www-form-urlencoded";
+			envp.push_back("CONTENT_TYPE=" + ctype);
 		}
 
+		// Query string
 		if (!reqPath.getQueryString().empty())
 			envp.push_back("QUERY_STRING=" + reqPath.getQueryString());
+
+		// PHP_SELF
+		envp.push_back("PHP_SELF=" + _pathRaw);
+
+		// REQUEST_TIME + FLOAT
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+
+		{
+			std::ostringstream os;
+			os << tv.tv_sec;
+			envp.push_back("REQUEST_TIME=" + os.str());
+		}
+		{
+			std::ostringstream os;
+			os << tv.tv_sec << "." << tv.tv_usec;
+			envp.push_back("REQUEST_TIME_FLOAT=" + os.str());
+		}
+
+		// Export all HTTP headers
+		std::map<std::string, std::string, Headers::CaseInsensitive> all =
+			_headers.getAll();
+
+		for (std::map<std::string, std::string, Headers::CaseInsensitive>::const_iterator it = all.begin();
+			it != all.end();
+			++it)
+		{
+			std::string key = it->first;
+			std::string val = it->second;
+
+			// Skip ones manually added
+			if (key == "Content-Type" || key == "Content-Length")
+				continue;
+
+			// Convert HEADER-NAME to HEADER_NAME uppercase
+			for (size_t i = 0; i < key.size(); ++i) {
+				if (key[i] == '-') key[i] = '_';
+				else key[i] = std::toupper(key[i]);
+			}
+
+			envp.push_back("HTTP_" + key + "=" + val);
+		}
 	}
+
 }
