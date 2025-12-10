@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 10:44:24 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/09 22:54:39 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/10 01:26:28 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,20 +123,22 @@ namespace config {
 	http::Server *ServerSpec::toServer(void)
 	{
 		std::vector<http::VirtualServer *> vservers;
-
 		for (std::vector<VirtualServerSpec>::iterator virtualServerIt
 				 = this->virtualServers.begin();
 			 virtualServerIt != this->virtualServers.end();
 			 ++virtualServerIt)
 		{
-			http::VirtualServer *virtualServer = (*virtualServerIt)
+			config::VirtualServerSpec &vserverSpec = (*virtualServerIt)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
 				.setIndexFileIfEmpty(this->indexFile)
 				.setCgiTimeoutIfUnset(this->cgiTimeout)
 				.setListDirectoriesIfUnset(this->listDirectories)
-				.addErrorPagesIfUnset(this->errorPages)
-				.toVirtualServer();
+				.addErrorPagesIfUnset(this->errorPages);
+			http::VirtualServer *virtualServer = vserverSpec.toVirtualServer();
+
+			std::cout <<  "==CREATING_VIRTUAL_SERVER==" << std::endl
+					  << vserverSpec.toString() << std::endl;
 			vservers.push_back(virtualServer);
 		}
 		http::Server *server = new http::Server(

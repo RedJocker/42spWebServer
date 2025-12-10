@@ -1,0 +1,9 @@
+http {	
+	
+    server {
+
+        location /42 {
+	    return 301 ./index.html;
+        }
+    }
+}

@@ -1,0 +1,9 @@
+http {	
+	
+    server {
+
+        location /42 {
+	    upload_pass ./www/uploads;
+        }
+    }
+}

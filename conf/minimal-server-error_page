@@ -1,0 +1,9 @@
+http {
+    error_page 400 ./www/text.html;
+    server {
+        
+        location / {
+
+        }
+    }
+}

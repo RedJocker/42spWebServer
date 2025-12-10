@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/09 23:05:32 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/10 01:25:22 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,7 +190,6 @@ namespace config {
 	VirtualServerSpec &VirtualServerSpec::setRedirection(
 		unsigned short int statusCode, const std::string &path)
 	{
-		// TODO validate arguments
 		this->redirection = std::make_pair(statusCode, path);
 		return *this;
 	}
@@ -249,7 +248,7 @@ namespace config {
 			 routeIt != this->routes.end();
 			 ++routeIt)
 		{
-			http::Route *route = (*routeIt)
+			RouteSpec &routeSpec = (*routeIt)
 				.setUploadFolderIfEmpty(this->uploadFolder)
 				.setDocrootIfEmpty(this->docroot)
 				.setMaxSizeBodyIfUnset(this->maxSizeBody)
@@ -257,8 +256,11 @@ namespace config {
 				.setCgiTimeoutIfUnset(this->cgiTimeout)
 				.setListDirectoriesIfUnset(this->listDirectories)
 				.addErrorPagesIfUnset(this->errorPages)
-				.setRedirectionIfUnset(this->redirection)
-				.toRoute();
+				.setRedirectionIfUnset(this->redirection);
+
+			http::Route *route = routeSpec.toRoute();
+			std::cout <<  "=CREATING_ROUTE=" << std::endl
+					  << routeSpec.toString() << std::endl;
 			_routes.push_back(route);
 		}
 		http::VirtualServer *virtualServer = new http::VirtualServer(*this,_routes);
@@ -266,7 +268,7 @@ namespace config {
 	}
 
 	int VirtualServerSpec::interpretDirective(const std::string &directive, Scanner &scanner)
-	{ // TODO handle errors
+	{
 		ssize_t end;
 		ssize_t prefixSize;
 

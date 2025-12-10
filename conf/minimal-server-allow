@@ -1,0 +1,9 @@
+http {
+    root ./www2;
+    server {
+        
+        location / {
+
+        }
+    }
+}
