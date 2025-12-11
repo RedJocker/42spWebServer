@@ -4,6 +4,6 @@ if (!isset($_GET['go'])) {
     exit;
 }
 
-header("Location: /index1.html");
+header("Location: /static1");
 exit;
 ?>

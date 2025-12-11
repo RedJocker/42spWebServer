@@ -1,4 +1,4 @@
-let toggler = false;
+let toggler = true;
 
 function changeColor() {
     if (toggler) {
