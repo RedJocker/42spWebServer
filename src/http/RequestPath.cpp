@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestPath.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 13:58:32 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/21 23:39:43 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/10 20:38:01 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,15 +98,6 @@ bool RequestPath::isFile() const {
 bool RequestPath::matchesPathSpecification(
 	const std::string &pathSpecification) const
 {
-	// TODO validade pathSpecification while parsing config
-	// TODO make unit test for this method
-	// "/**.ext" should only be used at end of spec, that is, any "/" or "*" after "/**" is invalid
-	// "/**.ext" matches any file with ".ext" either at current folder or any subfolder
-	// "/**" should only be used at end of spec, mathing all files on folder and subfolders
-	// "**" that is not preceded by "/" or is not at end of spec is invalid
-	// "*" on end of spec matches only at same level, that is, if path has no extra "/"
-	// "*" on other position with match until first occurrence of next spec char on path
-
 	const std::string &spec = pathSpecification;
 	const size_t spec_len = spec.size();
 	const size_t path_len = this->path.size();

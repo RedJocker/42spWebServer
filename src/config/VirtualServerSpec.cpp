@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 11:03:12 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/10 01:25:22 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/10 19:36:57 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,6 +267,55 @@ namespace config {
 		return virtualServer;
 	}
 
+	static bool isValidPathSpecification(const std::string &spec)
+	{
+		if (spec.empty())
+			return false;
+		if (spec[0] != '/')
+			return false;
+	
+		const size_t len = spec.size();
+		for (size_t i = 0; i < len; )
+		{
+			char c = spec[i];
+			if (c == '*')
+			{
+				if (i + 1 < len && spec[i + 1] == '*')
+				{
+					if (i == 0 || spec[i - 1] != '/')
+						return false;
+					if (i + 2 == len)
+						return true;
+					if (spec[i + 2] == '.')
+					{
+						for (size_t j = i + 3; j < len; ++j)
+							if (spec[j] == '/' || spec[j] == '*')
+								return false;
+						return true;
+					}
+					return false;
+				}
+				else
+				{
+					if (i == 0 || spec[i - 1] != '/')
+						return false;
+					if (i + 1 == len)
+						return true;
+					if (spec[i + 1] == '.')
+					{
+						for (size_t j = i + 2; j < len; ++j)
+							if (spec[j] == '/' || spec[j] == '*')
+								return false;
+						return true;
+					}
+					return false;
+				}
+			}
+			++i;
+		}
+		return true;
+	}
+
 	int VirtualServerSpec::interpretDirective(const std::string &directive, Scanner &scanner)
 	{
 		ssize_t end;
@@ -435,14 +484,19 @@ namespace config {
 		std::string param;
 		std::string innerDirectives;
 		if (utils::isDirectiveCompound("location", directive, param, innerDirectives))
-		{ // TODO validate param as path spec on  RequestPath::matchesPathSpecification
+		{
+			if (isValidPathSpecification(param) == false)
+			{
+				std::cerr << "======================================== " << std::endl;
+				std::cerr << "Invalid location path specification: " << param << std::endl;
+				return -1;
+			}
 			RouteSpec routeSpec;
 			if (routeSpec.routeConfigParse(param, innerDirectives, scanner) != 0)
 			{
 				std::cerr << "Error parsing location directive" << std::endl;
 				return -1;
 			}
-
 			this->addRoute(routeSpec);
 
 			std::cout << "adding route "  << ": " << routeSpec.toString()
