@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 22:58:25 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 19:23:03 by maurodri         ###   ########.fr       */
+//   Updated: 2025/12/11 06:14:05 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -63,7 +63,7 @@ WriteState BufferedWriter::getState() const
 	return this->state;
 }
 
-std::pair<WriteState, char *>  BufferedWriter::flushMessage()
+std::pair<WriteState, std::string>  BufferedWriter::flushMessage()
 {
 	if (this->state != BufferedWriter::WRITING)
 		throw std::domain_error(
@@ -75,16 +75,16 @@ std::pair<WriteState, char *>  BufferedWriter::flushMessage()
 	{
 		this->state = BufferedWriter::ERROR;
 		return std::make_pair(
-			this->state, const_cast<char *>("write returned negative number"));
+			this->state, "write returned negative number");
 	}
 	else if (sizeWritten < sizeToWrite)
 	{
 		this->toWrite = this->toWrite.substr(sizeWritten);
-		return std::make_pair(this->state, reinterpret_cast<char *>(0));
+		return std::make_pair(this->state, "");
 	}
 	else
 	{
 		this->state = BufferedWriter::DONE;
-		return std::make_pair(this->state, reinterpret_cast<char *>(0));
+		return std::make_pair(this->state, "");
 	}
 }

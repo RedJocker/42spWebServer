@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-//   Updated: 2025/12/10 17:45:19 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/11 06:09:12 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ namespace config {
 		}
 		BufferedReader reader(fd);
 		std::cout << "Parsing config file: " << filename << std::endl;
-		std::pair<ReadState, char *> result;
+		std::pair<ReadState, std::string> result;
 		while (true)
 		{
 			std::cout << "Reading..." << std::endl;
@@ -84,7 +84,6 @@ namespace config {
 			return 1;
 		}
 		this->content = std::string(result.second);
-		delete[] result.second;
 		return 0;
 	}
 

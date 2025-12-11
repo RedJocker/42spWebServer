@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:23 by maurodri          #+#    #+#             //
-//   Updated: 2025/11/15 18:10:12 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/11 05:57:24 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -31,8 +31,8 @@ class BufferedReader
 	std::vector<char> saved;
 	char readBuffer[BUFFER_SIZE];
 
-	char *consumeBufferedContent();
-	char *consumeBufferedContent(size_t len, size_t eraseAfter);
+	std::string consumeBufferedContent();
+	std::string consumeBufferedContent(size_t len, size_t eraseAfter);
 	ssize_t crlfIndex(size_t start) const;
 	void clear();
 	BufferedReader();
@@ -43,9 +43,9 @@ public:
 	BufferedReader &operator=(const BufferedReader &other);
 	~BufferedReader();
 
-	std::pair<ReadState, char *> read(size_t length);
-	std::pair<ReadState, char *> readlineCrlf(void);
-	std::pair<ReadState, char *> readAll(void);
+	std::pair<ReadState, std::string> read(size_t length);
+	std::pair<ReadState, std::string> readlineCrlf(void);
+	std::pair<ReadState, std::string> readAll(void);
 
 	bool hasBufferedContent() const;
 	bool bufferedContentCanMatch(const std::string &str) const;

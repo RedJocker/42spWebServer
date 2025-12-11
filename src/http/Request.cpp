@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:51:33 by vcarrara          #+#    #+#             */
-//   Updated: 2025/12/10 17:42:28 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/11 08:03:09 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ namespace http
 
 	Request::ReadState Request::readRequestLine(BufferedReader &reader)
 	{
-		std::pair<BufferedReader::ReadState, char*> result;
+		std::pair<BufferedReader::ReadState, std::string> result;
 		result = reader.readlineCrlf();
 		switch(result.first) {
 		case BufferedReader::READING: {
@@ -98,18 +98,15 @@ namespace http
 			return _state;
 		}
 		case BufferedReader::NO_CONTENT: {
-			delete[] result.second;
 			_state = READ_EOF;
 			return _state;
 		}
 		case BufferedReader::DONE: {
-			if (!parseRequestLine(std::string(result.second)))
+			if (!parseRequestLine(result.second))
 			{
 				_state = READ_BAD_REQUEST;
-				delete[] result.second;
 				return _state;
 			}
-			delete[] result.second;
 			_state = READING_HEADERS;
 			if (reader.hasBufferedContent())
 				return this->readHeaderLine(reader);
@@ -122,7 +119,7 @@ namespace http
 
 	Request::ReadState Request::readHeaderLine(BufferedReader &reader)
 	{
-		std::pair<BufferedReader::ReadState, char*> result;
+		std::pair<BufferedReader::ReadState, std::string> result;
 
 		result = reader.readlineCrlf();
 
@@ -134,14 +131,12 @@ namespace http
 			return _state;
 		}
 		case BufferedReader::NO_CONTENT: {
-			delete[] result.second;
 			_state = READ_EOF;
 			return _state;
 		}
 		case BufferedReader::DONE:
 		{
 			std::string line(result.second);
-			delete[] result.second;
 
 			if (line.empty()) { // End of Headers
 				_multipartBoundary = ""; // clear previous multipart boundaries
@@ -186,7 +181,7 @@ namespace http
 			if (reader.hasBufferedContent()) {
 				if (_state == READING_HEADERS)
 					return readHeaderLine(reader);
- 				else if (_state == READING_BODY)
+				else if (_state == READING_BODY)
 					return readBody(reader);
 			}
 			return _state;
@@ -198,11 +193,10 @@ namespace http
 
 	Request::ReadState Request::readBody(BufferedReader &reader)
 	{
-		std::pair<BufferedReader::ReadState, char*> result;
+		std::pair<BufferedReader::ReadState, std::string> result;
 		std::string contentLength = _headers.getHeader("Content-Length");
 		std::string contentType = _headers.getHeader("Content-Type");
 		size_t expectedLength = 0;
-
 		if (!contentLength.empty())
 			expectedLength = std::strtoul(contentLength.c_str(), NULL, 10);
 
@@ -218,14 +212,13 @@ namespace http
 			return _state;
 		case BufferedReader::DONE:
 		{
-			std::string chunk(result.second, expectedLength);
-			delete[] result.second;
-
-			if (!_body.parse(chunk.c_str(), expectedLength))
+			std::string chunk(result.second);
+			if (!_body.parse(chunk, expectedLength)) {
 				return _state;
-			if (_body.size() >= expectedLength)
+			}
+			if (_body.size() >= expectedLength) {
 				_state = READ_COMPLETE;
-
+			}
 			return _state;
 		}
 		default:
@@ -236,11 +229,10 @@ namespace http
 	Request::ReadState Request::readChunkedBody(BufferedReader &reader) {
 		while (true) {
 			// Read chunk size line
-			std::pair<BufferedReader::ReadState, char*> sizeLine = reader.readlineCrlf();
+			std::pair<BufferedReader::ReadState, std::string> sizeLine = reader.readlineCrlf();
 			if (sizeLine.first != BufferedReader::DONE)
 				return _state;
 			std::string sizeStr(sizeLine.second);
-			delete[] sizeLine.second;
 
 			// Hex to int
 			size_t chunkSize = std::strtoul(sizeStr.c_str(), NULL, 16);
@@ -250,12 +242,11 @@ namespace http
 			}
 
 			// Read chunk data + \r\n
-			std::pair<BufferedReader::ReadState, char*> chunkData = reader.read(chunkSize + 2);
+			std::pair<BufferedReader::ReadState, std::string> chunkData = reader.read(chunkSize + 2);
 			if (chunkData.first != BufferedReader::DONE)
 				return _state;
 
 			_body.parse(chunkData.second, chunkSize); // Ignores \r\n
-			delete[] chunkData.second;
 		}
 		return _state;
 	}
@@ -287,7 +278,7 @@ namespace http
 	std::string Request::getHeader(const std::string &key) const {
 		return _headers.getHeader(key);
 	}
-	std::string Request::getBody() const { return _body.str(); }
+	const std::string &Request::getBody() const { return _body.str(); }
 	void Request::clear()
 	{
 		_method = "";

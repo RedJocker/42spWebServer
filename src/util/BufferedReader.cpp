@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/21 21:13:05 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/11 18:48:59 by maurodri         ###   ########.fr       */
+//   Updated: 2025/12/11 08:03:51 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -81,20 +81,18 @@ ssize_t BufferedReader::crlfIndex(size_t start) const
 	return index_crlf;
 }
 
-// returns allocated char*
-char *BufferedReader::consumeBufferedContent(size_t len, size_t eraseAfter)
+std::string BufferedReader::consumeBufferedContent(size_t len, size_t eraseAfter)
 {
 	len = std::min(len, this->buffered.size());
-	char *message = new char[len + 1];
-	::memcpy(message, &this->buffered[0], len);
-	message[len] = '\0';
+
+	std::string message(this->buffered.data(), len);
 	size_t toErase = std::min(len + eraseAfter, this->buffered.size());
 	this->buffered.erase(buffered.begin(), buffered.begin() + toErase);
 	this->readBefore = this->buffered.size();
 	return message;
 }
 
-std::pair<ReadState, char *> BufferedReader::read(size_t length)
+std::pair<ReadState, std::string> BufferedReader::read(size_t length)
 {
 	size_t toRead = length > this->readBefore
 		? length - this->readBefore
@@ -102,22 +100,24 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 
 	if (toRead == 0)
 	{
-		char *message = this->consumeBufferedContent(length, 0);
+		const std::string &message = this->consumeBufferedContent(length, 0);
 		return std::make_pair(DONE, message);
 	}
 	ssize_t currentRead = ::read(
 		this->fd,
 		this->readBuffer,
 		std::min(toRead, static_cast<size_t>(BUFFER_SIZE)));
+	write(1, this->readBuffer, currentRead);
 	if (currentRead < 0)
 	{
 		return std::make_pair(
 			ERROR,
-			const_cast<char *>("read returned negative"));
+			"read returned negative");
 	}
 	else if (currentRead == 0)
 	{
-		char *message = this->consumeBufferedContent(buffered.size(), 0);
+		std::string message =
+			this->consumeBufferedContent(buffered.size(), 0);
 		return std::make_pair(
 			NO_CONTENT,
 			message
@@ -133,17 +133,18 @@ std::pair<ReadState, char *> BufferedReader::read(size_t length)
 
 	if (static_cast<size_t>(currentRead) == toRead)
 	{
-		char *message = this->consumeBufferedContent(length, 0);
+		std::string message =
+			this->consumeBufferedContent(length, 0);
 		return std::make_pair(DONE, message);
 	}
 	else // if (currentRead < toRead && currentRead > 0)
 	{
 		this->readBefore += currentRead;
-		return std::make_pair(READING, reinterpret_cast<char *>(0));
+		return std::make_pair(READING, "");
 	}
 }
 
-std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
+std::pair<ReadState, std::string> BufferedReader::readlineCrlf(void)
 {
 	ssize_t currentRead = 0;
 	// read only if does not have buffered content
@@ -151,7 +152,7 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
 	size_t lenBeforeRead = this->buffered.size();
 	if (index_crlf_buffered >=0)
 	{
-		char *messageLineCrlf =
+		std::string messageLineCrlf =
 			this->consumeBufferedContent(index_crlf_buffered, 2);
 
 		return std::make_pair(
@@ -161,20 +162,21 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
 	else
 	{
 		currentRead = ::read(this->fd, this->readBuffer, BUFFER_SIZE);
-
 		if (currentRead < 0)
 		{ // read fail
 			return std::make_pair(
 				ERROR,
-				const_cast<char *>("read returned negative"));
+				"read returned negative");
 		}
 		else if (currentRead == 0)
 		{ // read eof
-			char *message = this->consumeBufferedContent(buffered.size(), 0);
+			std::string message =
+				this->consumeBufferedContent(buffered.size(), 0);
 			return std::make_pair(
 				NO_CONTENT,
 				message);
 		}
+		write(1, this->readBuffer, currentRead);
 		// append current read to buffered
 		this->buffered.insert(
 			this->buffered.end(),
@@ -184,9 +186,10 @@ std::pair<ReadState, char *> BufferedReader::readlineCrlf(void)
 	ssize_t index_crlf = this->crlfIndex(
 		lenBeforeRead < 1 ? 0 : lenBeforeRead - 1);
 	if (index_crlf < 0)
-		return std::make_pair(READING, reinterpret_cast<char *>(0));
+		return std::make_pair(READING, "");
 
-	char *messageLineCrlf = this->consumeBufferedContent(index_crlf, 2);
+	std::string messageLineCrlf =
+		this->consumeBufferedContent(index_crlf, 2);
 	return std::make_pair(
 		DONE,
 		messageLineCrlf);
@@ -199,7 +202,7 @@ void BufferedReader::clear()
 }
 
 
-std::pair<ReadState, char *> BufferedReader::readAll(void)
+std::pair<ReadState, std::string> BufferedReader::readAll(void)
 {
 
 	ssize_t currentRead = ::read(
@@ -211,21 +214,22 @@ std::pair<ReadState, char *> BufferedReader::readAll(void)
 	{
 		return std::make_pair(
 			ERROR,
-			const_cast<char *>("read returned negative"));
+			"read returned negative");
 	}
 	else if (currentRead == 0)
 	{
-		char *message = this->consumeBufferedContent(buffered.size(), 0);
+		std::string message = this->consumeBufferedContent(buffered.size(), 0);
 		return std::make_pair(
 			NO_CONTENT,
 			message
 		);
 	}
+	write(1, this->readBuffer, currentRead);
 
 	this->buffered.insert(
 			this->buffered.end(),
 			readBuffer,
 			readBuffer + currentRead);
 
-	return std::make_pair(READING, reinterpret_cast<char *>(0));
+	return std::make_pair(READING, "");
 }

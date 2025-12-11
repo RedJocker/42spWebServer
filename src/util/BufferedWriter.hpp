@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 22:57:40 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 18:43:21 by maurodri         ###   ########.fr       */
+//   Updated: 2025/12/11 06:14:18 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -34,7 +34,7 @@ public:
 
 	void setMessage(std::string message);
 	WriteState getState() const;
-	std::pair<WriteState, char*> flushMessage();
+	std::pair<WriteState, std::string> flushMessage();
 	std::string getMessage() const;
 };
 

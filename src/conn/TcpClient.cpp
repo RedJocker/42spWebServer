@@ -6,7 +6,7 @@
 //   By: maurodri <maurodri@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2025/08/25 21:44:37 by maurodri          #+#    #+#             //
-/*   Updated: 2025/11/05 18:09:40 by maurodri         ###   ########.fr       */
+//   Updated: 2025/12/11 06:14:33 by maurodri         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -53,12 +53,12 @@ TcpClient::TcpClient()
 
 	}
 
-	std::pair<ReadState, char *> TcpClient::read(size_t length)
+	std::pair<ReadState, std::string> TcpClient::read(size_t length)
 	{
 		return this->reader.read(length);
 	}
 
-	std::pair<ReadState, char *> TcpClient::readlineCrlf()
+	std::pair<ReadState, std::string> TcpClient::readlineCrlf()
 	{
 		return this->reader.readlineCrlf();
 	}
@@ -79,7 +79,7 @@ TcpClient::TcpClient()
 		return this->writer.getMessage();
 	}
 
-	std::pair<WriteState, char*> TcpClient::flushMessage()
+	std::pair<WriteState, std::string> TcpClient::flushMessage()
 	{
 		return this->writer.flushMessage();
 	}

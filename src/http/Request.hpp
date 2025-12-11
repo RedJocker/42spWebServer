@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:41:51 by vcarrara          #+#    #+#             */
-//   Updated: 2025/11/25 20:12:00 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/11 06:35:24 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ namespace http
 
 		RequestPath &getPath(void);
 		std::string getHeader(const std::string &key) const;
-		std::string getBody(void) const;
+		const std::string &getBody(void) const;
 
 		std::string toString(void) const;
 		char **envp(void) const;

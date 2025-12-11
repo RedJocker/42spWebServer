@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 11:38:22 by vcarrara          #+#    #+#             */
-/*   Updated: 2025/12/09 18:02:56 by bnespoli         ###   ########.fr       */
+//   Updated: 2025/12/11 08:05:30 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,7 @@ namespace utils {
 		}
 		BufferedReader reader(fd);
 		std::cout << "Reading file: " << path << std::endl;
-		std::pair<ReadState, char *> result;
+		std::pair<ReadState, std::string> result;
 		while (true)
 		{
 			result = reader.readAll();
@@ -246,9 +246,8 @@ namespace utils {
 			std::cerr << "unexpected path: " << result.second << std::endl;
 			return 1;
 		}
-		out_content = std::string(result.second);
+		out_content = result.second;
 		std::cout << "File content:\n" << out_content << std::endl;
-		delete[] result.second;
 		return 0;
 	}
 	

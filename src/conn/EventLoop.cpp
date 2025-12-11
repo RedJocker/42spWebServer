@@ -6,7 +6,7 @@
 /*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/10 17:48:03 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/11 08:00:40 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,7 +239,7 @@ namespace conn
 									"content to write");
 		}
 
-		std::pair<WriteState, char*> writeResult =
+		std::pair<WriteState, std::string> writeResult =
 			op.writer->flushMessage();
 
 		if (writeResult.first == BufferedWriter::WRITING)
@@ -277,7 +277,7 @@ namespace conn
 		std::cout << "clientFd = " << client.getFd() << std::endl;
 		std::cout << "handleFileReads" << std::endl;
 
-		std::pair<BufferedReader::ReadState, char*> readResult
+		std::pair<BufferedReader::ReadState, std::string> readResult
 			= op.reader->readAll();
 
 		if(readResult.first == BufferedReader::READING)
@@ -285,8 +285,7 @@ namespace conn
 		std::cout << "handleFileReads after reading" << std::endl;
 		if (readResult.first == BufferedReader::NO_CONTENT)
 		{
-			op.content = std::string(readResult.second);
-			delete[] readResult.second;
+			op.content = readResult.second;
 			http::Route *route = client.getRoute();
 			if (route)
 				route->respond(client, op);
@@ -309,7 +308,7 @@ namespace conn
 		// Write CGI request
 		std::cout << "parent writing to cgi: " << std::endl;
 
-		std::pair<WriteState, char *> flushResult = op.writer->flushMessage();
+		std::pair<WriteState, std::string> flushResult = op.writer->flushMessage();
 		if (flushResult.first == BufferedWriter::WRITING)
 			return;
 
@@ -332,7 +331,7 @@ namespace conn
 			return ;
 		int cgiFd = op.fd;
 		// Read CGI response
-		std::pair<ReadState, char *> readResult = op.reader->readAll();
+		std::pair<ReadState, std::string> readResult = op.reader->readAll();
 		if(readResult.first == BufferedReader::READING)
 		{
 			std::cout << "parent reading" << std::endl;
@@ -348,8 +347,8 @@ namespace conn
 			return ;
 		}
 
-		op.content = std::string(readResult.second);
-		delete[] readResult.second;
+		op.content = readResult.second;
+
 		std::cout << "CGI Response: " << op.content << std::endl;
 
 		http::Route *route = client.getRoute();
@@ -433,7 +432,7 @@ namespace conn
 			return;
 		if(client->getWriterState() != BufferedWriter::WRITING)
 			throw std::domain_error("called handleClientWriteResponse without content to write");
-		std::pair<WriteState, char*> flushResult = client->flushMessage();
+		std::pair<WriteState, std::string> flushResult = client->flushMessage();
 
 		if (flushResult.first == BufferedWriter::WRITING)
 			return ; // still has content to write
