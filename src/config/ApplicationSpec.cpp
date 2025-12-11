@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/15 16:24:53 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/09 22:50:55 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/10 12:27:11 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,8 @@ namespace config
 	int ApplicationSpec::applicationConfigParse(char **av)
 	{
 		config::Scanner scanner;
-		scanner.readContent(av[1]);
+		if (scanner.readContent(av[1]) != 0)
+			return -1;
 		std::string filecontent = scanner.getContent();
 		ssize_t alreadyread = 0;
 		int counter = 0;
