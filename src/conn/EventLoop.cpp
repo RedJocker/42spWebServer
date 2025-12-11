@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventLoop.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcarrara <vcarrara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 17:06:06 by maurodri          #+#    #+#             */
-//   Updated: 2025/12/11 08:00:40 by maurodri         ###   ########.fr       //
+/*   Updated: 2025/12/11 16:29:28 by bnespoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -662,9 +662,8 @@ namespace conn
 					this->subscribeFds.end());
 				this->subscribeFds.clear();
 			}
-			// waiting for ready event from epoll
+			// waiting for ready event from poll
 			// -1 without timeout
-			// TODO make timeout system for clients
 			int timeoutTime = minTimeout > 5
 				? 5000 : minTimeout * 1000;
 			int numReadyEvents =

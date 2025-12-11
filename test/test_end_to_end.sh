@@ -1,7 +1,7 @@
 #!/bin/bash
 
 actual_basedir=$(basename $(pwd))
-expected_basedir='42spWebServer'
+expected_basedir='webserver'
 expected_basedir_regex=".*$expected_basedir$"
 
 if ! [[ $actual_basedir =~ $expected_basedir_regex ]]; then
