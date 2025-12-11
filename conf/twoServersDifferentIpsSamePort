@@ -1,0 +1,43 @@
+http {
+        listen 127.0.0.1:8080;
+        root ./www3;
+        server {
+
+               location /** {
+                   index index.html;
+                   allow GET;
+                   allow POST;
+                   allow DELETE;
+               }
+
+               location /**.php {
+                   cgi_bin /usr/bin/php-cgi;
+                   index index.php;
+                   allow GET;
+                   allow POST;
+               }
+
+               location /upload/uploads/** {
+                   autoindex on;
+                   upload_pass ./www3/upload/uploads/;
+                   allow GET;
+                   allow POST;
+               }
+        }
+}
+
+
+http {
+        listen 127.0.0.2:8080;
+        root ./www3;
+        server {
+               cgi_bin /usr/bin/php-cgi;
+               autoindex on;
+               location /** {
+                   allow GET;
+               }
+               location /**.php {
+                   allow GET;
+               }
+        }
+}

@@ -6,7 +6,7 @@
 /*   By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/26 20:08:11 by bnespoli          #+#    #+#             */
-//   Updated: 2025/12/11 06:09:12 by maurodri         ###   ########.fr       //
+//   Updated: 2025/12/11 08:09:39 by maurodri         ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,7 @@ namespace config {
 		std::pair<ReadState, std::string> result;
 		while (true)
 		{
-			std::cout << "Reading..." << std::endl;
 			result = reader.readAll();
-			std::cout << "Read state: " << result.first << std::endl;
 			if (result.first == BufferedReader::ERROR)
 			{
 				std::cerr << "Error reading config file: " << result.second << std::endl;

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Test</title>
+</head>
+<body>
+    <h1>Teste de Upload</h1>
+    <form method="POST" action="./upload.php" enctype="multipart/form-data">
+        <input type="file" name="arquivo">
+        <button type="submit">Enviar para php</button>
+    </form>
+    <form method="POST" action="/upload/" enctype="multipart/form-data">
+        <input type="file" name="arquivo">
+        <button type="submit">Enviar para o servidor</button>
+    </form>
+</body>
+</html>
