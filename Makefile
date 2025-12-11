@@ -6,7 +6,7 @@
 #    By: bnespoli <bnespoli@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:53:38 by maurodri          #+#    #+#              #
-#    Updated: 2025/11/26 20:15:10 by bnespoli         ###   ########.fr        #
+#    Updated: 2025/12/11 17:59:20 by maurodri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -110,16 +110,6 @@ fclean: clean
 
 re: fclean all
 
-nginx: build-nginx
-	docker run \
-		--name some-nginx \
-		--rm \
-		-p 8080:8080 \
-		nginx-custom
-
-build-nginx: ./Dockerfile
-	docker build -t nginx-custom .
-
-.PHONY: all clean fclean re bonus test_tcp nginx build-nginx
+.PHONY: all clean fclean re bonus test_tcp
 
 -include $(DEP_FILES)
